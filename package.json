@@ -1,16 +1,57 @@
 {
-  "name": "play-console-info",
-  "version": "1.0.0",
-  "description": "A Github Action to get play console info",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Ijlal Ahmad",
-  "license": "MIT",
-  "devDependencies": {
-    "nodemon": "^3.1.10",
-    "tsc": "^2.0.4",
-    "typescript": "^5.9.2"
-  }
+    "name": "play-console-info",
+    "version": "1.0.0",
+    "description": "A Github Action to get play console info",
+    "author": "Ijlal Ahmad",
+    "main": "index.js",
+    "private": true,
+    "keywords": [
+        "play",
+        "console",
+        "info",
+        "actions",
+        "github"
+    ],
+    "exports": {
+        ".": {
+            "dist": "./dist/index.js"
+        }
+    },
+    "license": "MIT",
+    "scripts": {
+        "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js",
+        "format:check": "prettier --check .",
+        "format:fix": "prettier --write .",
+        "lint": "eslint src --ext .ts",
+        "local-action": "npx @github/local-action . src/main.ts .env"
+    },
+    "dependencies": {
+        "@actions/core": "^1.11.1",
+        "@actions/github": "^6.0.1"
+    },
+    "devDependencies": {
+        "@eslint/eslintrc": "^3.3.1",
+        "@eslint/js": "^9.34.0",
+        "@eslint/json": "^0.13.1",
+        "@eslint/markdown": "^7.2.0",
+        "@github/local-action": "^5.1.0",
+        "@types/node": "^24.3.0",
+        "@typescript-eslint/eslint-plugin": "^8.40.0",
+        "@typescript-eslint/parser": "^8.40.0",
+        "esbuild": "^0.25.9",
+        "eslint": "^9.34.0",
+        "eslint-plugin-import": "^2.32.0",
+        "eslint-plugin-prettier": "^5.5.4",
+        "globals": "^16.3.0",
+        "jiti": "^2.5.1",
+        "nodemon": "^3.1.10",
+        "prettier": "^3.6.2",
+        "prettier-eslint": "^16.4.2",
+        "tsc": "^2.0.4",
+        "typescript": "^5.9.2",
+        "typescript-eslint": "^8.40.0"
+    },
+    "engines": {
+        "node": ">=20.0.0"
+    }
 }
