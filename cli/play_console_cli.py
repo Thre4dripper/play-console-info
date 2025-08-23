@@ -12,10 +12,9 @@ from googleapiclient.errors import HttpError
 SCOPES = ["https://www.googleapis.com/auth/androidpublisher"]
 
 
-def build_service() -> Any:
-    creds_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+def build_service(creds_path: str) -> Any:
     if not creds_path or not os.path.exists(creds_path):
-        raise SystemExit("Missing GOOGLE_APPLICATION_CREDENTIALS file path")
+        raise SystemExit(f"Missing or invalid credentials file path: {creds_path}")
     credentials = service_account.Credentials.from_service_account_file(
         creds_path, scopes=SCOPES
     )
@@ -264,7 +263,8 @@ def main():
             "  - Use 'all' to select all supported values.\n"
         ),
     )
-    ap.add_argument("--package", required=True)
+    ap.add_argument("--package", required=True, help="Android application package name")
+    ap.add_argument("--creds-path", required=True, help="Path to Google service account credentials JSON file")
     # Simplified resource flags (require explicit value 'all' or comma-separated values)
     ap.add_argument(
         "--tracks",
@@ -314,7 +314,7 @@ def main():
     args = ap.parse_args()
 
     try:
-        service = build_service()
+        service = build_service(args.creds_path)
     except HttpError as e:
         print(e)
         raise SystemExit(1)
