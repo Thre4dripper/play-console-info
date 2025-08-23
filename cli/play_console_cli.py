@@ -68,7 +68,8 @@ def fetch_inapps(service, package_name: str) -> Dict[str, Any]:
 def fetch_reviews(service, package_name: str, pages: int, page_size: int) -> Dict[str, Any]:
     reviews: List[Dict[str, Any]] = []
     token = None
-    for _ in range(pages):
+    for page in range(pages):
+        print(f"  Fetching reviews page {page + 1}/{pages}...", file=sys.stderr)
         params = {"packageName": package_name, "maxResults": page_size}
         if token:
             params["token"] = token
@@ -76,6 +77,7 @@ def fetch_reviews(service, package_name: str, pages: int, page_size: int) -> Dic
         reviews.extend(resp.get("reviews", []))
         token = resp.get("tokenPagination", {}).get("nextPageToken")
         if not token:
+            print(f"  Completed early at page {page + 1} (no more data)", file=sys.stderr)
             break
         time.sleep(0.2)
     return {"count": len(reviews), "reviews": reviews}
@@ -84,7 +86,8 @@ def fetch_reviews(service, package_name: str, pages: int, page_size: int) -> Dic
 def fetch_voided_purchases(service, package_name: str, pages: int, page_size: int) -> Dict[str, Any]:
     items: List[Dict[str, Any]] = []
     token = None
-    for _ in range(pages):
+    for page in range(pages):
+        print(f"  Fetching voided purchases page {page + 1}/{pages}...", file=sys.stderr)
         params = {"packageName": package_name, "maxResults": page_size}
         if token:
             params["token"] = token
@@ -94,6 +97,7 @@ def fetch_voided_purchases(service, package_name: str, pages: int, page_size: in
         items.extend(resp.get("voidedPurchases", []))
         token = resp.get("tokenPagination", {}).get("nextPageToken")
         if not token:
+            print(f"  Completed early at page {page + 1} (no more data)", file=sys.stderr)
             break
         time.sleep(0.2)
     return {"count": len(items), "voidedPurchases": items}
@@ -230,7 +234,8 @@ def fetch_images_for_selection(service, package_name: str, language: Optional[st
     ]
     types_list = types_all if selection == "all" else list(selection)
     images_map: Dict[str, Any] = {}
-    for t in types_list:
+    for i, t in enumerate(types_list, 1):
+        print(f"  Fetching {t} images ({i}/{len(types_list)})...", file=sys.stderr)
         images_map[t] = fetch_images(service, package_name, language, t)
     return types_list, images_map
 
@@ -239,10 +244,12 @@ def fetch_testers_for_selection(service, package_name: str, selection: Any) -> D
     # Always return a consistent shape: { "testers": { track: data, ... } }
     testers_map: Dict[str, Any] = {}
     if selection == "all":
+        print("  Fetching testers for all tracks...", file=sys.stderr)
         all_data = fetch_testers_all(service, package_name)
         testers_map = dict(all_data.get("tracks", {}))
     else:
-        for t in selection:
+        for i, t in enumerate(selection, 1):
+            print(f"  Fetching testers for {t} track ({i}/{len(selection)})...", file=sys.stderr)
             testers_map[t] = fetch_testers(service, package_name, t)
     return {"testers": testers_map}
 
@@ -362,15 +369,20 @@ def main():
 
     try:
         if "tracks" in requested:
+            print("Fetching tracks...", file=sys.stderr)
             selection = parse_tracks_arg(args.tracks, args.all)
             results["tracks"] = fetch_and_filter_tracks(service, args.package, selection)
         if "apks" in requested:
+            print("Fetching APKs...", file=sys.stderr)
             results["apks"] = fetch_apks(service, args.package)
         if "bundles" in requested:
+            print("Fetching App Bundles...", file=sys.stderr)
             results["bundles"] = fetch_bundles(service, args.package)
         if "listings" in requested:
+            print("Fetching store listings...", file=sys.stderr)
             results["listings"] = fetch_listings(service, args.package)
         if "images" in requested:
+            print("Fetching images...", file=sys.stderr)
             selection = parse_images_arg(args.images, args.all)
             types_list, images_map = fetch_images_for_selection(
                 service, args.package, args.images_language, selection
@@ -378,17 +390,23 @@ def main():
             # Always emit a consistent map of imageType -> images payload
             results["images"] = images_map
         if "inapps" in requested:
+            print("Fetching in-app products...", file=sys.stderr)
             results["inapps"] = fetch_inapps(service, args.package)
         if "reviews" in requested:
+            print(f"Fetching reviews ({args.reviews_pages} pages, {args.reviews_page_size} per page)...", file=sys.stderr)
             results["reviews"] = fetch_reviews(service, args.package, args.reviews_pages, args.reviews_page_size)
         if "voided_purchases" in requested:
+            print(f"Fetching voided purchases ({args.reviews_pages} pages, {args.reviews_page_size} per page)...", file=sys.stderr)
             results["voided_purchases"] = fetch_voided_purchases(service, args.package, args.reviews_pages, args.reviews_page_size)
         if "testers" in requested:
+            print("Fetching testers...", file=sys.stderr)
             selection = parse_testers_arg(args.testers, args.all)
             results.update(fetch_testers_for_selection(service, args.package, selection))
         if "app_details" in requested:
+            print("Fetching app details...", file=sys.stderr)
             results["app_details"] = fetch_app_details(service, args.package)
         if "expansion_files" in requested:
+            print("Fetching expansion files...", file=sys.stderr)
             results["expansion_files"] = fetch_expansion_files(service, args.package)
     except HttpError as e:
         # Print error details and exit
@@ -400,6 +418,7 @@ def main():
         raise SystemExit(1)
 
     # Print the results as formatted JSON
+    print("Completed successfully! Results:", file=sys.stderr)
     print(json.dumps(results, indent=2, ensure_ascii=False))
 
 
