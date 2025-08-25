@@ -14,56 +14,56 @@ import path from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const compat = new FlatCompat({
-    baseDirectory: __dirname,
-    recommendedConfig: js.configs.recommended,
-    allConfig: js.configs.all,
+  baseDirectory: __dirname,
+  recommendedConfig: js.configs.recommended,
+  allConfig: js.configs.all,
 });
 
 export default [
-    {
-        ignores: [
-            '**/coverage',
-            '**/dist',
-            '**/linter',
-            '**/node_modules',
-            '**/.venv',
-            '**/venv',
-            '**/env',
-            '**/__pycache__',
-            '**/cli',
-            '**/*.json',
-            '**/*.md',
-        ],
+  {
+    ignores: [
+      '**/coverage',
+      '**/dist',
+      '**/linter',
+      '**/node_modules',
+      '**/.venv',
+      '**/venv',
+      '**/env',
+      '**/__pycache__',
+      '**/cli',
+      '**/*.json',
+      '**/*.md',
+    ],
+  },
+  ...compat.extends(
+    'eslint:recommended',
+    'plugin:@typescript-eslint/eslint-recommended',
+    'plugin:@typescript-eslint/recommended'
+  ),
+  {
+    files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
+    languageOptions: {
+      globals: globals.node,
+      parser: tsParser,
+      ecmaVersion: 2023,
+      sourceType: 'module',
+      parserOptions: {
+        project: 'tsconfig.eslint.json',
+        tsconfigRootDir: __dirname,
+      },
     },
-    ...compat.extends(
-        'eslint:recommended',
-        'plugin:@typescript-eslint/eslint-recommended',
-        'plugin:@typescript-eslint/recommended'
-    ),
-    {
-        files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
-        languageOptions: {
-            globals: globals.node,
-            parser: tsParser,
-            ecmaVersion: 2023,
-            sourceType: 'module',
-            parserOptions: {
-                project: 'tsconfig.eslint.json',
-                tsconfigRootDir: __dirname,
-            },
-        },
-        plugins: {
-            '@typescript-eslint': typescriptEslint,
-            import: _import,
-            prettier: prettier,
-        },
-        rules: {
-            'prettier/prettier': 'error',
-        },
+    plugins: {
+      '@typescript-eslint': typescriptEslint,
+      import: _import,
+      prettier: prettier,
     },
-    ...tseslint.configs.recommended,
-    { files: ['**/*.json'], plugins: { json }, language: 'json/json' },
-    { files: ['**/*.jsonc'], plugins: { json }, language: 'json/jsonc' },
-    { files: ['**/*.json5'], plugins: { json }, language: 'json/json5' },
-    { files: ['**/*.md'], plugins: { markdown }, language: 'markdown/gfm' },
+    rules: {
+      'prettier/prettier': 'error',
+    },
+  },
+  ...tseslint.configs.recommended,
+  { files: ['**/*.json'], plugins: { json }, language: 'json/json' },
+  { files: ['**/*.jsonc'], plugins: { json }, language: 'json/jsonc' },
+  { files: ['**/*.json5'], plugins: { json }, language: 'json/json5' },
+  { files: ['**/*.md'], plugins: { markdown }, language: 'markdown/gfm' },
 ];
