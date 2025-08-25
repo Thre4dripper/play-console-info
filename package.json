@@ -20,11 +20,8 @@
   "license": "MIT",
   "scripts": {
     "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js",
-    "build-cli": "PyInstaller -F cli/play_console_cli.py --distpath cli/dist --workpath cli/build --specpath cli --name play_console_cli",
-    "virtual-env-windows": "python -m venv venv && .\\venv\\Scripts\\activate && pip install -r cli/requirements.txt",
-    "virtual-env-linux": "python3 -m venv venv && . venv/bin/activate && pip install -r cli/requirements.txt",
-    "build-cli-windows": "npm run virtual-env-windows && .\\venv\\Scripts\\activate &&  npm run build-cli",
-    "build-cli-linux": "npm run virtual-env-linux && . venv/bin/activate && npm run build-cli",
+    "build-cli-windows": "./cli/build-cli.bat",
+    "build-cli-linux": "./cli/build-cli.sh",
     "cli-cleanup": "rimraf cli\\build cli\\dist cli\\play_console_cli.spec",
     "dev": "nodemon --watch 'src/**/*.ts' --exec 'npm run build && node dist/index.js'",
     "start": "node dist/index.js",

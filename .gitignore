@@ -10,3 +10,4 @@ dist/
 **/__pycache__/**
 cli/build
 cli/dist
+cli/play_console_cli.spec
