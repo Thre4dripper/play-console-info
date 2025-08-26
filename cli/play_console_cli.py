@@ -161,9 +161,6 @@ def fetch_expansion_files(service, package_name: str) -> Dict[str, Any]:
     return results
 
 
-
-
-
 # Helper parsing and fetchers for tracks/images/testers
 
 def parse_tracks_arg(value: Optional[str], all_flag: bool) -> Any:
@@ -219,7 +216,8 @@ def fetch_and_filter_tracks(service, package_name: str, selection: Any) -> Dict[
     return out
 
 
-def fetch_images_for_selection(service, package_name: str, language: Optional[str], selection: Any) -> Tuple[List[str], Dict[str, Any]]:
+def fetch_images_for_selection(service, package_name: str, language: Optional[str], selection: Any) -> Tuple[
+    List[str], Dict[str, Any]]:
     # Allowed image types per Android Publisher API v3
     types_all = [
         "icon",
@@ -306,11 +304,15 @@ def main():
     )
     ap.add_argument("--app-details", dest="app_details", action="store_true", help="Include app details")
     ap.add_argument("--expansion-files", dest="expansion_files", action="store_true", help="Include expansion files")
-    ap.add_argument("--all", action="store_true", help="Include all supported resources")
-    # Options
+
+    # Options for specific resources
     ap.add_argument("--images-language", default="en-US", help="Listing language for images (default: en-US)")
     ap.add_argument("--reviews-pages", type=int, default=1)
     ap.add_argument("--reviews-page-size", type=int, default=100)
+
+    # Global options
+    ap.add_argument("--all", action="store_true", help="Include all supported resources")
+    ap.add_argument("--json", action="store_true", help="Output raw JSON")
     args = ap.parse_args()
 
     try:
@@ -393,11 +395,14 @@ def main():
             print("Fetching in-app products...", file=sys.stderr)
             results["inapps"] = fetch_inapps(service, args.package)
         if "reviews" in requested:
-            print(f"Fetching reviews ({args.reviews_pages} pages, {args.reviews_page_size} per page)...", file=sys.stderr)
+            print(f"Fetching reviews ({args.reviews_pages} pages, {args.reviews_page_size} per page)...",
+                  file=sys.stderr)
             results["reviews"] = fetch_reviews(service, args.package, args.reviews_pages, args.reviews_page_size)
         if "voided_purchases" in requested:
-            print(f"Fetching voided purchases ({args.reviews_pages} pages, {args.reviews_page_size} per page)...", file=sys.stderr)
-            results["voided_purchases"] = fetch_voided_purchases(service, args.package, args.reviews_pages, args.reviews_page_size)
+            print(f"Fetching voided purchases ({args.reviews_pages} pages, {args.reviews_page_size} per page)...",
+                  file=sys.stderr)
+            results["voided_purchases"] = fetch_voided_purchases(service, args.package, args.reviews_pages,
+                                                                 args.reviews_page_size)
         if "testers" in requested:
             print("Fetching testers...", file=sys.stderr)
             selection = parse_testers_arg(args.testers, args.all)
@@ -419,7 +424,55 @@ def main():
 
     # Print the results as formatted JSON
     print("Completed successfully! Results:", file=sys.stderr)
-    print(json.dumps(results, indent=2, ensure_ascii=False))
+
+    if args.json:
+        print(json.dumps(results, indent=2, ensure_ascii=False))
+    else:
+        def print_section(title: str, data: Any, indent: int = 0, prefix: str = "", is_last: bool = True,
+                          is_root: bool = False):
+            # Branch characters
+            if is_root:
+                branch = "\033[34m● \033[0m"  # blue root marker
+            else:
+                branch = "└─╴" if is_last else "├─╴"
+            space = "    " if is_last else "│   "
+
+            # Print title
+            if title:
+                print(f"{prefix}{branch}\033[1m{title}\033[0m")
+
+            # Update prefix for children
+            new_prefix = prefix + (space if not is_root and title else "")
+
+            if isinstance(data, dict):
+                if not data:  # empty dict
+                    branch_val = "└─╴" if is_last else "├─╴"
+                    print(f"{new_prefix}{branch_val}\033[2m<empty>\033[0m")  # dim placeholder
+                else:
+                    items = list(data.items())
+                    for idx, (k, v) in enumerate(items):
+                        last = idx == len(items) - 1
+                        print_section(k, v, indent + 1, new_prefix, last)
+
+            elif isinstance(data, list):
+                if not data:  # empty list
+                    branch_val = "└─╴" if is_last else "├─╴"
+                    print(f"{new_prefix}{branch_val}\033[2m<empty>\033[0m")  # dim placeholder
+                else:
+                    for idx, item in enumerate(data):
+                        last = idx == len(data) - 1
+                        print_section(f"[{idx}]", item, indent + 1, new_prefix, last)
+
+            else:
+                # Leaf value (leave multiline as-is)
+                value_str = str(data)
+                branch_val = "└─╴" if is_last else "├─╴"
+                print(f"{new_prefix}{branch_val}\033[36m{value_str}\033[0m")  # cyan for values
+
+        # Usage
+        for idx, (section, content) in enumerate(results.items()):
+            print_section(section, content, is_root=True)
+            print()  # blank line between root sections
 
 
 if __name__ == "__main__":
