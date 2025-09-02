@@ -3,7 +3,12 @@ import sys
 import json
 import argparse
 import time
+import io
 from typing import Dict, Any, List, Optional, Tuple
+
+# --- Force UTF-8 output on all platforms (esp. Windows CMD/PowerShell) ---
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace", line_buffering=True)
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace", line_buffering=True)
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
