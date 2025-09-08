@@ -1,0 +1,203 @@
+{
+  "tracks": {
+    "kind": "androidpublisher#tracksListResponse",
+    "tracks": [
+      {
+        "track": "production",
+        "releases": [
+          {
+            "name": "Release X.Y-ZZZZZZZ",
+            "versionCodes": [
+              "101"
+            ],
+            "releaseNotes": [
+              {
+                "language": "en-US",
+                "text": "General improvements and stability updates\n"
+              },
+              {
+                "language": "fr-FR",
+                "text": "Améliorations générales et mises à jour de stabilité\n"
+              }
+            ],
+            "status": "completed"
+          }
+        ]
+      },
+      {
+        "track": "beta",
+        "releases": [
+          {
+            "name": "Second Test Release",
+            "versionCodes": [
+              "55"
+            ],
+            "releaseNotes": [
+              {
+                "language": "en-US",
+                "text": "Introducing a fresh new beta build with updated features!"
+              }
+            ],
+            "status": "completed"
+          }
+        ]
+      },
+      {
+        "track": "alpha"
+      },
+      {
+        "track": "internal"
+      }
+    ]
+  },
+  "apks": {
+    "kind": "androidpublisher#apksListResponse"
+  },
+  "bundles": {
+    "kind": "androidpublisher#bundlesListResponse",
+    "bundles": [
+      {
+        "versionCode": 101,
+        "sha1": "aaaa111122223333444455556666777788889999",
+        "sha256": "111aaa222bbb333ccc444ddd555eee666fff777888999000aaa111bbb222ccc3"
+      },
+      {
+        "versionCode": 102,
+        "sha1": "bbbb222233334444555566667777888899990000",
+        "sha256": "222bbb333ccc444ddd555eee666fff777888999000aaa111bbb222ccc333ddd4"
+      },
+      {
+        "versionCode": 103,
+        "sha1": "cccc333344445555666677778888999900001111",
+        "sha256": "333ccc444ddd555eee666fff777888999000aaa111bbb222ccc333ddd444eee5"
+      },
+      {
+        "versionCode": 104,
+        "sha1": "dddd444455556666777788889999000011112222",
+        "sha256": "444ddd555eee666fff777888999000aaa111bbb222ccc333ddd444eee555fff6"
+      },
+      {
+        "versionCode": 105,
+        "sha1": "eeee555566667777888899990000111122223333",
+        "sha256": "555eee666fff777888999000aaa111bbb222ccc333ddd444eee555fff666ggg7"
+      },
+      {
+        "versionCode": 106,
+        "sha1": "ffff666677778888999900001111222233334444",
+        "sha256": "666fff777888999000aaa111bbb222ccc333ddd444eee555fff666ggg777hhh8"
+      },
+      {
+        "versionCode": 107,
+        "sha1": "gggg777788889999000011112222333344445555",
+        "sha256": "777888999000aaa111bbb222ccc333ddd444eee555fff666ggg777hhh888iii9"
+      }
+    ]
+  },
+  "listings": {
+    "kind": "androidpublisher#listingsListResponse",
+    "listings": [
+      {
+        "language": "en-US",
+        "title": "ObfusCalc: Advanced Calculator",
+        "fullDescription": "ObfusCalc: Next-gen scientific calculator\n\nPerform advanced calculations with ObfusCalc – a powerful and intuitive tool!\n\nFEATURES\n\n⚡ Real-time results • Multiple calculation modes • Elegant design • Debug-friendly logs\n\n🎯 Ideal for: Students, engineers, and professionals.\n\nDownload today and experience a new way of calculating!\n",
+        "shortDescription": "ObfusCalc, a modern and fast advanced calculator"
+      }
+    ]
+  },
+  "images": {
+    "icon": {
+      "images": [
+        {
+          "id": "999111222333444555666",
+          "url": "https://example.com/icon123.png",
+          "sha1": "111aaa222bbb333ccc444ddd555eee666fff7778",
+          "sha256": "aaa111bbb222ccc333ddd444eee555fff666ggg777hhh888iii999jjj000kkk1"
+        }
+      ]
+    },
+    "featureGraphic": {
+      "images": [
+        {
+          "id": "888777666555444333222",
+          "url": "https://example.com/feature456.png",
+          "sha1": "222bbb333ccc444ddd555eee666fff7778889990",
+          "sha256": "bbb222ccc333ddd444eee555fff666ggg777hhh888iii999jjj000kkk111lll2"
+        }
+      ]
+    },
+    "tvBanner": {},
+    "phoneScreenshots": {
+      "images": [
+        {
+          "id": "111222333444555666777",
+          "url": "https://example.com/screen1.png",
+          "sha1": "333ccc444ddd555eee666fff777888999000aaa1",
+          "sha256": "ccc333ddd444eee555fff666ggg777hhh888iii999jjj000kkk111lll222mmm3"
+        },
+        {
+          "id": "222333444555666777888",
+          "url": "https://example.com/screen2.png",
+          "sha1": "444ddd555eee666fff777888999000aaa111bbb2",
+          "sha256": "ddd444eee555fff666ggg777hhh888iii999jjj000kkk111lll222mmm333nnn4"
+        },
+        {
+          "id": "333444555666777888999",
+          "url": "https://example.com/screen3.png",
+          "sha1": "555eee666fff777888999000aaa111bbb222ccc3",
+          "sha256": "eee555fff666ggg777hhh888iii999jjj000kkk111lll222mmm333nnn444ooo5"
+        },
+        {
+          "id": "444555666777888999000",
+          "url": "https://example.com/screen4.png",
+          "sha1": "666fff777888999000aaa111bbb222ccc333ddd4",
+          "sha256": "fff666ggg777hhh888iii999jjj000kkk111lll222mmm333nnn444ooo555ppp6"
+        },
+        {
+          "id": "555666777888999000111",
+          "url": "https://example.com/screen5.png",
+          "sha1": "777888999000aaa111bbb222ccc333ddd444eee5",
+          "sha256": "ggg777hhh888iii999jjj000kkk111lll222mmm333nnn444ooo555ppp666qqq7"
+        },
+        {
+          "id": "666777888999000111222",
+          "url": "https://example.com/screen6.png",
+          "sha1": "888999000aaa111bbb222ccc333ddd444eee5556",
+          "sha256": "hhh888iii999jjj000kkk111lll222mmm333nnn444ooo555ppp666qqq777rrr8"
+        }
+      ]
+    },
+    "sevenInchScreenshots": {},
+    "tenInchScreenshots": {},
+    "tvScreenshots": {},
+    "wearScreenshots": {}
+  },
+  "inapps": {
+    "kind": "androidpublisher#inappproductsListResponse",
+    "tokenPagination": {
+      "previousPageToken": ""
+    }
+  },
+  "reviews": {
+    "count": 0,
+    "reviews": []
+  },
+  "voided_purchases": {
+    "count": 0,
+    "voidedPurchases": []
+  },
+  "testers": {
+    "internal": {},
+    "alpha": {},
+    "beta": {},
+    "production": {
+      "googleGroups": []
+    }
+  },
+  "app_details": {
+    "defaultLanguage": "en-US",
+    "contactEmail": "contact@example.com"
+  },
+  "expansion_files": {
+    "apks": {}
+  }
+}
