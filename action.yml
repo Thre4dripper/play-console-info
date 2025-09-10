@@ -1,0 +1,118 @@
+name: Play Console Info
+description: Fetch Google Play Console data and expose as outputs
+inputs:
+  package:
+    description: Android applicationId / package name
+    required: true
+  serviceAccountJsonPath:
+    description: >
+      Service account JSON path (string). Use only if you have the file checked in or mounted in the runner.
+      This will be preferred over serviceAccountJsonPlainText if both are provided.
+    required: false
+  serviceAccountJsonPlainText:
+    description: >
+      Service account JSON content as plain text (string). Use only if you can securely store it as a secret.
+      This will be ignored if serviceAccountJsonPath is provided.
+    required: false
+  # Resources
+  tracks:
+    description: "Include tracks ('all' or comma-separated). Supported: internal, alpha, beta, production"
+    required: false
+    default: 'all'
+  apks:
+    description: Include APKs ('true' or 'false')
+    required: false
+    default: 'false'
+  bundles:
+    description: Include App Bundles ('true' or 'false')
+    required: false
+    default: 'false'
+  listings:
+    description: Include store listings ('true' or 'false')
+    required: false
+    default: 'false'
+  images:
+    description: "Include images ('all' or comma-separated). Supported: icon, featureGraphic, promoGraphic, tvBanner, phoneScreenshots, sevenInchScreenshots, tenInchScreenshots, tvScreenshots, wearScreenshots"
+    required: false
+    default: 'all'
+  inapps:
+    description: Include in-app products ('true' or 'false')
+    required: false
+    default: 'false'
+  reviews:
+    description: Include reviews ('true' or 'false')
+    required: false
+    default: 'false'
+  voidedPurchases:
+    description: Include voided purchases ('true' or 'false')
+    required: false
+    default: 'false'
+  testers:
+    description: "Include testers ('all' or comma-separated). Supported: internal, alpha, beta, production"
+    required: false
+    default: 'all'
+  appDetails:
+    description: Include app details ('true' or 'false')
+    required: false
+    default: 'false'
+  expansionFiles:
+    description: Include expansion files ('true' or 'false')
+    required: false
+    default: 'false'
+
+  # Options
+  imagesLanguage:
+    description: Language for images (e.g., en-US)
+    required: false
+    default: 'en-US'
+  reviewsPages:
+    description: Number of pages for reviews
+    required: false
+    default: '1'
+  reviewsPageSize:
+    description: Page size for reviews
+    required: false
+    default: '100'
+  all:
+    description: Set to 'true' to include all supported resources
+    required: false
+    default: 'false'
+
+  # Output/Artifact options
+  uploadOutputsArtifact:
+    description: Set to 'true' to upload the outputs JSON as an artifact
+    required: false
+    default: 'false'
+  outputsJsonPath:
+    description: Optional path to write combined outputs JSON (e.g., outputs/play_console_outputs.json). If empty, a temp path is used when uploading artifacts.
+    required: false
+  outputsArtifactName:
+    description: Artifact name when upload_outputs_artifact is true
+    required: false
+    default: 'play-console-outputs'
+outputs:
+  tracks:
+    description: JSON of tracks
+  apks:
+    description: JSON of apks
+  bundles:
+    description: JSON of bundles
+  listings:
+    description: JSON of listings
+  images:
+    description: JSON of listing images
+  inapps:
+    description: JSON of in-app products
+  reviews:
+    description: JSON of reviews (subset per pagination inputs)
+  voidedPurchases:
+    description: JSON of voided purchases
+  testers:
+    description: JSON map of tester groups per track
+  appDetails:
+    description: App details
+  expansionFiles:
+    description: Expansion files info per APK
+runs:
+  using: node20
+  main: dist/index.js
