@@ -26,7 +26,7 @@ export default [
   {
     files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
     languageOptions: {
-      globals: globals.node,
+      globals: [...globals.node, ...globals.jest],
       ecmaVersion: 'latest',
       sourceType: 'module',
     },

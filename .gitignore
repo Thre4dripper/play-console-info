@@ -9,3 +9,4 @@ node_modules/
 **/__pycache__/**
 cli/build
 cli/play_console_cli.spec
+coverage
