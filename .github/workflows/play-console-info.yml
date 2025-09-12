@@ -14,9 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     name: Test Basic Functionality
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
       - name: Give Execute Permission
         run: chmod +x ./cli/dist/play_console_cli
+
       - name: Test basic package info
         id: basic
         uses: ./
@@ -34,8 +37,14 @@ jobs:
   test-all-resources:
     runs-on: ubuntu-latest
     name: Test All Resources
+    needs: test-basic
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Give Execute Permission
+        run: chmod +x ./cli/dist/play_console_cli
+
       - name: Test with all resources enabled
         id: all
         uses: ./
@@ -65,7 +74,9 @@ jobs:
   test-specific-tracks:
     runs-on: ubuntu-latest
     name: Test Specific Tracks
+    needs: test-all-resources
     strategy:
+      max-parallel: 1
       matrix:
         tracks:
           [
@@ -77,7 +88,12 @@ jobs:
             'beta,production',
           ]
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Give Execute Permission
+        run: chmod +x ./cli/dist/play_console_cli
+
       - name: Test tracks - ${{ matrix.tracks }}
         id: tracks
         uses: ./
@@ -95,13 +111,20 @@ jobs:
   test-image-options:
     runs-on: ubuntu-latest
     name: Test Image Options
+    needs: test-specific-tracks
     strategy:
+      max-parallel: 1
       matrix:
         images:
           ['icon', 'featureGraphic', 'phoneScreenshots', 'icon,featureGraphic']
         language: ['en-US', 'es-ES', 'fr-FR']
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Give Execute Permission
+        run: chmod +x ./cli/dist/play_console_cli
+
       - name: Test images - ${{ matrix.images }} (${{ matrix.language }})
         id: images
         uses: ./
@@ -120,12 +143,19 @@ jobs:
   test-reviews-pagination:
     runs-on: ubuntu-latest
     name: Test Reviews Pagination
+    needs: test-image-options
     strategy:
+      max-parallel: 1
       matrix:
         pages: ['1', '2', '3']
         pageSize: ['50', '100', '200']
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Give Execute Permission
+        run: chmod +x ./cli/dist/play_console_cli
+
       - name: Test reviews - ${{ matrix.pages }} pages, ${{ matrix.pageSize }} size
         id: reviews
         uses: ./
@@ -145,8 +175,13 @@ jobs:
   test-file-vs-plaintext:
     runs-on: ubuntu-latest
     name: Test File vs PlainText Auth
+    needs: test-reviews-pagination
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Give Execute Permission
+        run: chmod +x ./cli/dist/play_console_cli
 
       - name: Create service account file
         run: |
@@ -178,8 +213,14 @@ jobs:
   test-output-artifacts:
     runs-on: ubuntu-latest
     name: Test Output Artifacts
+    needs: test-file-vs-plaintext
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Give Execute Permission
+        run: chmod +x ./cli/dist/play_console_cli
+
       - name: Test custom output path
         id: custom-output
         uses: ./
@@ -207,7 +248,9 @@ jobs:
   test-individual-resources:
     runs-on: ubuntu-latest
     name: Test Individual Resources
+    needs: test-output-artifacts
     strategy:
+      max-parallel: 1
       matrix:
         resource:
           - { name: 'apks', value: 'true' }
@@ -218,7 +261,12 @@ jobs:
           - { name: 'appDetails', value: 'true' }
           - { name: 'expansionFiles', value: 'true' }
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Give Execute Permission
+        run: chmod +x ./cli/dist/play_console_cli
+
       - name: Test ${{ matrix.resource.name }}
         id: resource-test
         uses: ./
@@ -244,12 +292,19 @@ jobs:
   test-testers:
     runs-on: ubuntu-latest
     name: Test Testers
+    needs: test-individual-resources
     strategy:
+      max-parallel: 1
       matrix:
         testers:
           ['internal', 'alpha', 'beta', 'production', 'all', 'internal,alpha']
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Give Execute Permission
+        run: chmod +x ./cli/dist/play_console_cli
+
       - name: Test testers - ${{ matrix.testers }}
         id: testers
         uses: ./
