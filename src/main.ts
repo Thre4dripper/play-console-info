@@ -48,7 +48,7 @@ const run = async ({ command, args }: runProps) => {
   });
 
   const result = await promise;
-  console.log(result);
+  console.log(JSON.stringify(result, null, 2));
   return result;
 };
 
