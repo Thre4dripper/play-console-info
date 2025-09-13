@@ -1,10 +1,6 @@
 import run from './main';
-import {
-  getArguments,
-  getExecutablePath,
-  getPackage,
-  getServiceAccountJsonPath,
-} from './utils';
+import { getExecutablePath } from './utils';
+import { getArguments, getPackage, getServiceAccountJsonPath } from './inputs';
 
 const executablePath = getExecutablePath();
 const serviceAccountJson = getServiceAccountJsonPath();
@@ -16,7 +12,7 @@ const args = [
   '--package',
   pkg,
   '--json',
-  ...getArguments()
+  ...getArguments(),
 ];
 
 run({ command: executablePath, args }).catch((err) => {
