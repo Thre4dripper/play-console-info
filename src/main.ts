@@ -1,12 +1,47 @@
 import { ChildProcess, spawn } from 'child_process';
-
-type runProps = {
-  command: string;
-  args: string[];
-};
+import { ResultData, runProps } from './types';
+import { ActionError } from './utils';
+import {
+  setApks,
+  setAppDetails,
+  setBundles,
+  setExpansionFiles,
+  setImages,
+  setInapps,
+  setListings,
+  setReviews,
+  setTesters,
+  setTracks,
+  setVoidedPurchases,
+} from './outputs';
 
 const run = async ({ command, args }: runProps) => {
-  const promise = new Promise((resolve, reject) => {
+  const result = await getResult({ command, args });
+
+  if (result == null) {
+    throw new ActionError('No Result returned from Service Account');
+  }
+  // Set Outputs
+  await Promise.all([
+    setTracks(result),
+    setApks(result),
+    setBundles(result),
+    setListings(result),
+    setImages(result),
+    setInapps(result),
+    setReviews(result),
+    setVoidedPurchases(result),
+    setTesters(result),
+    setAppDetails(result),
+    setExpansionFiles(result),
+  ]);
+};
+
+const getResult = async ({
+  command,
+  args,
+}: runProps): Promise<ResultData | null> => {
+  return new Promise((resolve, reject) => {
     const child: ChildProcess = spawn(command, args, {
       stdio: ['inherit', 'pipe', 'pipe'],
       env: {
@@ -46,10 +81,6 @@ const run = async ({ command, args }: runProps) => {
       }
     });
   });
-
-  const result = await promise;
-  console.log(JSON.stringify(result, null, 2));
-  return result;
 };
 
 export default run;

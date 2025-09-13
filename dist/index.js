@@ -90,11 +90,11 @@ var require_command = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.issue = exports2.issueCommand = void 0;
-    var os2 = __importStar(require("os"));
+    var os3 = __importStar(require("os"));
     var utils_1 = require_utils();
     function issueCommand(command, properties, message) {
       const cmd = new Command(command, properties, message);
-      process.stdout.write(cmd.toString() + os2.EOL);
+      process.stdout.write(cmd.toString() + os3.EOL);
     }
     exports2.issueCommand = issueCommand;
     function issue(name, message = "") {
@@ -178,7 +178,7 @@ var require_file_command = __commonJS({
     exports2.prepareKeyValueMessage = exports2.issueFileCommand = void 0;
     var crypto = __importStar(require("crypto"));
     var fs2 = __importStar(require("fs"));
-    var os2 = __importStar(require("os"));
+    var os3 = __importStar(require("os"));
     var utils_1 = require_utils();
     function issueFileCommand(command, message) {
       const filePath = process.env[`GITHUB_${command}`];
@@ -188,7 +188,7 @@ var require_file_command = __commonJS({
       if (!fs2.existsSync(filePath)) {
         throw new Error(`Missing file at path: ${filePath}`);
       }
-      fs2.appendFileSync(filePath, `${(0, utils_1.toCommandValue)(message)}${os2.EOL}`, {
+      fs2.appendFileSync(filePath, `${(0, utils_1.toCommandValue)(message)}${os3.EOL}`, {
         encoding: "utf8"
       });
     }
@@ -202,7 +202,7 @@ var require_file_command = __commonJS({
       if (convertedValue.includes(delimiter)) {
         throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter}"`);
       }
-      return `${key}<<${delimiter}${os2.EOL}${convertedValue}${os2.EOL}${delimiter}`;
+      return `${key}<<${delimiter}${os3.EOL}${convertedValue}${os3.EOL}${delimiter}`;
     }
     exports2.prepareKeyValueMessage = prepareKeyValueMessage;
   }
@@ -991,14 +991,14 @@ var require_util = __commonJS({
         }
         const port = url.port != null ? url.port : url.protocol === "https:" ? 443 : 80;
         let origin = url.origin != null ? url.origin : `${url.protocol}//${url.hostname}:${port}`;
-        let path2 = url.path != null ? url.path : `${url.pathname || ""}${url.search || ""}`;
+        let path3 = url.path != null ? url.path : `${url.pathname || ""}${url.search || ""}`;
         if (origin.endsWith("/")) {
           origin = origin.substring(0, origin.length - 1);
         }
-        if (path2 && !path2.startsWith("/")) {
-          path2 = `/${path2}`;
+        if (path3 && !path3.startsWith("/")) {
+          path3 = `/${path3}`;
         }
-        url = new URL(origin + path2);
+        url = new URL(origin + path3);
       }
       return url;
     }
@@ -2612,20 +2612,20 @@ var require_parseParams = __commonJS({
 var require_basename = __commonJS({
   "node_modules/.pnpm/@fastify+busboy@2.1.1/node_modules/@fastify/busboy/lib/utils/basename.js"(exports2, module2) {
     "use strict";
-    module2.exports = function basename(path2) {
-      if (typeof path2 !== "string") {
+    module2.exports = function basename(path3) {
+      if (typeof path3 !== "string") {
         return "";
       }
-      for (var i = path2.length - 1; i >= 0; --i) {
-        switch (path2.charCodeAt(i)) {
+      for (var i = path3.length - 1; i >= 0; --i) {
+        switch (path3.charCodeAt(i)) {
           case 47:
           // '/'
           case 92:
-            path2 = path2.slice(i + 1);
-            return path2 === ".." || path2 === "." ? "" : path2;
+            path3 = path3.slice(i + 1);
+            return path3 === ".." || path3 === "." ? "" : path3;
         }
       }
-      return path2 === ".." || path2 === "." ? "" : path2;
+      return path3 === ".." || path3 === "." ? "" : path3;
     };
   }
 });
@@ -5655,7 +5655,7 @@ var require_request = __commonJS({
     }
     var Request = class _Request {
       constructor(origin, {
-        path: path2,
+        path: path3,
         method,
         body,
         headers,
@@ -5669,11 +5669,11 @@ var require_request = __commonJS({
         throwOnError,
         expectContinue
       }, handler) {
-        if (typeof path2 !== "string") {
+        if (typeof path3 !== "string") {
           throw new InvalidArgumentError("path must be a string");
-        } else if (path2[0] !== "/" && !(path2.startsWith("http://") || path2.startsWith("https://")) && method !== "CONNECT") {
+        } else if (path3[0] !== "/" && !(path3.startsWith("http://") || path3.startsWith("https://")) && method !== "CONNECT") {
           throw new InvalidArgumentError("path must be an absolute URL or start with a slash");
-        } else if (invalidPathRegex.exec(path2) !== null) {
+        } else if (invalidPathRegex.exec(path3) !== null) {
           throw new InvalidArgumentError("invalid request path");
         }
         if (typeof method !== "string") {
@@ -5736,7 +5736,7 @@ var require_request = __commonJS({
         this.completed = false;
         this.aborted = false;
         this.upgrade = upgrade || null;
-        this.path = query ? util.buildURL(path2, query) : path2;
+        this.path = query ? util.buildURL(path3, query) : path3;
         this.origin = origin;
         this.idempotent = idempotent == null ? method === "HEAD" || method === "GET" : idempotent;
         this.blocking = blocking == null ? false : blocking;
@@ -6744,9 +6744,9 @@ var require_RedirectHandler = __commonJS({
           return this.handler.onHeaders(statusCode, headers, resume, statusText);
         }
         const { origin, pathname, search } = util.parseURL(new URL(this.location, this.opts.origin && new URL(this.opts.path, this.opts.origin)));
-        const path2 = search ? `${pathname}${search}` : pathname;
+        const path3 = search ? `${pathname}${search}` : pathname;
         this.opts.headers = cleanRequestHeaders(this.opts.headers, statusCode === 303, this.opts.origin !== origin);
-        this.opts.path = path2;
+        this.opts.path = path3;
         this.opts.origin = origin;
         this.opts.maxRedirections = 0;
         this.opts.query = null;
@@ -7986,7 +7986,7 @@ var require_client = __commonJS({
         writeH2(client, client[kHTTP2Session], request);
         return;
       }
-      const { body, method, path: path2, host, upgrade, headers, blocking, reset } = request;
+      const { body, method, path: path3, host, upgrade, headers, blocking, reset } = request;
       const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH";
       if (body && typeof body.read === "function") {
         body.read(0);
@@ -8036,7 +8036,7 @@ var require_client = __commonJS({
       if (blocking) {
         socket[kBlocking] = true;
       }
-      let header = `${method} ${path2} HTTP/1.1\r
+      let header = `${method} ${path3} HTTP/1.1\r
 `;
       if (typeof host === "string") {
         header += `host: ${host}\r
@@ -8099,7 +8099,7 @@ upgrade: ${upgrade}\r
       return true;
     }
     function writeH2(client, session, request) {
-      const { body, method, path: path2, host, upgrade, expectContinue, signal, headers: reqHeaders } = request;
+      const { body, method, path: path3, host, upgrade, expectContinue, signal, headers: reqHeaders } = request;
       let headers;
       if (typeof reqHeaders === "string") headers = Request[kHTTP2CopyHeaders](reqHeaders.trim());
       else headers = reqHeaders;
@@ -8142,7 +8142,7 @@ upgrade: ${upgrade}\r
         });
         return true;
       }
-      headers[HTTP2_HEADER_PATH] = path2;
+      headers[HTTP2_HEADER_PATH] = path3;
       headers[HTTP2_HEADER_SCHEME] = "https";
       const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH";
       if (body && typeof body.read === "function") {
@@ -10382,20 +10382,20 @@ var require_mock_utils = __commonJS({
       }
       return true;
     }
-    function safeUrl(path2) {
-      if (typeof path2 !== "string") {
-        return path2;
+    function safeUrl(path3) {
+      if (typeof path3 !== "string") {
+        return path3;
       }
-      const pathSegments = path2.split("?");
+      const pathSegments = path3.split("?");
       if (pathSegments.length !== 2) {
-        return path2;
+        return path3;
       }
       const qp = new URLSearchParams(pathSegments.pop());
       qp.sort();
       return [...pathSegments, qp.toString()].join("?");
     }
-    function matchKey(mockDispatch2, { path: path2, method, body, headers }) {
-      const pathMatch = matchValue(mockDispatch2.path, path2);
+    function matchKey(mockDispatch2, { path: path3, method, body, headers }) {
+      const pathMatch = matchValue(mockDispatch2.path, path3);
       const methodMatch = matchValue(mockDispatch2.method, method);
       const bodyMatch = typeof mockDispatch2.body !== "undefined" ? matchValue(mockDispatch2.body, body) : true;
       const headersMatch = matchHeaders(mockDispatch2, headers);
@@ -10413,7 +10413,7 @@ var require_mock_utils = __commonJS({
     function getMockDispatch(mockDispatches, key) {
       const basePath = key.query ? buildURL(key.path, key.query) : key.path;
       const resolvedPath = typeof basePath === "string" ? safeUrl(basePath) : basePath;
-      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path: path2 }) => matchValue(safeUrl(path2), resolvedPath));
+      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path: path3 }) => matchValue(safeUrl(path3), resolvedPath));
       if (matchedMockDispatches.length === 0) {
         throw new MockNotMatchedError(`Mock dispatch not matched for path '${resolvedPath}'`);
       }
@@ -10450,9 +10450,9 @@ var require_mock_utils = __commonJS({
       }
     }
     function buildKey(opts) {
-      const { path: path2, method, body, headers, query } = opts;
+      const { path: path3, method, body, headers, query } = opts;
       return {
-        path: path2,
+        path: path3,
         method,
         body,
         headers,
@@ -10901,10 +10901,10 @@ var require_pending_interceptors_formatter = __commonJS({
       }
       format(pendingInterceptors) {
         const withPrettyHeaders = pendingInterceptors.map(
-          ({ method, path: path2, data: { statusCode }, persist, times, timesInvoked, origin }) => ({
+          ({ method, path: path3, data: { statusCode }, persist, times, timesInvoked, origin }) => ({
             Method: method,
             Origin: origin,
-            Path: path2,
+            Path: path3,
             "Status code": statusCode,
             Persistent: persist ? "\u2705" : "\u274C",
             Invocations: timesInvoked,
@@ -15524,8 +15524,8 @@ var require_util6 = __commonJS({
         }
       }
     }
-    function validateCookiePath(path2) {
-      for (const char of path2) {
+    function validateCookiePath(path3) {
+      for (const char of path3) {
         const code = char.charCodeAt(0);
         if (code < 33 || char === ";") {
           throw new Error("Invalid cookie path");
@@ -17205,11 +17205,11 @@ var require_undici = __commonJS({
           if (typeof opts.path !== "string") {
             throw new InvalidArgumentError("invalid opts.path");
           }
-          let path2 = opts.path;
+          let path3 = opts.path;
           if (!opts.path.startsWith("/")) {
-            path2 = `/${path2}`;
+            path3 = `/${path3}`;
           }
-          url = new URL(util.parseOrigin(url).origin + path2);
+          url = new URL(util.parseOrigin(url).origin + path3);
         } else {
           if (!opts) {
             opts = typeof url === "object" ? url : {};
@@ -18432,7 +18432,7 @@ var require_path_utils = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.toPlatformPath = exports2.toWin32Path = exports2.toPosixPath = void 0;
-    var path2 = __importStar(require("path"));
+    var path3 = __importStar(require("path"));
     function toPosixPath(pth) {
       return pth.replace(/[\\]/g, "/");
     }
@@ -18442,7 +18442,7 @@ var require_path_utils = __commonJS({
     }
     exports2.toWin32Path = toWin32Path;
     function toPlatformPath(pth) {
-      return pth.replace(/[/\\]/g, path2.sep);
+      return pth.replace(/[/\\]/g, path3.sep);
     }
     exports2.toPlatformPath = toPlatformPath;
   }
@@ -18506,7 +18506,7 @@ var require_io_util = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getCmdPath = exports2.tryGetExecutablePath = exports2.isRooted = exports2.isDirectory = exports2.exists = exports2.READONLY = exports2.UV_FS_O_EXLOCK = exports2.IS_WINDOWS = exports2.unlink = exports2.symlink = exports2.stat = exports2.rmdir = exports2.rm = exports2.rename = exports2.readlink = exports2.readdir = exports2.open = exports2.mkdir = exports2.lstat = exports2.copyFile = exports2.chmod = void 0;
     var fs2 = __importStar(require("fs"));
-    var path2 = __importStar(require("path"));
+    var path3 = __importStar(require("path"));
     _a = fs2.promises, exports2.chmod = _a.chmod, exports2.copyFile = _a.copyFile, exports2.lstat = _a.lstat, exports2.mkdir = _a.mkdir, exports2.open = _a.open, exports2.readdir = _a.readdir, exports2.readlink = _a.readlink, exports2.rename = _a.rename, exports2.rm = _a.rm, exports2.rmdir = _a.rmdir, exports2.stat = _a.stat, exports2.symlink = _a.symlink, exports2.unlink = _a.unlink;
     exports2.IS_WINDOWS = process.platform === "win32";
     exports2.UV_FS_O_EXLOCK = 268435456;
@@ -18555,7 +18555,7 @@ var require_io_util = __commonJS({
         }
         if (stats && stats.isFile()) {
           if (exports2.IS_WINDOWS) {
-            const upperExt = path2.extname(filePath).toUpperCase();
+            const upperExt = path3.extname(filePath).toUpperCase();
             if (extensions.some((validExt) => validExt.toUpperCase() === upperExt)) {
               return filePath;
             }
@@ -18579,11 +18579,11 @@ var require_io_util = __commonJS({
           if (stats && stats.isFile()) {
             if (exports2.IS_WINDOWS) {
               try {
-                const directory = path2.dirname(filePath);
-                const upperName = path2.basename(filePath).toUpperCase();
+                const directory = path3.dirname(filePath);
+                const upperName = path3.basename(filePath).toUpperCase();
                 for (const actualName of yield exports2.readdir(directory)) {
                   if (upperName === actualName.toUpperCase()) {
-                    filePath = path2.join(directory, actualName);
+                    filePath = path3.join(directory, actualName);
                     break;
                   }
                 }
@@ -18678,7 +18678,7 @@ var require_io = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.findInPath = exports2.which = exports2.mkdirP = exports2.rmRF = exports2.mv = exports2.cp = void 0;
     var assert_1 = require("assert");
-    var path2 = __importStar(require("path"));
+    var path3 = __importStar(require("path"));
     var ioUtil = __importStar(require_io_util());
     function cp(source, dest, options = {}) {
       return __awaiter(this, void 0, void 0, function* () {
@@ -18687,7 +18687,7 @@ var require_io = __commonJS({
         if (destStat && destStat.isFile() && !force) {
           return;
         }
-        const newDest = destStat && destStat.isDirectory() && copySourceDirectory ? path2.join(dest, path2.basename(source)) : dest;
+        const newDest = destStat && destStat.isDirectory() && copySourceDirectory ? path3.join(dest, path3.basename(source)) : dest;
         if (!(yield ioUtil.exists(source))) {
           throw new Error(`no such file or directory: ${source}`);
         }
@@ -18699,7 +18699,7 @@ var require_io = __commonJS({
             yield cpDirRecursive(source, newDest, 0, force);
           }
         } else {
-          if (path2.relative(source, newDest) === "") {
+          if (path3.relative(source, newDest) === "") {
             throw new Error(`'${newDest}' and '${source}' are the same file`);
           }
           yield copyFile(source, newDest, force);
@@ -18712,7 +18712,7 @@ var require_io = __commonJS({
         if (yield ioUtil.exists(dest)) {
           let destExists = true;
           if (yield ioUtil.isDirectory(dest)) {
-            dest = path2.join(dest, path2.basename(source));
+            dest = path3.join(dest, path3.basename(source));
             destExists = yield ioUtil.exists(dest);
           }
           if (destExists) {
@@ -18723,7 +18723,7 @@ var require_io = __commonJS({
             }
           }
         }
-        yield mkdirP(path2.dirname(dest));
+        yield mkdirP(path3.dirname(dest));
         yield ioUtil.rename(source, dest);
       });
     }
@@ -18786,7 +18786,7 @@ var require_io = __commonJS({
         }
         const extensions = [];
         if (ioUtil.IS_WINDOWS && process.env["PATHEXT"]) {
-          for (const extension of process.env["PATHEXT"].split(path2.delimiter)) {
+          for (const extension of process.env["PATHEXT"].split(path3.delimiter)) {
             if (extension) {
               extensions.push(extension);
             }
@@ -18799,12 +18799,12 @@ var require_io = __commonJS({
           }
           return [];
         }
-        if (tool.includes(path2.sep)) {
+        if (tool.includes(path3.sep)) {
           return [];
         }
         const directories = [];
         if (process.env.PATH) {
-          for (const p of process.env.PATH.split(path2.delimiter)) {
+          for (const p of process.env.PATH.split(path3.delimiter)) {
             if (p) {
               directories.push(p);
             }
@@ -18812,7 +18812,7 @@ var require_io = __commonJS({
         }
         const matches = [];
         for (const directory of directories) {
-          const filePath = yield ioUtil.tryGetExecutablePath(path2.join(directory, tool), extensions);
+          const filePath = yield ioUtil.tryGetExecutablePath(path3.join(directory, tool), extensions);
           if (filePath) {
             matches.push(filePath);
           }
@@ -18925,10 +18925,10 @@ var require_toolrunner = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.argStringToArray = exports2.ToolRunner = void 0;
-    var os2 = __importStar(require("os"));
+    var os3 = __importStar(require("os"));
     var events = __importStar(require("events"));
     var child = __importStar(require("child_process"));
-    var path2 = __importStar(require("path"));
+    var path3 = __importStar(require("path"));
     var io = __importStar(require_io());
     var ioUtil = __importStar(require_io_util());
     var timers_1 = require("timers");
@@ -18980,12 +18980,12 @@ var require_toolrunner = __commonJS({
       _processLineBuffer(data, strBuffer, onLine) {
         try {
           let s = strBuffer + data.toString();
-          let n = s.indexOf(os2.EOL);
+          let n = s.indexOf(os3.EOL);
           while (n > -1) {
             const line = s.substring(0, n);
             onLine(line);
-            s = s.substring(n + os2.EOL.length);
-            n = s.indexOf(os2.EOL);
+            s = s.substring(n + os3.EOL.length);
+            n = s.indexOf(os3.EOL);
           }
           return s;
         } catch (err) {
@@ -19143,7 +19143,7 @@ var require_toolrunner = __commonJS({
       exec() {
         return __awaiter(this, void 0, void 0, function* () {
           if (!ioUtil.isRooted(this.toolPath) && (this.toolPath.includes("/") || IS_WINDOWS && this.toolPath.includes("\\"))) {
-            this.toolPath = path2.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
+            this.toolPath = path3.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
           }
           this.toolPath = yield io.which(this.toolPath, true);
           return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
@@ -19154,7 +19154,7 @@ var require_toolrunner = __commonJS({
             }
             const optionsNonNull = this._cloneExecOptions(this.options);
             if (!optionsNonNull.silent && optionsNonNull.outStream) {
-              optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os2.EOL);
+              optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os3.EOL);
             }
             const state = new ExecState(optionsNonNull, this.toolPath);
             state.on("debug", (message) => {
@@ -19642,8 +19642,8 @@ var require_core = __commonJS({
     var command_1 = require_command();
     var file_command_1 = require_file_command();
     var utils_1 = require_utils();
-    var os2 = __importStar(require("os"));
-    var path2 = __importStar(require("path"));
+    var os3 = __importStar(require("os"));
+    var path3 = __importStar(require("path"));
     var oidc_utils_1 = require_oidc_utils();
     var ExitCode;
     (function(ExitCode2) {
@@ -19671,7 +19671,7 @@ var require_core = __commonJS({
       } else {
         (0, command_1.issueCommand)("add-path", {}, inputPath);
       }
-      process.env["PATH"] = `${inputPath}${path2.delimiter}${process.env["PATH"]}`;
+      process.env["PATH"] = `${inputPath}${path3.delimiter}${process.env["PATH"]}`;
     }
     exports2.addPath = addPath;
     function getInput2(name, options) {
@@ -19710,7 +19710,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       if (filePath) {
         return (0, file_command_1.issueFileCommand)("OUTPUT", (0, file_command_1.prepareKeyValueMessage)(name, value));
       }
-      process.stdout.write(os2.EOL);
+      process.stdout.write(os3.EOL);
       (0, command_1.issueCommand)("set-output", { name }, (0, utils_1.toCommandValue)(value));
     }
     exports2.setOutput = setOutput2;
@@ -19744,7 +19744,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     }
     exports2.notice = notice;
     function info(message) {
-      process.stdout.write(message + os2.EOL);
+      process.stdout.write(message + os3.EOL);
     }
     exports2.info = info;
     function startGroup(name) {
@@ -19810,8 +19810,113 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
 
 // src/main.ts
 var import_child_process = require("child_process");
+
+// src/utils.ts
+var import_path = __toESM(require("path"));
+var import_os = __toESM(require("os"));
+var core = __toESM(require_core());
+var ActionError = class extends Error {
+  constructor(message) {
+    super(message);
+    core.setFailed(message);
+  }
+};
+var getExecutablePath = () => {
+  const basePath = import_path.default.join(process.cwd(), "cli", "dist");
+  switch (import_os.default.platform()) {
+    case "win32":
+      return import_path.default.join(basePath, "play_console_cli.exe");
+    case "darwin":
+    case "linux":
+      return import_path.default.join(basePath, "play_console_cli");
+    default:
+      throw new ActionError(`Unknown platform: ${import_os.default.platform()}`);
+  }
+};
+
+// src/outputs.ts
+var core2 = __toESM(require_core());
+var setTracks = async (result) => {
+  if ("tracks" in result) {
+    core2.setOutput("tracks", result.tracks);
+  }
+};
+var setApks = async (result) => {
+  if ("apks" in result) {
+    core2.setOutput("apks", result.apks);
+  }
+};
+var setBundles = async (result) => {
+  if ("bundles" in result) {
+    core2.setOutput("bundles", result.bundles);
+  }
+};
+var setListings = async (result) => {
+  if ("listings" in result) {
+    core2.setOutput("listings", result.listings);
+  }
+};
+var setImages = async (result) => {
+  if ("images" in result) {
+    core2.setOutput("images", result.images);
+  }
+};
+var setInapps = async (result) => {
+  if ("inapps" in result) {
+    core2.setOutput("inapps", result.inapps);
+  }
+};
+var setReviews = async (result) => {
+  if ("reviews" in result) {
+    core2.setOutput("reviews", result.reviews);
+  }
+};
+var setVoidedPurchases = async (result) => {
+  if ("voidedPurchases" in result) {
+    core2.setOutput("voidedPurchases", result.voidedPurchases);
+  }
+};
+var setTesters = async (result) => {
+  if ("testers" in result) {
+    core2.setOutput("testers", result.testers);
+  }
+};
+var setAppDetails = async (result) => {
+  if ("appDetails" in result) {
+    core2.setOutput("appDetails", result.appDetails);
+  }
+};
+var setExpansionFiles = async (result) => {
+  if ("expansionFiles" in result) {
+    core2.setOutput("expansionFiles", result.expansionFiles);
+  }
+};
+
+// src/main.ts
 var run = async ({ command, args: args2 }) => {
-  const promise = new Promise((resolve, reject) => {
+  const result = await getResult({ command, args: args2 });
+  if (result == null) {
+    throw new ActionError("No Result returned from Service Account");
+  }
+  await Promise.all([
+    setTracks(result),
+    setApks(result),
+    setBundles(result),
+    setListings(result),
+    setImages(result),
+    setInapps(result),
+    setReviews(result),
+    setVoidedPurchases(result),
+    setTesters(result),
+    setAppDetails(result),
+    setExpansionFiles(result)
+  ]);
+};
+var getResult = async ({
+  command,
+  args: args2
+}) => {
+  return new Promise((resolve, reject) => {
     const child = (0, import_child_process.spawn)(command, args2, {
       stdio: ["inherit", "pipe", "pipe"],
       env: {
@@ -19843,63 +19948,35 @@ var run = async ({ command, args: args2 }) => {
       }
     });
   });
-  const result = await promise;
-  console.log(JSON.stringify(result, null, 2));
-  return result;
 };
 var main_default = run;
 
-// src/utils.ts
-var import_path = __toESM(require("path"));
-var import_os = __toESM(require("os"));
-var core = __toESM(require_core());
+// src/inputs.ts
+var core3 = __toESM(require_core());
 var import_fs = __toESM(require("fs"));
-var ActionError = class extends Error {
-  constructor(message) {
-    super(message);
-    core.setFailed(message);
-    process.exit(1);
-  }
-};
-var getExecutablePath = () => {
-  const basePath = import_path.default.join(process.cwd(), "cli", "dist");
-  switch (import_os.default.platform()) {
-    case "win32":
-      return import_path.default.join(basePath, "play_console_cli.exe");
-    case "darwin":
-    case "linux":
-      return import_path.default.join(basePath, "play_console_cli");
-    default:
-      throw new ActionError(`Unknown platform: ${import_os.default.platform()}`);
-  }
-};
+var import_os2 = __toESM(require("os"));
+var import_path2 = __toESM(require("path"));
 var getPackage = () => {
-  const pkg2 = core.getInput("package");
+  const pkg2 = core3.getInput("package");
   if (!pkg2) {
     throw new ActionError("Input 'package' is required.");
   }
   return pkg2;
 };
 var getServiceAccountJsonPath = () => {
-  const serviceAccountJsonPath = core.getInput("serviceAccountJsonPath", {
+  const serviceAccountJsonPath = core3.getInput("serviceAccountJsonPath", {
     required: false
   });
-  core.setOutput("serviceAccountJsonPath", serviceAccountJsonPath);
-  if (serviceAccountJsonPath) {
-    if (!import_fs.default.existsSync(serviceAccountJsonPath)) {
-      throw new ActionError(
-        `Credentials file not found at path: ${serviceAccountJsonPath}`
-      );
-    }
+  if (serviceAccountJsonPath && import_fs.default.existsSync(serviceAccountJsonPath.trim())) {
     return serviceAccountJsonPath;
   }
-  const serviceAccountJsonPlainText = core.getInput(
+  const serviceAccountJsonPlainText = core3.getInput(
     "serviceAccountJsonPlainText",
     { required: false }
   );
   if (serviceAccountJsonPlainText) {
-    const tempFilePath = import_path.default.join(
-      import_os.default.tmpdir(),
+    const tempFilePath = import_path2.default.join(
+      import_os2.default.tmpdir(),
       `gplaycli-creds-${Date.now()}.json`
     );
     import_fs.default.writeFileSync(tempFilePath, serviceAccountJsonPlainText);
@@ -19911,42 +19988,38 @@ var getServiceAccountJsonPath = () => {
 };
 var getArguments = () => {
   const resourceRequestInputs = {
-    tracks: core.getInput("tracks", { required: false }),
+    tracks: core3.getInput("tracks", { required: false }),
     // Comma-separated tracks, supported: production, beta, alpha, internal, default: all
-    apks: core.getInput("apks", { required: false }),
+    apks: core3.getInput("apks", { required: false }),
     // boolean, default: false
-    bundles: core.getInput("bundles", { required: false }),
+    bundles: core3.getInput("bundles", { required: false }),
     // boolean, default: false
-    listings: core.getInput("listings", { required: false }),
+    listings: core3.getInput("listings", { required: false }),
     // boolean, default: false
-    images: core.getInput("images", { required: false }),
+    images: core3.getInput("images", { required: false }),
     // Comma-separated image types, supported: icon, featureGraphic, promoGraphic, tvBanner, phoneScreenshots, sevenInchScreenshots, tenInchScreenshots, tvScreenshots, wearScreenshots, default: all
-    inapps: core.getInput("inapps", { required: false }),
+    inapps: core3.getInput("inapps", { required: false }),
     // boolean, default: false
-    reviews: core.getInput("reviews", { required: false }),
+    reviews: core3.getInput("reviews", { required: false }),
     // boolean, default: false
-    voidedPurchases: core.getInput("voidedPurchases", { required: false }),
+    voidedPurchases: core3.getInput("voidedPurchases", { required: false }),
     // boolean, default: false
-    testers: core.getInput("testers", { required: false }),
+    testers: core3.getInput("testers", { required: false }),
     // Comma-separated testers, supported: internal, alpha, beta, production, default: all
-    appDetails: core.getInput("appDetails", { required: false }),
+    appDetails: core3.getInput("appDetails", { required: false }),
     // boolean, default: false
-    expansionFiles: core.getInput("expansionFiles", { required: false }),
+    expansionFiles: core3.getInput("expansionFiles", { required: false }),
     // boolean, default: false
-    all: core.getInput("all", { required: false })
+    all: core3.getInput("all", { required: false })
     // boolean, default: false
   };
-  if (!Object.values(resourceRequestInputs).some((value) => !!value)) {
-    throw new ActionError(
-      "At least one of the following inputs must be set to true: 'tracks', 'apks', 'bundles', 'listings', 'images', 'inapps', 'reviews', 'voided_purchases', 'testers', 'app_details', 'expansion_files', or 'all'."
-    );
-  }
+  validateResourceRequestInputs(resourceRequestInputs);
   const resourceOptionsInputs = {
-    imagesLanguage: core.getInput("imagesLanguage"),
+    imagesLanguage: core3.getInput("imagesLanguage"),
     // comma-separated BCP-47 language codes, e.g. en-US, fr-FR, default: en-US
-    reviewsPages: core.getInput("reviewsPages"),
+    reviewsPages: core3.getInput("reviewsPages"),
     // number of review pages to fetch, each page contains reviewsPageSize reviews, default: 1
-    reviewsPageSize: core.getInput("reviewsPageSize")
+    reviewsPageSize: core3.getInput("reviewsPageSize")
     // number of reviews per page, default: 100, max: 200
   };
   const args2 = [];
@@ -19995,7 +20068,63 @@ var getArguments = () => {
   if (resourceRequestInputs.all === "true") {
     args2.push("--all");
   }
+  console.log("args", args2);
   return args2;
+};
+var validateResourceRequestInputs = (inputs) => {
+  if (!Object.values(inputs).some((value) => !!value)) {
+    throw new ActionError(
+      "At least one of the following inputs must be set: 'tracks', 'apks', 'bundles', 'listings', 'images', 'inapps', 'reviews', 'voided_purchases', 'testers', 'app_details', 'expansion_files', or 'all'."
+    );
+  }
+  if (inputs.tracks) {
+    const validTracks = ["production", "beta", "alpha", "internal", "all"];
+    const tracks = inputs.tracks.split(",").map((t) => t.trim());
+    for (const track of tracks) {
+      if (!validTracks.includes(track)) {
+        throw new ActionError(
+          `Invalid track: ${track}. Valid tracks are: ${validTracks.join(", ")}`
+        );
+      }
+    }
+  }
+  if (inputs.images) {
+    const validImageTypes = [
+      "icon",
+      "featureGraphic",
+      "promoGraphic",
+      "tvBanner",
+      "phoneScreenshots",
+      "sevenInchScreenshots",
+      "tenInchScreenshots",
+      "tvScreenshots",
+      "wearScreenshots",
+      "all"
+    ];
+    const images = inputs.images.split(",").map((i) => i.trim());
+    for (const image of images) {
+      if (!validImageTypes.includes(image)) {
+        throw new ActionError(
+          `Invalid image type: ${image}. Valid image types are: ${validImageTypes.join(
+            ", "
+          )}`
+        );
+      }
+    }
+  }
+  if (inputs.testers) {
+    const validTesters = ["internal", "alpha", "beta", "production", "all"];
+    const testers = inputs.testers.split(",").map((t) => t.trim());
+    for (const tester of testers) {
+      if (!validTesters.includes(tester)) {
+        throw new ActionError(
+          `Invalid tester: ${tester}. Valid testers are: ${validTesters.join(
+            ", "
+          )}`
+        );
+      }
+    }
+  }
 };
 
 // src/index.ts
