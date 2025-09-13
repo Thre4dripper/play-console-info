@@ -18,7 +18,6 @@ inputs:
   tracks:
     description: "Include tracks ('all' or comma-separated). Supported: internal, alpha, beta, production"
     required: false
-    default: 'all'
   apks:
     description: Include APKs ('true' or 'false')
     required: false
@@ -34,7 +33,6 @@ inputs:
   images:
     description: "Include images ('all' or comma-separated). Supported: icon, featureGraphic, promoGraphic, tvBanner, phoneScreenshots, sevenInchScreenshots, tenInchScreenshots, tvScreenshots, wearScreenshots"
     required: false
-    default: 'all'
   inapps:
     description: Include in-app products ('true' or 'false')
     required: false
@@ -50,7 +48,6 @@ inputs:
   testers:
     description: "Include testers ('all' or comma-separated). Supported: internal, alpha, beta, production"
     required: false
-    default: 'all'
   appDetails:
     description: Include app details ('true' or 'false')
     required: false
@@ -64,15 +61,12 @@ inputs:
   imagesLanguage:
     description: Language for images (e.g., en-US)
     required: false
-    default: 'en-US'
   reviewsPages:
     description: Number of pages for reviews
     required: false
-    default: '1'
   reviewsPageSize:
     description: Page size for reviews
     required: false
-    default: '100'
   all:
     description: Set to 'true' to include all supported resources
     required: false
