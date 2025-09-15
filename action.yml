@@ -80,10 +80,15 @@ inputs:
   outputsJsonPath:
     description: Optional path to write combined outputs JSON (e.g., outputs/play_console_outputs.json). If empty, a temp path is used when uploading artifacts.
     required: false
+    default: 'artifacts/'
   outputsArtifactName:
     description: Artifact name when upload_outputs_artifact is true
     required: false
-    default: 'play-console-outputs'
+    default: 'play-console-outputs.json'
+  outputsArtifactRetentionDays:
+    description: Number of days to retain the artifact (1-90)
+    required: false
+    default: '1'
 outputs:
   tracks:
     description: JSON of tracks
