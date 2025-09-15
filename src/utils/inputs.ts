@@ -1,8 +1,9 @@
-import { ActionError } from './utils';
+import { ActionError } from './helpers';
 import * as core from '@actions/core';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { ArtifactArgs } from '../types';
 
 export const getPackage = (): string => {
   const pkg = core.getInput('package');
@@ -39,7 +40,7 @@ export const getServiceAccountJsonPath = (): string => {
   );
 };
 
-export const getArguments = (): string[] => {
+export const getCliArguments = (): string[] => {
   const resourceRequestInputs: Record<string, string> = {
     tracks: core.getInput('tracks', { required: false }), // Comma-separated tracks, supported: production, beta, alpha, internal, default: all
     apks: core.getInput('apks', { required: false }), // boolean, default: false
@@ -59,9 +60,9 @@ export const getArguments = (): string[] => {
   validateResourceRequestInputs(resourceRequestInputs);
 
   const resourceOptionsInputs: Record<string, string> = {
-    imagesLanguage: core.getInput('imagesLanguage'), // comma-separated BCP-47 language codes, e.g. en-US, fr-FR, default: en-US
-    reviewsPages: core.getInput('reviewsPages'), // number of review pages to fetch, each page contains reviewsPageSize reviews, default: 1
-    reviewsPageSize: core.getInput('reviewsPageSize'), // number of reviews per page, default: 100, max: 200
+    imagesLanguage: core.getInput('imagesLanguage', { required: false }), // comma-separated BCP-47 language codes, e.g. en-US, fr-FR, default: en-US
+    reviewsPages: core.getInput('reviewsPages', { required: false }), // number of review pages to fetch, each page contains reviewsPageSize reviews, default: 1
+    reviewsPageSize: core.getInput('reviewsPageSize', { required: false }), // number of reviews per page, default: 100, max: 200
   };
 
   const args: string[] = [];
@@ -188,6 +189,71 @@ const validateResourceRequestInputs = (
           )}`
         );
       }
+    }
+  }
+};
+
+export const getArtifactsInputs = (): ArtifactArgs => {
+  const artifactsInputs: Record<string, string> = {
+    uploadOutputsArtifact: core.getInput('uploadOutputsArtifact', {
+      required: false,
+    }), // boolean, default: false
+    outputsJsonPath: core.getInput('outputsJsonPath', { required: false }), // string, default: artifacts/
+    outputsArtifactName: core.getInput('outputsArtifactName', {
+      required: false,
+    }), // string, default: play-console-outputs
+    outputsArtifactRetentionDays: core.getInput(
+      'outputsArtifactRetentionDays',
+      {
+        required: false,
+      }
+    ), // string, default: 1
+  };
+
+  // Check if outputsJsonPath exists, if not, create it
+  if (artifactsInputs.outputsJsonPath) {
+    const outputsPath = artifactsInputs.outputsJsonPath.trim();
+    if (!fs.existsSync(outputsPath)) {
+      fs.mkdirSync(outputsPath, { recursive: true });
+    }
+  } else {
+    // Set the default path if not provided
+    const defaultPath = path.join(process.cwd(), 'artifacts');
+    artifactsInputs.outputsJsonPath = defaultPath;
+    if (!fs.existsSync(defaultPath)) {
+      fs.mkdirSync(defaultPath, { recursive: true });
+    }
+  }
+
+  // Validate artifact inputs
+  validateArtifactInputs(artifactsInputs);
+
+  return {
+    uploadOutputsArtifact: artifactsInputs.uploadOutputsArtifact === 'true',
+    outputsJsonPath: artifactsInputs.outputsJsonPath,
+    outputsArtifactName: artifactsInputs.outputsArtifactName,
+    outputsArtifactRetentionDays: artifactsInputs.outputsArtifactRetentionDays,
+  };
+};
+
+const validateArtifactInputs = (inputs: Record<string, string>): void => {
+  // uploadOutputsArtifact must be true or false
+  if (
+    inputs.uploadOutputsArtifact &&
+    !['true', 'false'].includes(inputs.uploadOutputsArtifact)
+  ) {
+    throw new ActionError(
+      "Input 'uploadOutputsArtifact' must be either 'true' or 'false'."
+    );
+  }
+
+  // outputsArtifactRetentionDays must be a positive integer between 1 and 90
+  if (inputs.outputsArtifactRetentionDays) {
+    const retentionDays = parseInt(inputs.outputsArtifactRetentionDays, 10);
+    if (isNaN(retentionDays) || retentionDays < 1 || retentionDays > 90) {
+      throw new ActionError(
+        "Input 'outputsArtifactRetentionDays' must be a positive integer between 1 and 90."
+      );
     }
   }
 };

@@ -1,48 +1,28 @@
 import { ChildProcess, spawn } from 'child_process';
-import { ResultData, runProps } from './types';
-import { ActionError } from './utils';
-import {
-  setApks,
-  setAppDetails,
-  setBundles,
-  setExpansionFiles,
-  setImages,
-  setInapps,
-  setListings,
-  setReviews,
-  setTesters,
-  setTracks,
-  setVoidedPurchases,
-} from './outputs';
+import { GetResultProps, ResultData, RunProps } from './types';
+import { ActionError } from './utils/helpers';
+import { setOutputs } from './utils/outputs';
+import { createArtifact } from './utils/artifacts';
 
-const run = async ({ command, args }: runProps) => {
-  const result = await getResult({ command, args });
+const run = async ({ command, cliArgs, artifactArgs }: RunProps) => {
+  const result = await getResult({ command, cliArgs });
 
   if (result == null) {
     throw new ActionError('No Result returned from Service Account');
   }
   // Set Outputs
-  await Promise.all([
-    setTracks(result),
-    setApks(result),
-    setBundles(result),
-    setListings(result),
-    setImages(result),
-    setInapps(result),
-    setReviews(result),
-    setVoidedPurchases(result),
-    setTesters(result),
-    setAppDetails(result),
-    setExpansionFiles(result),
-  ]);
+  await setOutputs(result);
+
+  // Create Artifacts
+  await createArtifact(artifactArgs, result);
 };
 
 const getResult = async ({
   command,
-  args,
-}: runProps): Promise<ResultData | null> => {
+  cliArgs,
+}: GetResultProps): Promise<ResultData | null> => {
   return new Promise((resolve, reject) => {
-    const child: ChildProcess = spawn(command, args, {
+    const child: ChildProcess = spawn(command, cliArgs, {
       stdio: ['inherit', 'pipe', 'pipe'],
       env: {
         ...process.env,

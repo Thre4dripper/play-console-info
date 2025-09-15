@@ -1,6 +1,17 @@
-export type runProps = {
+export type GetResultProps = {
   command: string;
-  args: string[];
+  cliArgs: string[];
+};
+
+export type ArtifactArgs = {
+  uploadOutputsArtifact: boolean;
+  outputsJsonPath: string;
+  outputsArtifactName: string;
+  outputsArtifactRetentionDays: string;
+};
+
+export type RunProps = GetResultProps & {
+  artifactArgs: ArtifactArgs;
 };
 
 // Result Types
