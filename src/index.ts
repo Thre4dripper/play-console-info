@@ -1,21 +1,28 @@
 import run from './main';
-import { getExecutablePath } from './utils';
-import { getArguments, getPackage, getServiceAccountJsonPath } from './inputs';
+import { getExecutablePath } from './utils/helpers';
+import {
+  getCliArguments,
+  getArtifactsInputs,
+  getPackage,
+  getServiceAccountJsonPath,
+} from './utils/inputs';
 
 const executablePath = getExecutablePath();
 const serviceAccountJson = getServiceAccountJsonPath();
 const pkg = getPackage();
 
-const args = [
+const cliArgs = [
   '--creds-path',
   serviceAccountJson,
   '--package',
   pkg,
   '--json',
-  ...getArguments(),
+  ...getCliArguments(),
 ];
 
-run({ command: executablePath, args }).catch((err) => {
+const artifactArgs = getArtifactsInputs();
+
+run({ command: executablePath, cliArgs, artifactArgs }).catch((err) => {
   console.error(err);
   process.exitCode = 1;
 });
