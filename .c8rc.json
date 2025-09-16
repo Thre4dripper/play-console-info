@@ -1,6 +1,5 @@
 {
   "include": [
-    "src/**/*.{js,ts,mjs,mts}",
     "tests/mocks/**/*.{js,ts,mjs,mts}"
   ],
   "exclude": [
