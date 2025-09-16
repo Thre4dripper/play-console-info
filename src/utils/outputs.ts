@@ -38,8 +38,8 @@ export const setOutputs = async (result: ResultData) => {
   }
 
   // Check for voidedPurchases
-  if ('voidedPurchases' in result) {
-    core.setOutput('voidedPurchases', result.voidedPurchases);
+  if ('voided_purchases' in result) {
+    core.setOutput('voidedPurchases', result.voided_purchases);
   }
 
   // Check for testers
@@ -48,12 +48,12 @@ export const setOutputs = async (result: ResultData) => {
   }
 
   // Check for appDetails
-  if ('appDetails' in result) {
-    core.setOutput('appDetails', result.appDetails);
+  if ('app_details' in result) {
+    core.setOutput('appDetails', result.app_details);
   }
 
   // Check for expansionFiles
-  if ('expansionFiles' in result) {
-    core.setOutput('expansionFiles', result.expansionFiles);
+  if ('expansion_files' in result) {
+    core.setOutput('expansionFiles', result.expansion_files);
   }
 };
