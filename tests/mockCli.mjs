@@ -9,7 +9,9 @@ program
   .name('mockCli.mjs')
   .description('Google Play Console Data Fetcher (Mock Version)')
   .version('1.0.0')
-  .addHelpText('after', `
+  .addHelpText(
+    'after',
+    `
 Examples:
   node mockCli.mjs -p com.example.app -c creds.json -A
   node mockCli.mjs --package com.example.app --creds-path creds.json -t production,beta -i icon,featureGraphic
@@ -18,45 +20,72 @@ Examples:
 Notes:
   - For comma-separated inputs, do not use spaces.
   - Use 'all' to select all supported values.
-`);
+`
+  );
 
 // Required arguments
 program
   .requiredOption('-p, --package <name>', 'Android application package name')
-  .requiredOption('-c, --creds-path <path>', 'Path to Google service account credentials JSON file');
+  .requiredOption(
+    '-c, --creds-path <path>',
+    'Path to Google service account credentials JSON file'
+  );
 
 // Resource flags
 program
-  .option('-t, --tracks <tracks>', 'Include tracks (\'all\' or comma-separated track names)')
+  .option(
+    '-t, --tracks <tracks>',
+    "Include tracks ('all' or comma-separated track names)"
+  )
   .option('-a, --apks', 'Include APKs')
   .option('-b, --bundles', 'Include App Bundles')
   .option('-l, --listings', 'Include store listings')
-  .option('-i, --images <images>', 'Include images (\'all\' or comma-separated image types)')
+  .option(
+    '-i, --images <images>',
+    "Include images ('all' or comma-separated image types)"
+  )
   .option('-I, --inapps', 'Include in-app products')
   .option('-r, --reviews', 'Include reviews')
   .option('-v, --voided-purchases', 'Include voided purchases')
-  .option('-T, --testers <testers>', 'Include testers (\'all\' or comma-separated track names)')
+  .option(
+    '-T, --testers <testers>',
+    "Include testers ('all' or comma-separated track names)"
+  )
   .option('-d, --app-details', 'Include app details')
   .option('-e, --expansion-files', 'Include expansion files')
   .option('-A, --all', 'Include all supported resources');
 
 // Options
 program
-  .option('-L, --images-language <lang>', 'Listing language for images', 'en-US')
-  .option('-P, --reviews-pages <num>', 'Number of review pages to fetch', (value) => {
-    const parsed = parseInt(value, 10);
-    if (isNaN(parsed) || parsed < 1) {
-      throw new Error('--reviews-pages must be a positive integer');
-    }
-    return parsed;
-  }, 1)
-  .option('-S, --reviews-page-size <num>', 'Reviews per page', (value) => {
-    const parsed = parseInt(value, 10);
-    if (isNaN(parsed) || parsed < 1) {
-      throw new Error('--reviews-page-size must be a positive integer');
-    }
-    return parsed;
-  }, 100)
+  .option(
+    '-L, --images-language <lang>',
+    'Listing language for images',
+    'en-US'
+  )
+  .option(
+    '-P, --reviews-pages <num>',
+    'Number of review pages to fetch',
+    (value) => {
+      const parsed = parseInt(value, 10);
+      if (isNaN(parsed) || parsed < 1) {
+        throw new Error('--reviews-pages must be a positive integer');
+      }
+      return parsed;
+    },
+    1
+  )
+  .option(
+    '-S, --reviews-page-size <num>',
+    'Reviews per page',
+    (value) => {
+      const parsed = parseInt(value, 10);
+      if (isNaN(parsed) || parsed < 1) {
+        throw new Error('--reviews-page-size must be a positive integer');
+      }
+      return parsed;
+    },
+    100
+  )
   .option('-j, --json', 'Output raw JSON instead of formatted tree');
 
 // Custom validation function
@@ -64,89 +93,112 @@ const validateCommaSeperatedOrAll = (value, key) => {
   if (!value || !value.trim()) {
     throw new Error(`--${key} requires a non-empty value`);
   }
-  
+
   const trimmed = value.trim();
   if (trimmed.toLowerCase() === 'all') {
     return trimmed; // 'all' is valid
   }
-  
+
   // Check for comma-separated values
-  if (trimmed.includes(',,') || trimmed.startsWith(',') || trimmed.endsWith(',')) {
+  if (
+    trimmed.includes(',,') ||
+    trimmed.startsWith(',') ||
+    trimmed.endsWith(',')
+  ) {
     throw new Error(`--${key} has invalid comma placement`);
   }
-  
-  const parts = trimmed.split(',').map(p => p.trim()).filter(p => p.length > 0);
+
+  const parts = trimmed
+    .split(',')
+    .map((p) => p.trim())
+    .filter((p) => p.length > 0);
   if (parts.length === 0) {
-    throw new Error(`--${key} must be 'all' or a comma-separated list of values`);
+    throw new Error(
+      `--${key} must be 'all' or a comma-separated list of values`
+    );
   }
-  
+
   return trimmed;
 };
 
 const validateTracks = (value) => {
   const validTracks = ['internal', 'alpha', 'beta', 'production'];
   const trimmed = value.trim();
-  
+
   if (trimmed.toLowerCase() === 'all') {
     return trimmed;
   }
-  
-  const parts = trimmed.split(',').map(p => p.trim().toLowerCase());
-  const invalidTracks = parts.filter(track => !validTracks.includes(track));
-  
+
+  const parts = trimmed.split(',').map((p) => p.trim().toLowerCase());
+  const invalidTracks = parts.filter((track) => !validTracks.includes(track));
+
   if (invalidTracks.length > 0) {
-    throw new Error(`Invalid track names: ${invalidTracks.join(', ')}. Valid tracks: ${validTracks.join(', ')}`);
+    throw new Error(
+      `Invalid track names: ${invalidTracks.join(', ')}. Valid tracks: ${validTracks.join(', ')}`
+    );
   }
-  
+
   return trimmed;
 };
 
 const validateImages = (value) => {
   const validImageTypes = [
-    'icon', 'featureGraphic', 'tvBanner', 'phoneScreenshots', 
-    'sevenInchScreenshots', 'tenInchScreenshots', 'tvScreenshots', 'wearScreenshots'
+    'icon',
+    'featureGraphic',
+    'tvBanner',
+    'phoneScreenshots',
+    'sevenInchScreenshots',
+    'tenInchScreenshots',
+    'tvScreenshots',
+    'wearScreenshots',
   ];
   const trimmed = value.trim();
-  
+
   if (trimmed.toLowerCase() === 'all') {
     return trimmed;
   }
-  
-  const parts = trimmed.split(',').map(p => p.trim());
-  const invalidTypes = parts.filter(type => !validImageTypes.includes(type));
-  
+
+  const parts = trimmed.split(',').map((p) => p.trim());
+  const invalidTypes = parts.filter((type) => !validImageTypes.includes(type));
+
   if (invalidTypes.length > 0) {
-    throw new Error(`Invalid image types: ${invalidTypes.join(', ')}. Valid types: ${validImageTypes.join(', ')}`);
+    throw new Error(
+      `Invalid image types: ${invalidTypes.join(', ')}. Valid types: ${validImageTypes.join(', ')}`
+    );
   }
-  
+
   return trimmed;
 };
 
 const validateTesters = (value) => {
   const validTracks = ['internal', 'alpha', 'beta', 'production'];
   const trimmed = value.trim();
-  
+
   if (trimmed.toLowerCase() === 'all') {
     return trimmed;
   }
-  
-  const parts = trimmed.split(',').map(p => p.trim().toLowerCase());
-  const invalidTracks = parts.filter(track => !validTracks.includes(track));
-  
+
+  const parts = trimmed.split(',').map((p) => p.trim().toLowerCase());
+  const invalidTracks = parts.filter((track) => !validTracks.includes(track));
+
   if (invalidTracks.length > 0) {
-    throw new Error(`Invalid tester track names: ${invalidTracks.join(', ')}. Valid tracks: ${validTracks.join(', ')}`);
+    throw new Error(
+      `Invalid tester track names: ${invalidTracks.join(', ')}. Valid tracks: ${validTracks.join(', ')}`
+    );
   }
-  
+
   return trimmed;
-};const filterTracks = (tracksData, selection) => {
+};
+
+const filterTracks = (tracksData, selection) => {
   if (!tracksData || !tracksData.tracks) {
-    return { kind: "androidpublisher#tracksListResponse", tracks: [] };
+    return { kind: 'androidpublisher#tracksListResponse', tracks: [] };
   }
 
   if (selection === 'all') return tracksData;
 
-  const wantedTracks = selection.split(',').map(t => t.trim().toLowerCase());
-  const filtered = tracksData.tracks.filter(track =>
+  const wantedTracks = selection.split(',').map((t) => t.trim().toLowerCase());
+  const filtered = tracksData.tracks.filter((track) =>
     wantedTracks.includes(track.track.toLowerCase())
   );
 
@@ -160,10 +212,10 @@ const filterImages = (imagesData, selection) => {
 
   if (selection === 'all') return imagesData;
 
-  const wantedTypes = selection.split(',').map(t => t.trim());
+  const wantedTypes = selection.split(',').map((t) => t.trim());
   const filtered = {};
 
-  wantedTypes.forEach(type => {
+  wantedTypes.forEach((type) => {
     if (imagesData[type]) {
       filtered[type] = imagesData[type];
     } else {
@@ -182,10 +234,10 @@ const filterTesters = (testersData, selection) => {
 
   if (selection === 'all') return testersData;
 
-  const wantedTracks = selection.split(',').map(t => t.trim().toLowerCase());
+  const wantedTracks = selection.split(',').map((t) => t.trim().toLowerCase());
   const filtered = {};
 
-  wantedTracks.forEach(track => {
+  wantedTracks.forEach((track) => {
     if (testersData[track]) {
       filtered[track] = testersData[track];
     } else {
@@ -198,8 +250,14 @@ const filterTesters = (testersData, selection) => {
 };
 
 const printTreeOutput = (results) => {
-  const printSection = (title, data, prefix = '', isLast = true, isRoot = false) => {
-    const branch = isRoot ? '\x1b[34m● \x1b[0m' : (isLast ? '└─╴' : '├─╴');
+  const printSection = (
+    title,
+    data,
+    prefix = '',
+    isLast = true,
+    isRoot = false
+  ) => {
+    const branch = isRoot ? '\x1b[34m● \x1b[0m' : isLast ? '└─╴' : '├─╴';
     const space = isLast ? '    ' : '│   ';
 
     if (title) {
@@ -258,7 +316,6 @@ const printTreeOutput = (results) => {
 };
 
 const mock = async () => {
-
   try {
     // Parse arguments using commander
     program.parse();
@@ -307,8 +364,19 @@ const mock = async () => {
     // Determine requested resources
     const requested = [];
     if (options.all) {
-      requested.push('tracks', 'apks', 'bundles', 'listings', 'images', 'inapps',
-        'reviews', 'voided_purchases', 'testers', 'app_details', 'expansion_files');
+      requested.push(
+        'tracks',
+        'apks',
+        'bundles',
+        'listings',
+        'images',
+        'inapps',
+        'reviews',
+        'voided_purchases',
+        'testers',
+        'app_details',
+        'expansion_files'
+      );
     } else {
       if (options.tracks) requested.push('tracks');
       if (options.apks) requested.push('apks');
@@ -324,7 +392,9 @@ const mock = async () => {
     }
 
     if (requested.length === 0) {
-      console.error('[ERROR] No resources selected. Provide --all or at least one of: --tracks, --apks, --bundles, --listings, --images, --inapps, --reviews, --voided-purchases, --testers, --app-details, --expansion-files');
+      console.error(
+        '[ERROR] No resources selected. Provide --all or at least one of: --tracks, --apks, --bundles, --listings, --images, --inapps, --reviews, --voided-purchases, --testers, --app-details, --expansion-files'
+      );
       console.log('Use --help for usage information');
       process.exit(1);
     }
@@ -332,7 +402,7 @@ const mock = async () => {
     const results = {};
 
     // Process each requested resource
-    requested.forEach(resource => {
+    requested.forEach((resource) => {
       switch (resource) {
         case 'tracks': {
           const trackSelection = options.tracks || 'all';
@@ -358,25 +428,95 @@ const mock = async () => {
       }
     });
 
-    // Show progress messages (to stderr) unless in JSON mode
-    if (!options.json) {
-      requested.forEach(resource => {
-        console.error(`[PROGRESS] Fetching ${resource}...`);
-      });
-      console.error('[INFO] Completed successfully!');
+    // Streaming implementation
+    const resultTxtPath = path.join(process.cwd(), 'tests', 'result.txt');
+
+    // Check if result.txt exists
+    if (!fs.existsSync(resultTxtPath)) {
+      console.error('[ERROR] result.txt not found in tests directory');
+      process.exit(1);
     }
 
-    // Output results
-    if (options.json) {
-      console.log(JSON.stringify(results, null, 2));
-    } else {
-      printTreeOutput(results);
+    const resultTxtContent = fs.readFileSync(resultTxtPath, 'utf8');
+    const lines = resultTxtContent.split('\n');
+
+    const chunkLimit = 1;
+    let linesCount = 0;
+    let actualOutputStreamed = false;
+    let charIndex = 0;
+
+    // Stream first part of result.txt (up to 25 lines)
+    for (
+      let lineIndex = 0;
+      lineIndex < lines.length && linesCount < 25;
+      lineIndex++
+    ) {
+      const line = lines[lineIndex] + '\n';
+      for (let i = 0; i < line.length; i += chunkLimit) {
+        const limitedChunk = line.slice(i, i + chunkLimit);
+        process.stderr.write(limitedChunk);
+        // await new Promise((resolve) => setTimeout(resolve, 0)); // Small delay for visibility
+      }
+      linesCount++;
+      charIndex += line.length;
+    }
+
+    // After 25 lines, output the actual CLI results
+    if (!actualOutputStreamed) {
+      actualOutputStreamed = true;
+
+      // Show progress messages (to stderr) unless in JSON mode
+      if (!options.json) {
+        requested.forEach((resource) => {
+          process.stderr.write(`[PROGRESS] Fetching ${resource}...\n`);
+        });
+        process.stderr.write('[INFO] Completed successfully!\n');
+      }
+
+      // Output results to stdout
+      if (options.json) {
+        const jsonOutput = JSON.stringify(results, null, 2);
+        for (let j = 0; j < jsonOutput.length; j += chunkLimit) {
+          const limitedChunk = jsonOutput.slice(j, j + chunkLimit);
+          process.stdout.write(limitedChunk);
+          // await new Promise((resolve) => setTimeout(resolve, 5)); // Faster for actual output
+        }
+      } else {
+        // Capture tree output as string
+        const originalConsoleLog = console.log;
+        let treeOutput = '';
+        console.log = (str) => {
+          treeOutput += str + '\n';
+        };
+
+        printTreeOutput(results);
+        console.log = originalConsoleLog;
+
+        // Stream tree output character by character
+        for (let j = 0; j < treeOutput.length; j += chunkLimit) {
+          const limitedChunk = treeOutput.slice(j, j + chunkLimit);
+          process.stdout.write(limitedChunk);
+          await new Promise((resolve) => setTimeout(resolve, 5)); // Faster for actual output
+        }
+      }
+
+      process.stdout.write('\n');
+    }
+
+    // Continue streaming the rest of result.txt
+    const remainingContent = resultTxtContent.slice(charIndex);
+    for (let i = 0; i < remainingContent.length; i += chunkLimit) {
+      const limitedChunk = remainingContent.slice(i, i + chunkLimit);
+      process.stderr.write(limitedChunk);
+      await new Promise((resolve) => setTimeout(resolve, 10)); // Small delay for visibility
     }
   } catch (error) {
     // Commander.js will automatically handle and display argument errors
-    if (error.code === 'commander.missingRequiredArgument' ||
-        error.code === 'commander.invalidArgument' ||
-        error.message.includes('required option')) {
+    if (
+      error.code === 'commander.missingRequiredArgument' ||
+      error.code === 'commander.invalidArgument' ||
+      error.message.includes('required option')
+    ) {
       process.exit(1);
     }
     console.error('[ERROR]', error.message);
