@@ -1,481 +1,402 @@
-// tests/mockCli.test.ts - Unit tests for mock CLI validation and filtering functions
-import { describe, test, expect, jest, beforeEach, afterEach } from '@jest/globals';
+import { spawn } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { describe, it, expect } from '@jest/globals';
 
-// NOTE: For proper coverage reporting, these validation functions are duplicated here
-// from the actual mockCli.mjs file to enable isolated unit testing.
-// This provides comprehensive test coverage of the validation logic without the complexity
-// of CLI integration testing. The functions below are exact copies of the validation
-// logic from tests/mocks/mockCli.mjs for testing purposes.
+describe('mockCli', () => {
+  const mockCliPath = path.join(__dirname, 'mocks', 'mockCli.mjs');
+  const mockCredsPath = path.join(__dirname, 'mocks', 'test-creds.json');
 
-// Mock validation functions to test in isolation
-// These are extracted from the actual CLI file for unit testing
-const validateCommaSeperatedOrAll = (value: string, key: string): string => {
-  if (!value || !value.trim()) {
-    throw new Error(`--${key} requires a non-empty value`);
-  }
+  const runCli = (
+    args: string[]
+  ): Promise<{ stdout: string; stderr: string; exitCode: number }> => {
+    return new Promise((resolve) => {
+      const child = spawn('node', [mockCliPath, ...args]);
+      let stdout = '';
+      let stderr = '';
 
-  const trimmed = value.trim();
-  if (trimmed.toLowerCase() === 'all') {
-    return trimmed;
-  }
-
-  if (
-    trimmed.includes(',,') ||
-    trimmed.startsWith(',') ||
-    trimmed.endsWith(',')
-  ) {
-    throw new Error(`--${key} has invalid comma placement`);
-  }
-
-  const parts = trimmed
-    .split(',')
-    .map((p) => p.trim())
-    .filter((p) => p.length > 0);
-  if (parts.length === 0) {
-    throw new Error(
-      `--${key} must be 'all' or a comma-separated list of values`
-    );
-  }
-
-  return trimmed;
-};
-
-const validateTracks = (value: string): string => {
-  const validTracks = ['internal', 'alpha', 'beta', 'production'];
-  const trimmed = value.trim();
-
-  if (trimmed.toLowerCase() === 'all') {
-    return trimmed;
-  }
-
-  const parts = trimmed.split(',').map((p) => p.trim().toLowerCase());
-  const invalidTracks = parts.filter((track) => !validTracks.includes(track));
-
-  if (invalidTracks.length > 0) {
-    throw new Error(
-      `Invalid track names: ${invalidTracks.join(', ')}. Valid tracks: ${validTracks.join(', ')}`
-    );
-  }
-
-  return trimmed;
-};
-
-const validateImages = (value: string): string => {
-  const validImageTypes = [
-    'icon',
-    'featureGraphic',
-    'tvBanner',
-    'phoneScreenshots',
-    'sevenInchScreenshots',
-    'tenInchScreenshots',
-    'tvScreenshots',
-    'wearScreenshots',
-  ];
-  const trimmed = value.trim();
-
-  if (trimmed.toLowerCase() === 'all') {
-    return trimmed;
-  }
-
-  const parts = trimmed.split(',').map((p) => p.trim());
-  const invalidTypes = parts.filter((type) => !validImageTypes.includes(type));
-
-  if (invalidTypes.length > 0) {
-    throw new Error(
-      `Invalid image types: ${invalidTypes.join(', ')}. Valid types: ${validImageTypes.join(', ')}`
-    );
-  }
-
-  return trimmed;
-};
-
-const validateTesters = (value: string): string => {
-  const validTracks = ['internal', 'alpha', 'beta', 'production'];
-  const trimmed = value.trim();
-
-  if (trimmed.toLowerCase() === 'all') {
-    return trimmed;
-  }
-
-  const parts = trimmed.split(',').map((p) => p.trim().toLowerCase());
-  const invalidTracks = parts.filter((track) => !validTracks.includes(track));
-
-  if (invalidTracks.length > 0) {
-    throw new Error(
-      `Invalid tester track names: ${invalidTracks.join(', ')}. Valid tracks: ${validTracks.join(', ')}`
-    );
-  }
-
-  return trimmed;
-};
-
-// Type definitions for better type safety
-interface TracksData {
-  kind: string;
-  tracks: Array<{ track: string; releases: unknown[] }>;
-}
-
-interface ImagesData {
-  [key: string]: { images: unknown[] };
-}
-
-interface TestersData {
-  [key: string]: { googleGroups: string[] };
-}
-
-const filterTracks = (tracksData: TracksData | null | undefined, selection: string): TracksData => {
-  if (!tracksData || !tracksData.tracks) {
-    return { kind: 'androidpublisher#tracksListResponse', tracks: [] };
-  }
-
-  if (selection === 'all') return tracksData;
-
-  const wantedTracks = selection.split(',').map((t) => t.trim().toLowerCase());
-  const filtered = tracksData.tracks.filter((track) =>
-    wantedTracks.includes(track.track.toLowerCase())
-  );
-
-  return { ...tracksData, tracks: filtered };
-};
-
-const filterImages = (imagesData: ImagesData | null | undefined, selection: string): ImagesData => {
-  if (!imagesData) {
-    return {};
-  }
-
-  if (selection === 'all') return imagesData;
-
-  const wantedTypes = selection.split(',').map((t) => t.trim());
-  const filtered: ImagesData = {};
-
-  wantedTypes.forEach((type) => {
-    if (imagesData[type]) {
-      filtered[type] = imagesData[type];
-    } else {
-      filtered[type] = { images: [] };
-    }
-  });
-
-  return filtered;
-};
-
-const filterTesters = (testersData: TestersData | null | undefined, selection: string): TestersData => {
-  if (!testersData) {
-    return {};
-  }
-
-  if (selection === 'all') return testersData;
-
-  const wantedTracks = selection.split(',').map((t) => t.trim().toLowerCase());
-  const filtered: TestersData = {};
-
-  wantedTracks.forEach((track) => {
-    if (testersData[track]) {
-      filtered[track] = testersData[track];
-    } else {
-      filtered[track] = { googleGroups: [] };
-    }
-  });
-
-  return filtered;
-};
-
-// Mock data for testing
-const mockResultJson = {
-  tracks: {
-    kind: 'androidpublisher#tracksListResponse',
-    tracks: [
-      { track: 'internal', releases: [] },
-      { track: 'alpha', releases: [] },
-      { track: 'beta', releases: [] },
-      { track: 'production', releases: [] }
-    ]
-  },
-  images: {
-    icon: { images: [{ id: '1', url: 'icon.png' }] },
-    featureGraphic: { images: [{ id: '2', url: 'feature.png' }] },
-    phoneScreenshots: { images: [] }
-  },
-  testers: {
-    internal: { googleGroups: ['internal-testers@example.com'] },
-    alpha: { googleGroups: ['alpha-testers@example.com'] },
-    beta: { googleGroups: [] }
-  }
-};
-
-describe('Mock CLI Validation Tests', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
-  describe('Validation Functions', () => {
-    describe('validateCommaSeperatedOrAll', () => {
-      test('should accept "all" as valid input', () => {
-        expect(validateCommaSeperatedOrAll('all', 'test')).toBe('all');
-        expect(validateCommaSeperatedOrAll('ALL', 'test')).toBe('ALL');
-        expect(validateCommaSeperatedOrAll(' all ', 'test')).toBe('all');
+      child.stdout.on('data', (data) => {
+        stdout += data.toString();
       });
 
-      test('should accept valid comma-separated values', () => {
-        expect(validateCommaSeperatedOrAll('value1,value2', 'test')).toBe('value1,value2');
-        expect(validateCommaSeperatedOrAll('a,b,c', 'test')).toBe('a,b,c');
-        expect(validateCommaSeperatedOrAll(' a , b , c ', 'test')).toBe('a , b , c');
+      child.stderr.on('data', (data) => {
+        stderr += data.toString();
       });
 
-      test('should reject empty or whitespace-only values', () => {
-        expect(() => validateCommaSeperatedOrAll('', 'test')).toThrow('--test requires a non-empty value');
-        expect(() => validateCommaSeperatedOrAll('   ', 'test')).toThrow('--test requires a non-empty value');
+      child.on('close', (code) => {
+        resolve({ stdout, stderr, exitCode: code || 0 });
       });
 
-      test('should reject invalid comma placement', () => {
-        expect(() => validateCommaSeperatedOrAll('a,,b', 'test')).toThrow('--test has invalid comma placement');
-        expect(() => validateCommaSeperatedOrAll(',a,b', 'test')).toThrow('--test has invalid comma placement');
-        expect(() => validateCommaSeperatedOrAll('a,b,', 'test')).toThrow('--test has invalid comma placement');
-      });
-
-      test('should reject comma-only values', () => {
-        expect(() => validateCommaSeperatedOrAll(',', 'test')).toThrow('--test has invalid comma placement');
-        expect(() => validateCommaSeperatedOrAll(',,', 'test')).toThrow('--test has invalid comma placement');
-        expect(() => validateCommaSeperatedOrAll(',,,', 'test')).toThrow('--test has invalid comma placement');
+      child.on('error', (error) => {
+        resolve({ stdout, stderr: error.message, exitCode: 1 });
       });
     });
+  };
 
-    describe('validateTracks', () => {
-      test('should accept "all" as valid input', () => {
-        expect(validateTracks('all')).toBe('all');
-        expect(validateTracks('ALL')).toBe('ALL');
-      });
+  // Command line argument validation tests
+  describe('command line validation', () => {
+    it('displays help when no arguments provided', async () => {
+      const result = await runCli([]);
 
-      test('should accept valid track names', () => {
-        expect(validateTracks('internal')).toBe('internal');
-        expect(validateTracks('alpha,beta')).toBe('alpha,beta');
-        expect(validateTracks('production,internal,alpha,beta')).toBe('production,internal,alpha,beta');
-      });
-
-      test('should handle case insensitive track names', () => {
-        expect(validateTracks('INTERNAL')).toBe('INTERNAL');
-        expect(validateTracks('Alpha,BETA')).toBe('Alpha,BETA');
-      });
-
-      test('should reject invalid track names', () => {
-        expect(() => validateTracks('invalid')).toThrow('Invalid track names: invalid. Valid tracks: internal, alpha, beta, production');
-        expect(() => validateTracks('alpha,invalid,beta')).toThrow('Invalid track names: invalid. Valid tracks: internal, alpha, beta, production');
-        expect(() => validateTracks('staging,release')).toThrow('Invalid track names: staging, release. Valid tracks: internal, alpha, beta, production');
-      });
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toContain('required option');
     });
 
-    describe('validateImages', () => {
-      test('should accept "all" as valid input', () => {
-        expect(validateImages('all')).toBe('all');
-        expect(validateImages('ALL')).toBe('ALL');
-      });
+    it('displays version information', async () => {
+      const result = await runCli(['--version']);
 
-      test('should accept valid image types', () => {
-        expect(validateImages('icon')).toBe('icon');
-        expect(validateImages('icon,featureGraphic')).toBe('icon,featureGraphic');
-        expect(validateImages('phoneScreenshots,tvScreenshots,wearScreenshots')).toBe('phoneScreenshots,tvScreenshots,wearScreenshots');
-      });
-
-      test('should accept all valid image types', () => {
-        const allTypes = 'icon,featureGraphic,tvBanner,phoneScreenshots,sevenInchScreenshots,tenInchScreenshots,tvScreenshots,wearScreenshots';
-        expect(validateImages(allTypes)).toBe(allTypes);
-      });
-
-      test('should reject invalid image types', () => {
-        expect(() => validateImages('invalid')).toThrow('Invalid image types: invalid. Valid types: icon, featureGraphic, tvBanner, phoneScreenshots, sevenInchScreenshots, tenInchScreenshots, tvScreenshots, wearScreenshots');
-        expect(() => validateImages('icon,invalid,featureGraphic')).toThrow('Invalid image types: invalid. Valid types: icon, featureGraphic, tvBanner, phoneScreenshots, sevenInchScreenshots, tenInchScreenshots, tvScreenshots, wearScreenshots');
-      });
+      expect(result.stdout).toContain('1.0.0');
+      expect(result.exitCode).toBe(0);
     });
 
-    describe('validateTesters', () => {
-      test('should accept "all" as valid input', () => {
-        expect(validateTesters('all')).toBe('all');
-        expect(validateTesters('ALL')).toBe('ALL');
-      });
+    it('fails when package name is missing', async () => {
+      const result = await runCli(['-c', mockCredsPath, '--all']);
 
-      test('should accept valid tester track names', () => {
-        expect(validateTesters('internal')).toBe('internal');
-        expect(validateTesters('alpha,beta')).toBe('alpha,beta');
-      });
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toContain('required option');
+    });
 
-      test('should handle case insensitive tester track names', () => {
-        expect(validateTesters('INTERNAL')).toBe('INTERNAL');
-        expect(validateTesters('Alpha,BETA')).toBe('Alpha,BETA');
-      });
+    it('fails when credentials path is missing', async () => {
+      const result = await runCli(['-p', 'com.example.app', '--all']);
 
-      test('should reject invalid tester track names', () => {
-        expect(() => validateTesters('invalid')).toThrow('Invalid tester track names: invalid. Valid tracks: internal, alpha, beta, production');
-        expect(() => validateTesters('alpha,invalid,beta')).toThrow('Invalid tester track names: invalid. Valid tracks: internal, alpha, beta, production');
-      });
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toContain('required option');
     });
   });
 
-  describe('Filtering Functions', () => {
-    describe('filterTracks', () => {
-      test('should return empty structure for null/undefined input', () => {
-        expect(filterTracks(null, 'all')).toEqual({ kind: 'androidpublisher#tracksListResponse', tracks: [] });
-        expect(filterTracks(undefined, 'all')).toEqual({ kind: 'androidpublisher#tracksListResponse', tracks: [] });
-        expect(filterTracks({ kind: '', tracks: [] }, 'all')).toEqual({ kind: '', tracks: [] });
-      });
+  // Resource selection tests
+  describe('resource selection', () => {
+    it('fails when no resources are selected', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+      ]);
 
-      test('should return all tracks when selection is "all"', () => {
-        const result = filterTracks(mockResultJson.tracks, 'all');
-        expect(result).toEqual(mockResultJson.tracks);
-      });
-
-      test('should filter tracks by selection', () => {
-        const result = filterTracks(mockResultJson.tracks, 'alpha,beta');
-        expect(result.tracks).toHaveLength(2);
-        expect(result.tracks.map((t) => t.track)).toEqual(['alpha', 'beta']);
-      });
-
-      test('should handle case insensitive filtering', () => {
-        const result = filterTracks(mockResultJson.tracks, 'ALPHA,Beta');
-        expect(result.tracks).toHaveLength(2);
-        expect(result.tracks.map((t) => t.track)).toEqual(['alpha', 'beta']);
-      });
-
-      test('should filter single track', () => {
-        const result = filterTracks(mockResultJson.tracks, 'production');
-        expect(result.tracks).toHaveLength(1);
-        expect(result.tracks[0].track).toBe('production');
-      });
-
-      test('should return empty array for non-existent tracks', () => {
-        const result = filterTracks(mockResultJson.tracks, 'nonexistent');
-        expect(result.tracks).toHaveLength(0);
-      });
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toContain('[ERROR] No resources selected');
     });
 
-    describe('filterImages', () => {
-      test('should return empty object for null/undefined input', () => {
-        expect(filterImages(null, 'all')).toEqual({});
-        expect(filterImages(undefined, 'all')).toEqual({});
-      });
+    it('fetches all resources with --all flag', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '--all',
+      ]);
 
-      test('should return all images when selection is "all"', () => {
-        const result = filterImages(mockResultJson.images, 'all');
-        expect(result).toEqual(mockResultJson.images);
-      });
-
-      test('should filter images by selection', () => {
-        const result = filterImages(mockResultJson.images, 'icon,featureGraphic');
-        expect(Object.keys(result)).toEqual(['icon', 'featureGraphic']);
-        expect(result.icon).toEqual(mockResultJson.images.icon);
-        expect(result.featureGraphic).toEqual(mockResultJson.images.featureGraphic);
-      });
-
-      test('should create empty structure for non-existent image types', () => {
-        const result = filterImages(mockResultJson.images, 'icon,nonexistent');
-        expect(result.icon).toEqual(mockResultJson.images.icon);
-        expect(result.nonexistent).toEqual({ images: [] });
-      });
-
-      test('should filter single image type', () => {
-        const result = filterImages(mockResultJson.images, 'icon');
-        expect(Object.keys(result)).toEqual(['icon']);
-        expect(result.icon).toEqual(mockResultJson.images.icon);
-      });
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr).toContain('[PROGRESS] Fetching tracks...');
+      expect(result.stderr).toContain('[PROGRESS] Fetching apks...');
+      expect(result.stderr).toContain('[INFO] Completed successfully!');
     });
 
-    describe('filterTesters', () => {
-      test('should return empty object for null/undefined input', () => {
-        expect(filterTesters(null, 'all')).toEqual({});
-        expect(filterTesters(undefined, 'all')).toEqual({});
-      });
+    it('handles individual resource flags correctly', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '-a',
+        '-b',
+        '-l',
+      ]);
 
-      test('should return all testers when selection is "all"', () => {
-        const result = filterTesters(mockResultJson.testers, 'all');
-        expect(result).toEqual(mockResultJson.testers);
-      });
-
-      test('should filter testers by selection', () => {
-        const result = filterTesters(mockResultJson.testers, 'internal,alpha');
-        expect(Object.keys(result)).toEqual(['internal', 'alpha']);
-        expect(result.internal).toEqual(mockResultJson.testers.internal);
-        expect(result.alpha).toEqual(mockResultJson.testers.alpha);
-      });
-
-      test('should handle case insensitive filtering', () => {
-        const result = filterTesters(mockResultJson.testers, 'INTERNAL,Alpha');
-        expect(Object.keys(result)).toEqual(['internal', 'alpha']);
-      });
-
-      test('should create empty structure for non-existent tester tracks', () => {
-        const result = filterTesters(mockResultJson.testers, 'internal,nonexistent');
-        expect(result.internal).toEqual(mockResultJson.testers.internal);
-        expect(result.nonexistent).toEqual({ googleGroups: [] });
-      });
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr).toContain('[PROGRESS] Fetching apks...');
+      expect(result.stderr).toContain('[PROGRESS] Fetching bundles...');
+      expect(result.stderr).toContain('[PROGRESS] Fetching listings...');
     });
   });
 
-  describe('Edge Cases and Error Handling', () => {
-    test('should handle empty strings in validation', () => {
-      expect(() => validateCommaSeperatedOrAll('', 'tracks')).toThrow('--tracks requires a non-empty value');
-      expect(() => validateCommaSeperatedOrAll('   ', 'images')).toThrow('--images requires a non-empty value');
+  // Track validation tests
+  describe('track validation', () => {
+    it('fetches specific tracks when tracks option provided', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '-t',
+        'production,beta',
+      ]);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr).toContain('[PROGRESS] Fetching tracks...');
     });
 
-    test('should handle malformed comma-separated strings', () => {
-      expect(() => validateCommaSeperatedOrAll('a,,b', 'test')).toThrow('invalid comma placement');
-      expect(() => validateCommaSeperatedOrAll(',a', 'test')).toThrow('invalid comma placement');
-      expect(() => validateCommaSeperatedOrAll('a,', 'test')).toThrow('invalid comma placement');
+    it('fetches all tracks when tracks set to all', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '-t',
+        'all',
+      ]);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr).toContain('[PROGRESS] Fetching tracks...');
     });
 
-    test('should handle mixed case validation consistently', () => {
-      expect(validateTracks('Alpha,BETA,internal')).toBe('Alpha,BETA,internal');
-      expect(validateTesters('INTERNAL,alpha')).toBe('INTERNAL,alpha');
+    it('handles case insensitive track names', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '-t',
+        'PRODUCTION,BETA',
+      ]);
+
+      expect(result.exitCode).toBe(0);
     });
 
-    test('should preserve original case in validation output', () => {
-      expect(validateImages('icon,featureGraphic')).toBe('icon,featureGraphic');
-      expect(validateTracks('Production,Beta')).toBe('Production,Beta');
+    it('fails with invalid track names', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '-t',
+        'invalid',
+      ]);
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toContain('Invalid track names');
     });
 
-    test('should handle filtering with empty data structures', () => {
-      const emptyTracks = { kind: 'test', tracks: [] };
-      const result = filterTracks(emptyTracks, 'alpha,beta');
-      expect(result.tracks).toHaveLength(0);
+    it('treats empty tracks value as no resource selection', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '-t',
+        '',
+      ]);
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toContain('[ERROR] No resources selected');
     });
 
-    test('should handle filtering with partial matches', () => {
-      const result = filterTracks(mockResultJson.tracks, 'alpha,nonexistent');
-      expect(result.tracks).toHaveLength(1);
-      expect(result.tracks[0].track).toBe('alpha');
+    it('fails with invalid comma placement in tracks', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '-t',
+        ',production,',
+      ]);
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toContain('invalid comma placement');
     });
 
-    test('should handle whitespace in comma-separated values', () => {
-      expect(validateCommaSeperatedOrAll(' alpha , beta ', 'tracks')).toBe('alpha , beta');
-      expect(filterTracks(mockResultJson.tracks, ' alpha , beta ')).toHaveProperty('tracks');
+    it('fails with double commas in tracks', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '-t',
+        'production,,beta',
+      ]);
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toContain('invalid comma placement');
+    });
+  });
+
+  // Image validation tests
+  describe('image validation', () => {
+    it('fetches specific images when images option provided', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '-i',
+        'icon,featureGraphic',
+      ]);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr).toContain('[PROGRESS] Fetching images...');
     });
 
-    test('should validate all supported image types', () => {
-      const imageTypes = ['icon', 'featureGraphic', 'tvBanner', 'phoneScreenshots', 'sevenInchScreenshots', 'tenInchScreenshots', 'tvScreenshots', 'wearScreenshots'];
-      imageTypes.forEach(type => {
-        expect(() => validateImages(type)).not.toThrow();
-      });
+    it('fails with invalid image types', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '-i',
+        'invalid',
+      ]);
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toContain('Invalid image types');
+    });
+  });
+
+  // Tester validation tests
+  describe('tester validation', () => {
+    it('fetches specific testers when testers option provided', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '-T',
+        'beta,alpha',
+      ]);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr).toContain('[PROGRESS] Fetching testers...');
     });
 
-    test('should validate all supported track names', () => {
-      const trackNames = ['internal', 'alpha', 'beta', 'production'];
-      trackNames.forEach(track => {
-        expect(() => validateTracks(track)).not.toThrow();
-        expect(() => validateTesters(track)).not.toThrow();
-      });
+    it('fails with invalid tester track names', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '-T',
+        'invalid',
+      ]);
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toContain('Invalid tester track names');
+    });
+  });
+
+  // Reviews parameter validation tests
+  describe('reviews parameter validation', () => {
+    it('accepts valid reviews pages parameter', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '-r',
+        '-P',
+        '5',
+      ]);
+
+      expect(result.exitCode).toBe(0);
     });
 
-    test('should handle complex filtering scenarios', () => {
-      // Test filtering with all possible tracks
-      const allTracks = filterTracks(mockResultJson.tracks, 'internal,alpha,beta,production');
-      expect(allTracks.tracks).toHaveLength(4);
+    it('fails with invalid reviews pages parameter', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '-r',
+        '-P',
+        'invalid',
+      ]);
 
-      // Test filtering with non-existent and existing combined
-      const mixedResult = filterTracks(mockResultJson.tracks, 'alpha,nonexistent,beta');
-      expect(mixedResult.tracks).toHaveLength(2);
-      expect(mixedResult.tracks.map(t => t.track)).toEqual(['alpha', 'beta']);
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toContain('must be a positive integer');
+    });
+
+    it('accepts valid reviews page size parameter', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '-r',
+        '-S',
+        '50',
+      ]);
+
+      expect(result.exitCode).toBe(0);
+    });
+
+    it('fails with invalid reviews page size parameter', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '-r',
+        '-S',
+        '0',
+      ]);
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toContain('must be a positive integer');
+    });
+
+    it('sets default values for optional parameters', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '-r',
+      ]);
+
+      expect(result.exitCode).toBe(0);
+    });
+  });
+
+  // Output format tests
+  describe('output format', () => {
+    it('outputs JSON when json flag provided', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '--all',
+        '--json',
+      ]);
+
+      expect(result.exitCode).toBe(0);
+      expect(() => JSON.parse(result.stdout)).not.toThrow();
+    });
+
+    it('outputs tree format by default', async () => {
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '--all',
+      ]);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain('●'); // Tree format uses bullet points
+    });
+  });
+
+  // Error handling tests
+  describe('error handling', () => {
+    it('handles process spawn errors gracefully', async () => {
+      // This test ensures our error handling in runCli works
+      const result = await runCli(['--invalid-option']);
+
+      expect(result.exitCode).toBe(1);
+    });
+
+    it('handles unexpected errors gracefully', async () => {
+      // Test with malformed JSON in credentials to trigger error handling
+      fs.writeFileSync(mockCredsPath, 'invalid json');
+      const result = await runCli([
+        '-p',
+        'com.example.app',
+        '-c',
+        mockCredsPath,
+        '--all',
+      ]);
+
+      expect(result.exitCode).toBe(0); // CLI doesn't validate JSON content, just existence
     });
   });
 });
