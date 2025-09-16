@@ -26,7 +26,7 @@
     "dev": "nodemon --watch 'src/**/*.ts' --exec 'npm run build && node dist/index.js'",
     "start": "npm run build && node dist/index.js",
     "preview": "node dist/index.js",
-    "mock-cli": "node tests/mockCli.mjs",
+    "mock-cli": "node tests/mocks/mockCli.mjs",
     "clean": "rimraf dist",
     "typecheck": "tsc --noEmit",
     "format:check": "prettier --check .",

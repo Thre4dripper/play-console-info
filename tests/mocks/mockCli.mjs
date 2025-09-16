@@ -342,9 +342,9 @@ const mock = async () => {
     }
 
     // Check if result.json exists
-    const resultPath = path.join(process.cwd(), 'tests', 'result.json');
+    const resultPath = path.join(process.cwd(), 'tests', 'mocks', 'result.json');
     if (!fs.existsSync(resultPath)) {
-      console.error('[ERROR] result.json not found in tests directory');
+      console.error('[ERROR] result.json not found in tests/mocks directory');
       process.exit(1);
     }
 
@@ -429,11 +429,11 @@ const mock = async () => {
     });
 
     // Streaming implementation
-    const resultTxtPath = path.join(process.cwd(), 'tests', 'result.txt');
+    const resultTxtPath = path.join(process.cwd(), 'tests', 'mocks', 'result.txt');
 
     // Check if result.txt exists
     if (!fs.existsSync(resultTxtPath)) {
-      console.error('[ERROR] result.txt not found in tests directory');
+      console.error('[ERROR] result.txt not found in tests/mocks directory');
       process.exit(1);
     }
 
