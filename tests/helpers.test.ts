@@ -66,7 +66,7 @@ describe('getExecutablePath', () => {
 
     unsupportedPlatforms.forEach((platform) => {
       mockOs.platform.mockReturnValue(platform as NodeJS.Platform);
-      
+
       expect(() => getExecutablePath()).toThrow(ActionError);
       expect(() => getExecutablePath()).toThrow(`Unknown platform: ${platform}`);
     });

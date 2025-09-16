@@ -10,12 +10,13 @@ const config: Config = {
   maxWorkers: '50%',
 
   // Disable Jest's built-in coverage when using c8
-  collectCoverage: false,
+  collectCoverage: true,
+  collectCoverageFrom: ['src/**/*.{js,ts,mjs,mts}'],
 
   // Optional: specify test patterns if needed
   testMatch: [
     '**/tests/**/*.test.{js,ts,mjs,mts}',
-    '**/tests/**/*.spec.{js,ts,mjs,mts}'
+    '**/tests/**/*.spec.{js,ts,mjs,mts}',
   ],
 };
 
