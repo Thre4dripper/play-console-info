@@ -189,6 +189,108 @@ def fetch_expansion_files(service, package_name: str) -> Dict[str, Any]:
     return results
 
 
+def positive_int(value):
+    """Custom argparse type for positive integers."""
+    try:
+        ivalue = int(value)
+        if ivalue <= 0:
+            raise argparse.ArgumentTypeError(f"'{value}' must be a positive integer")
+        return ivalue
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"'{value}' is not a valid integer")
+
+
+def validate_comma_separated_or_all(value: str, arg_name: str) -> None:
+    """Validate that value is either 'all' or a comma-separated list."""
+    if not value or not value.strip():
+        raise SystemExit(f"--{arg_name} requires a non-empty value")
+    
+    trimmed = value.strip()
+    if trimmed.lower() == "all":
+        return  # 'all' is valid
+    
+    # Check for comma-separated values
+    if ',' in trimmed:
+        # Check for invalid comma placement
+        if trimmed.startswith(',') or trimmed.endswith(',') or ',,' in trimmed:
+            raise SystemExit(f"--{arg_name} has invalid comma placement")
+        
+        parts = [p.strip() for p in trimmed.split(',') if p.strip()]
+        if not parts:
+            raise SystemExit(f"--{arg_name} must be 'all' or a comma-separated list of values")
+    else:
+        # Single value is also valid
+        if not trimmed:
+            raise SystemExit(f"--{arg_name} must be 'all' or a comma-separated list of values")
+
+
+def validate_tracks(value: str) -> None:
+    """Validate track names."""
+    valid_tracks = ['internal', 'alpha', 'beta', 'production']
+    trimmed = value.strip()
+    
+    if trimmed.lower() == 'all':
+        return
+    
+    parts = trimmed.split(',')
+    parts = [p.strip().lower() for p in parts]
+    invalid_tracks = [track for track in parts if track not in valid_tracks]
+    
+    if invalid_tracks:
+        raise SystemExit(f"Invalid track names: {', '.join(invalid_tracks)}. Valid tracks: {', '.join(valid_tracks)}")
+
+
+def validate_images(value: str) -> None:
+    """Validate image types."""
+    valid_image_types = [
+        'icon', 'featureGraphic', 'tvBanner', 'phoneScreenshots', 
+        'sevenInchScreenshots', 'tenInchScreenshots', 'tvScreenshots', 'wearScreenshots'
+    ]
+    trimmed = value.strip()
+    
+    if trimmed.lower() == 'all':
+        return
+    
+    parts = trimmed.split(',')
+    parts = [p.strip() for p in parts]
+    invalid_types = [img_type for img_type in parts if img_type not in valid_image_types]
+    
+    if invalid_types:
+        raise SystemExit(f"Invalid image types: {', '.join(invalid_types)}. Valid types: {', '.join(valid_image_types)}")
+
+
+def validate_testers(value: str) -> None:
+    """Validate tester track names."""
+    valid_tracks = ['internal', 'alpha', 'beta', 'production']
+    trimmed = value.strip()
+    
+    if trimmed.lower() == 'all':
+        return
+    
+    parts = trimmed.split(',')
+    parts = [p.strip().lower() for p in parts]
+    invalid_tracks = [track for track in parts if track not in valid_tracks]
+    
+    if invalid_tracks:
+        raise SystemExit(f"Invalid tester track names: {', '.join(invalid_tracks)}. Valid tracks: {', '.join(valid_tracks)}")
+
+
+def validate_args(args) -> None:
+    """Perform additional validation on parsed arguments."""
+    # Validate comma-separated arguments (custom logic for format and valid values)
+    if args.tracks is not None:
+        validate_comma_separated_or_all(args.tracks, "tracks")
+        validate_tracks(args.tracks)
+    
+    if args.images is not None:
+        validate_comma_separated_or_all(args.images, "images")
+        validate_images(args.images)
+    
+    if args.testers is not None:
+        validate_comma_separated_or_all(args.testers, "testers")
+        validate_testers(args.testers)
+
+
 # Helper parsing and fetchers for tracks/images/testers
 
 def parse_tracks_arg(value: Optional[str], all_flag: bool) -> Any:
@@ -284,16 +386,22 @@ def main():
         formatter_class=argparse.RawTextHelpFormatter,
         description="Fetch Google Play Console data",
         epilog=(
+            "Examples:\n"
+            "  python play_console_cli.py -p com.example.app -c creds.json -A\n"
+            "  python play_console_cli.py --package com.example.app --creds-path creds.json -t production,beta -i icon,featureGraphic\n"
+            "  python play_console_cli.py -p com.example.app -c creds.json -t all -i all -j\n"
+            "\n"
             "Notes:\n"
             "  - For comma-separated inputs, do not use spaces.\n"
             "  - Use 'all' to select all supported values.\n"
+            "  - Both short (-p) and long (--package) flags are supported.\n"
         ),
     )
-    ap.add_argument("--package", required=True, help="Android application package name")
-    ap.add_argument("--creds-path", required=True, help="Path to Google service account credentials JSON file")
+    ap.add_argument("-p", "--package", required=True, help="Android application package name")
+    ap.add_argument("-c", "--creds-path", required=True, help="Path to Google service account credentials JSON file")
     # Simplified resource flags (require explicit value 'all' or comma-separated values)
     ap.add_argument(
-        "--tracks",
+        "-t", "--tracks",
         metavar="TRACKS",
         help=(
             "Include tracks.\n"
@@ -302,11 +410,11 @@ def main():
             "    - list: comma-separated from {internal, alpha, beta, production}"
         ),
     )
-    ap.add_argument("--apks", action="store_true", help="Include APKs")
-    ap.add_argument("--bundles", action="store_true", help="Include App Bundles")
-    ap.add_argument("--listings", action="store_true", help="Include store listings")
+    ap.add_argument("-a", "--apks", action="store_true", help="Include APKs")
+    ap.add_argument("-b", "--bundles", action="store_true", help="Include App Bundles")
+    ap.add_argument("-l", "--listings", action="store_true", help="Include store listings")
     ap.add_argument(
-        "--images",
+        "-i", "--images",
         metavar="IMAGES",
         help=(
             "Include images.\n"
@@ -317,11 +425,11 @@ def main():
             "            tvScreenshots, wearScreenshots}"
         ),
     )
-    ap.add_argument("--inapps", action="store_true", help="Include in-app products")
-    ap.add_argument("--reviews", action="store_true", help="Include reviews")
-    ap.add_argument("--voided-purchases", dest="voided_purchases", action="store_true", help="Include voided purchases")
+    ap.add_argument("-I", "--inapps", action="store_true", help="Include in-app products")
+    ap.add_argument("-r", "--reviews", action="store_true", help="Include reviews")
+    ap.add_argument("-v", "--voided-purchases", dest="voided_purchases", action="store_true", help="Include voided purchases")
     ap.add_argument(
-        "--testers",
+        "-T", "--testers",
         metavar="TESTERS",
         help=(
             "Include testers.\n"
@@ -330,18 +438,23 @@ def main():
             "    - list: comma-separated from {internal, alpha, beta, production}"
         ),
     )
-    ap.add_argument("--app-details", dest="app_details", action="store_true", help="Include app details")
-    ap.add_argument("--expansion-files", dest="expansion_files", action="store_true", help="Include expansion files")
+    ap.add_argument("-d", "--app-details", dest="app_details", action="store_true", help="Include app details")
+    ap.add_argument("-e", "--expansion-files", dest="expansion_files", action="store_true", help="Include expansion files")
 
     # Options for specific resources
-    ap.add_argument("--images-language", default="en-US", help="Listing language for images (default: en-US)")
-    ap.add_argument("--reviews-pages", type=int, default=1)
-    ap.add_argument("--reviews-page-size", type=int, default=100)
+    ap.add_argument("-L", "--images-language", default="en-US", help="Listing language for images (default: en-US)")
+    ap.add_argument("-P", "--reviews-pages", type=positive_int, default=1, 
+                   help="Number of review pages to fetch (must be positive, default: 1)")
+    ap.add_argument("-S", "--reviews-page-size", type=positive_int, default=100,
+                   help="Reviews per page (must be positive, default: 100)")
 
     # Global options
-    ap.add_argument("--all", action="store_true", help="Include all supported resources")
-    ap.add_argument("--json", action="store_true", help="Output raw JSON")
+    ap.add_argument("-A", "--all", action="store_true", help="Include all supported resources")
+    ap.add_argument("-j", "--json", action="store_true", help="Output raw JSON")
     args = ap.parse_args()
+
+    # Validate arguments
+    validate_args(args)
 
     try:
         service = build_service(args.creds_path)
