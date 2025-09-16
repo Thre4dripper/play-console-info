@@ -496,7 +496,7 @@ const mock = async () => {
         for (let j = 0; j < treeOutput.length; j += chunkLimit) {
           const limitedChunk = treeOutput.slice(j, j + chunkLimit);
           process.stdout.write(limitedChunk);
-          await new Promise((resolve) => setTimeout(resolve, 5)); // Faster for actual output
+          // await new Promise((resolve) => setTimeout(resolve, 5)); // Faster for actual output
         }
       }
 
