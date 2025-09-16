@@ -9,6 +9,28 @@ export class ActionError extends Error {
   }
 }
 
+export class Logger {
+  static info(message: string) {
+    core.info(message);
+  }
+
+  static warning(message: string) {
+    core.warning(message);
+  }
+
+  static error(message: string) {
+    core.error(message);
+  }
+
+  static debug(message: string) {
+    core.debug(message);
+  }
+
+  static notice(message: string) {
+    core.notice(message);
+  }
+}
+
 export const getExecutablePath = (): string => {
   const basePath = path.join(process.cwd(), 'cli', 'dist');
   switch (os.platform()) {
