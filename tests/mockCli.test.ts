@@ -1,7 +1,7 @@
 import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect, afterAll } from '@jest/globals';
 
 describe('mockCli', () => {
   const mockCliPath = path.join(__dirname, 'mocks', 'mockCli.mjs');
@@ -397,6 +397,11 @@ describe('mockCli', () => {
       ]);
 
       expect(result.exitCode).toBe(0); // CLI doesn't validate JSON content, just existence
+    });
+
+    afterAll(() => {
+      // Restore the valid JSON credentials file
+      fs.writeFileSync(mockCredsPath, JSON.stringify({}));
     });
   });
 });
