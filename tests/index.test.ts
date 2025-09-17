@@ -14,14 +14,12 @@ jest.mock('../src/utils/inputs', () => ({
   getServiceAccountJsonPath: jest.fn().mockReturnValue('/path/to/creds.json'),
   getPackage: jest.fn().mockReturnValue('com.example.app'),
   getCliArguments: jest.fn().mockReturnValue(['--extra-arg']),
-  getArtifactsInputs: jest
-    .fn()
-    .mockReturnValue({ 
-      uploadOutputsArtifact: false,
-      outputsJsonPath: 'test-path',
-      outputsArtifactName: 'test-artifact',
-      outputsArtifactRetentionDays: '30'
-    }),
+  getArtifactsInputs: jest.fn().mockReturnValue({
+    uploadOutputsArtifact: false,
+    outputsJsonPath: 'test-path',
+    outputsArtifactName: 'test-artifact',
+    outputsArtifactRetentionDays: '30',
+  }),
 }));
 jest.mock('@actions/core', () => ({
   setFailed: jest.fn(),
@@ -29,7 +27,7 @@ jest.mock('@actions/core', () => ({
   warning: jest.fn(),
   error: jest.fn(),
   debug: jest.fn(),
-  notice: jest.fn()
+  notice: jest.fn(),
 }));
 
 describe('index', () => {
@@ -46,10 +44,14 @@ describe('index', () => {
   });
 
   it('should call run and handle rejection', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
     const originalExitCode = process.exitCode;
-    
-    mockRun.mockImplementationOnce(() => Promise.reject(new Error('Test error')));
+
+    mockRun.mockImplementationOnce(() =>
+      Promise.reject(new Error('Test error'))
+    );
 
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     require('../src/index');
@@ -59,13 +61,20 @@ describe('index', () => {
 
     expect(mockRun).toHaveBeenCalledWith({
       command: '/path/to/cli',
-      cliArgs: ['--creds-path', '/path/to/creds.json', '--package', 'com.example.app', '--json', '--extra-arg'],
+      cliArgs: [
+        '--creds-path',
+        '/path/to/creds.json',
+        '--package',
+        'com.example.app',
+        '--json',
+        '--extra-arg',
+      ],
       artifactArgs: {
         uploadOutputsArtifact: false,
         outputsJsonPath: 'test-path',
         outputsArtifactName: 'test-artifact',
-        outputsArtifactRetentionDays: '30'
-      }
+        outputsArtifactRetentionDays: '30',
+      },
     });
     expect(consoleSpy).toHaveBeenCalledWith(new Error('Test error'));
     expect(process.exitCode).toBe(1);

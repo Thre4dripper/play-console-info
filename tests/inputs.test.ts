@@ -1,4 +1,3 @@
-import { ActionError } from '../src/utils/helpers';
 import * as core from '@actions/core';
 import fs from 'fs';
 import os from 'os';

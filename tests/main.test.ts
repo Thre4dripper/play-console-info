@@ -16,12 +16,14 @@ jest.mock('@actions/core', () => ({
   warning: jest.fn(),
   error: jest.fn(),
   debug: jest.fn(),
-  notice: jest.fn()
+  notice: jest.fn(),
 }));
 
 const mockSpawn = spawn as jest.MockedFunction<typeof spawn>;
 const mockSetOutputs = setOutputs as jest.MockedFunction<typeof setOutputs>;
-const mockCreateArtifact = createArtifact as jest.MockedFunction<typeof createArtifact>;
+const mockCreateArtifact = createArtifact as jest.MockedFunction<
+  typeof createArtifact
+>;
 
 describe('main.ts', () => {
   let mockChildProcess: any;
@@ -48,8 +50,8 @@ describe('main.ts', () => {
         uploadOutputsArtifact: true,
         outputsJsonPath: 'test-path',
         outputsArtifactName: 'test-artifact',
-        outputsArtifactRetentionDays: '30'
-      }
+        outputsArtifactRetentionDays: '30',
+      },
     };
 
     it('should execute successfully with valid JSON output', async () => {
@@ -57,14 +59,37 @@ describe('main.ts', () => {
         tracks: { kind: 'androidpublisher#tracksListResponse', tracks: [] },
         apks: { kind: 'androidpublisher#apksListResponse' },
         bundles: { kind: 'androidpublisher#bundlesListResponse', bundles: [] },
-        listings: { kind: 'androidpublisher#listingsListResponse', listings: [] },
-        images: { icon: { images: [] }, featureGraphic: { images: [] }, tvBanner: {}, phoneScreenshots: { images: [] }, sevenInchScreenshots: {}, tenInchScreenshots: {}, tvScreenshots: {}, wearScreenshots: {} },
-        inapps: { kind: 'androidpublisher#inappsListResponse', tokenPagination: { previousPageToken: '' } },
+        listings: {
+          kind: 'androidpublisher#listingsListResponse',
+          listings: [],
+        },
+        images: {
+          icon: { images: [] },
+          featureGraphic: { images: [] },
+          tvBanner: {},
+          phoneScreenshots: { images: [] },
+          sevenInchScreenshots: {},
+          tenInchScreenshots: {},
+          tvScreenshots: {},
+          wearScreenshots: {},
+        },
+        inapps: {
+          kind: 'androidpublisher#inappsListResponse',
+          tokenPagination: { previousPageToken: '' },
+        },
         reviews: { count: 0, reviews: [] },
         voided_purchases: { count: 0, voidedPurchases: [] },
-        testers: { internal: {}, alpha: {}, beta: {}, production: { googleGroups: [] } },
-        app_details: { defaultLanguage: 'en-US', contactEmail: 'test@example.com' },
-        expansion_files: { apks: {} }
+        testers: {
+          internal: {},
+          alpha: {},
+          beta: {},
+          production: { googleGroups: [] },
+        },
+        app_details: {
+          defaultLanguage: 'en-US',
+          contactEmail: 'test@example.com',
+        },
+        expansion_files: { apks: {} },
       };
       const jsonOutput = JSON.stringify(mockResult);
 
@@ -78,12 +103,19 @@ describe('main.ts', () => {
 
       await runPromise;
 
-      expect(mockSpawn).toHaveBeenCalledWith('test-command', ['--arg1', 'value1'], {
-        stdio: ['inherit', 'pipe', 'pipe'],
-        env: { ...process.env }
-      });
+      expect(mockSpawn).toHaveBeenCalledWith(
+        'test-command',
+        ['--arg1', 'value1'],
+        {
+          stdio: ['inherit', 'pipe', 'pipe'],
+          env: { ...process.env },
+        }
+      );
       expect(mockSetOutputs).toHaveBeenCalledWith(mockResult);
-      expect(mockCreateArtifact).toHaveBeenCalledWith(mockRunProps.artifactArgs, mockResult);
+      expect(mockCreateArtifact).toHaveBeenCalledWith(
+        mockRunProps.artifactArgs,
+        mockResult
+      );
     });
 
     it('should throw ActionError when getResult returns null', async () => {
@@ -93,7 +125,9 @@ describe('main.ts', () => {
       mockChildProcess.emit('exit', 0);
 
       await expect(runPromise).rejects.toThrow(ActionError);
-      await expect(runPromise).rejects.toThrow('No Result returned from Service Account');
+      await expect(runPromise).rejects.toThrow(
+        'No Result returned from Service Account'
+      );
     });
 
     it('should handle process exit with non-zero code', async () => {
@@ -128,14 +162,37 @@ describe('main.ts', () => {
         tracks: { kind: 'androidpublisher#tracksListResponse', tracks: [] },
         apks: { kind: 'androidpublisher#apksListResponse' },
         bundles: { kind: 'androidpublisher#bundlesListResponse', bundles: [] },
-        listings: { kind: 'androidpublisher#listingsListResponse', listings: [] },
-        images: { icon: { images: [] }, featureGraphic: { images: [] }, tvBanner: {}, phoneScreenshots: { images: [] }, sevenInchScreenshots: {}, tenInchScreenshots: {}, tvScreenshots: {}, wearScreenshots: {} },
-        inapps: { kind: 'androidpublisher#inappsListResponse', tokenPagination: { previousPageToken: '' } },
+        listings: {
+          kind: 'androidpublisher#listingsListResponse',
+          listings: [],
+        },
+        images: {
+          icon: { images: [] },
+          featureGraphic: { images: [] },
+          tvBanner: {},
+          phoneScreenshots: { images: [] },
+          sevenInchScreenshots: {},
+          tenInchScreenshots: {},
+          tvScreenshots: {},
+          wearScreenshots: {},
+        },
+        inapps: {
+          kind: 'androidpublisher#inappsListResponse',
+          tokenPagination: { previousPageToken: '' },
+        },
         reviews: { count: 0, reviews: [] },
         voided_purchases: { count: 0, voidedPurchases: [] },
-        testers: { internal: {}, alpha: {}, beta: {}, production: { googleGroups: [] } },
-        app_details: { defaultLanguage: 'en-US', contactEmail: 'test@example.com' },
-        expansion_files: { apks: {} }
+        testers: {
+          internal: {},
+          alpha: {},
+          beta: {},
+          production: { googleGroups: [] },
+        },
+        app_details: {
+          defaultLanguage: 'en-US',
+          contactEmail: 'test@example.com',
+        },
+        expansion_files: { apks: {} },
       };
       const jsonOutput = JSON.stringify(mockResult);
       const chunk1 = jsonOutput.slice(0, 5);
@@ -151,7 +208,10 @@ describe('main.ts', () => {
       await runPromise;
 
       expect(mockSetOutputs).toHaveBeenCalledWith(mockResult);
-      expect(mockCreateArtifact).toHaveBeenCalledWith(mockRunProps.artifactArgs, mockResult);
+      expect(mockCreateArtifact).toHaveBeenCalledWith(
+        mockRunProps.artifactArgs,
+        mockResult
+      );
     });
 
     it('should stream stderr data to stdout', async () => {
@@ -198,7 +258,9 @@ describe('main.ts', () => {
       mockChildProcess.stdout.emit('data', '   \n  \t  ');
       mockChildProcess.emit('exit', 0);
 
-      await expect(runPromise).rejects.toThrow('No Result returned from Service Account');
+      await expect(runPromise).rejects.toThrow(
+        'No Result returned from Service Account'
+      );
     });
 
     it('should pass environment variables to child process', async () => {
@@ -218,7 +280,7 @@ describe('main.ts', () => {
         expect.any(String),
         expect.any(Array),
         expect.objectContaining({
-          env: expect.objectContaining({ TEST_VAR: 'test-value' })
+          env: expect.objectContaining({ TEST_VAR: 'test-value' }),
         })
       );
 
