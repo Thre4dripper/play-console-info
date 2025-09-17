@@ -14,124 +14,126 @@ describe('setOutputs', () => {
     jest.clearAllMocks();
   });
 
-  it('sets outputs for all properties in ResultData', async () => {
-    const testResult: ResultData = result as ResultData;
+  describe('individual output properties', () => {
+    it('sets tracks output when tracks property exists', async () => {
+      const testResult = { tracks: ['alpha', 'beta'] } as ResultData;
 
-    await setOutputs(testResult);
+      await setOutputs(testResult);
 
-    if ('tracks' in testResult) {
-      expect(mockCore.setOutput).toHaveBeenCalledWith(
-        'tracks',
-        testResult.tracks
-      );
-    }
-    if ('apks' in testResult) {
+      expect(mockCore.setOutput).toHaveBeenCalledWith('tracks', testResult.tracks);
+      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+    });
+
+    it('sets apks output when apks property exists', async () => {
+      const testResult = { apks: ['apk1', 'apk2'] } as ResultData;
+
+      await setOutputs(testResult);
+
       expect(mockCore.setOutput).toHaveBeenCalledWith('apks', testResult.apks);
-    }
-    if ('bundles' in testResult) {
-      expect(mockCore.setOutput).toHaveBeenCalledWith(
-        'bundles',
-        testResult.bundles
-      );
-    }
-    if ('listings' in testResult) {
-      expect(mockCore.setOutput).toHaveBeenCalledWith(
-        'listings',
-        testResult.listings
-      );
-    }
-    if ('images' in testResult) {
-      expect(mockCore.setOutput).toHaveBeenCalledWith(
-        'images',
-        testResult.images
-      );
-    }
-    if ('inapps' in testResult) {
-      expect(mockCore.setOutput).toHaveBeenCalledWith(
-        'inapps',
-        testResult.inapps
-      );
-    }
-    if ('reviews' in testResult) {
-      expect(mockCore.setOutput).toHaveBeenCalledWith(
-        'reviews',
-        testResult.reviews
-      );
-    }
-    if ('voidedPurchases' in testResult) {
-      expect(mockCore.setOutput).toHaveBeenCalledWith(
-        'voidedPurchases',
-        testResult.voided_purchases
-      );
-    }
-    if ('testers' in testResult) {
-      expect(mockCore.setOutput).toHaveBeenCalledWith(
-        'testers',
-        testResult.testers
-      );
-    }
-    if ('appDetails' in testResult) {
-      expect(mockCore.setOutput).toHaveBeenCalledWith(
-        'appDetails',
-        testResult.app_details
-      );
-    }
-    if ('expansionFiles' in testResult) {
-      expect(mockCore.setOutput).toHaveBeenCalledWith(
-        'expansionFiles',
-        testResult.expansion_files
-      );
-    }
+      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+    });
+
+    it('sets bundles output when bundles property exists', async () => {
+      const testResult = { bundles: ['bundle1'] } as ResultData;
+
+      await setOutputs(testResult);
+
+      expect(mockCore.setOutput).toHaveBeenCalledWith('bundles', testResult.bundles);
+      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+    });
+
+    it('sets listings output when listings property exists', async () => {
+      const testResult = { listings: ['listing1'] } as ResultData;
+
+      await setOutputs(testResult);
+
+      expect(mockCore.setOutput).toHaveBeenCalledWith('listings', testResult.listings);
+      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+    });
+
+    it('sets images output when images property exists', async () => {
+      const testResult = { images: ['image1'] } as ResultData;
+
+      await setOutputs(testResult);
+
+      expect(mockCore.setOutput).toHaveBeenCalledWith('images', testResult.images);
+      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+    });
+
+    it('sets inapps output when inapps property exists', async () => {
+      const testResult = { inapps: ['inapp1'] } as ResultData;
+
+      await setOutputs(testResult);
+
+      expect(mockCore.setOutput).toHaveBeenCalledWith('inapps', testResult.inapps);
+      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+    });
+
+    it('sets reviews output when reviews property exists', async () => {
+      const testResult = { reviews: ['review1'] } as ResultData;
+
+      await setOutputs(testResult);
+
+      expect(mockCore.setOutput).toHaveBeenCalledWith('reviews', testResult.reviews);
+      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+    });
+
+    it('sets voidedPurchases output when voided_purchases property exists', async () => {
+      const testResult = { voided_purchases: ['purchase1'] } as ResultData;
+
+      await setOutputs(testResult);
+
+      expect(mockCore.setOutput).toHaveBeenCalledWith('voidedPurchases', testResult.voided_purchases);
+      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+    });
+
+    it('sets testers output when testers property exists', async () => {
+      const testResult = { testers: ['tester1'] } as ResultData;
+
+      await setOutputs(testResult);
+
+      expect(mockCore.setOutput).toHaveBeenCalledWith('testers', testResult.testers);
+      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+    });
+
+    it('sets appDetails output when app_details property exists', async () => {
+      const testResult = { app_details: { name: 'test' } } as ResultData;
+
+      await setOutputs(testResult);
+
+      expect(mockCore.setOutput).toHaveBeenCalledWith('appDetails', testResult.app_details);
+      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+    });
+
+    it('sets expansionFiles output when expansion_files property exists', async () => {
+      const testResult = { expansion_files: ['file1'] } as ResultData;
+
+      await setOutputs(testResult);
+
+      expect(mockCore.setOutput).toHaveBeenCalledWith('expansionFiles', testResult.expansion_files);
+      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+    });
   });
 
-  it('does not set outputs for missing properties', async () => {
-    const partialResult = {
-      tracks: ['alpha'],
-      apks: ['apk1', 'apk2'],
-    } as unknown as Partial<ResultData>;
+  describe('missing properties', () => {
+    it('does not set any outputs when no properties exist', async () => {
+      const emptyResult = {} as ResultData;
 
-    await setOutputs(partialResult as ResultData);
+      await setOutputs(emptyResult);
 
-    expect(mockCore.setOutput).toHaveBeenCalledWith(
-      'tracks',
-      partialResult.tracks
-    );
-    expect(mockCore.setOutput).toHaveBeenCalledWith('apks', partialResult.apks);
-    expect(mockCore.setOutput).not.toHaveBeenCalledWith(
-      'bundles',
-      expect.anything()
-    );
-    expect(mockCore.setOutput).not.toHaveBeenCalledWith(
-      'listings',
-      expect.anything()
-    );
-    expect(mockCore.setOutput).not.toHaveBeenCalledWith(
-      'images',
-      expect.anything()
-    );
-    expect(mockCore.setOutput).not.toHaveBeenCalledWith(
-      'inapps',
-      expect.anything()
-    );
-    expect(mockCore.setOutput).not.toHaveBeenCalledWith(
-      'reviews',
-      expect.anything()
-    );
-    expect(mockCore.setOutput).not.toHaveBeenCalledWith(
-      'voidedPurchases',
-      expect.anything()
-    );
-    expect(mockCore.setOutput).not.toHaveBeenCalledWith(
-      'testers',
-      expect.anything()
-    );
-    expect(mockCore.setOutput).not.toHaveBeenCalledWith(
-      'appDetails',
-      expect.anything()
-    );
-    expect(mockCore.setOutput).not.toHaveBeenCalledWith(
-      'expansionFiles',
-      expect.anything()
-    );
+      expect(mockCore.setOutput).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('complete result', () => {
+    it('sets outputs for all properties in complete ResultData', async () => {
+      const testResult: ResultData = result as ResultData;
+
+      await setOutputs(testResult);
+
+      // Count expected calls based on properties in testResult
+      const expectedCalls = Object.keys(testResult).length;
+      expect(mockCore.setOutput).toHaveBeenCalledTimes(expectedCalls);
+    });
   });
 });
