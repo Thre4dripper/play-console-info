@@ -1,7 +1,5 @@
 {
-  "include": [
-    "tests/mocks/**/*.{js,ts,mjs,mts}"
-  ],
+  "include": ["tests/mocks/**/*.{js,ts,mjs,mts}"],
   "exclude": [
     "**/*.d.ts",
     "tests/**/*.{test,spec}.{js,ts,mjs,mts}",
@@ -15,11 +13,7 @@
     ".vscode",
     "venv"
   ],
-  "reporter": [
-    "text",
-    "lcov",
-    "json"
-  ],
+  "reporter": ["text", "lcov", "json"],
   "all": true,
   "branches": 80,
   "lines": 80,
@@ -27,11 +21,6 @@
   "statements": 80,
   "temp-directory": "./coverage/tmp",
   "clean": true,
-  "extension": [
-    ".ts",
-    ".js",
-    ".mjs",
-    ".mts"
-  ],
+  "extension": [".ts", ".js", ".mjs", ".mts"],
   "merge-async": true
 }

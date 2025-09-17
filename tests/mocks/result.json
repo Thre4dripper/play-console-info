@@ -7,9 +7,7 @@
         "releases": [
           {
             "name": "Release X.Y-ZZZZZZZ",
-            "versionCodes": [
-              "101"
-            ],
+            "versionCodes": ["101"],
             "releaseNotes": [
               {
                 "language": "en-US",
@@ -29,9 +27,7 @@
         "releases": [
           {
             "name": "Second Test Release",
-            "versionCodes": [
-              "55"
-            ],
+            "versionCodes": ["55"],
             "releaseNotes": [
               {
                 "language": "en-US",

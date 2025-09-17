@@ -14,7 +14,7 @@ jest.mock('@actions/artifact', () => ({
       super(message);
       this.name = 'ArtifactNotFoundError';
     }
-  }
+  },
 }));
 jest.mock('fs', () => ({
   writeFileSync: jest.fn(),
@@ -28,7 +28,7 @@ jest.mock('fs', () => ({
     R_OK: 4,
     W_OK: 2,
     X_OK: 1,
-  }
+  },
 }));
 jest.mock('path', () => ({
   join: jest.fn((...args) => args.join('/')),
@@ -57,7 +57,12 @@ describe('artifacts utilities', () => {
 
   describe('createArtifact', () => {
     it('should skip when uploadOutputsArtifact is false', async () => {
-      const args = { uploadOutputsArtifact: false, outputsArtifactName: 'test', outputsJsonPath: '/test', outputsArtifactRetentionDays: '30' };
+      const args = {
+        uploadOutputsArtifact: false,
+        outputsArtifactName: 'test',
+        outputsJsonPath: '/test',
+        outputsArtifactRetentionDays: '30',
+      };
 
       await createArtifact(args, mockData);
 
@@ -66,33 +71,67 @@ describe('artifacts utilities', () => {
     });
 
     it('should create and upload artifact successfully', async () => {
-      const args = { uploadOutputsArtifact: true, outputsArtifactName: 'test-artifact', outputsJsonPath: '/test/path', outputsArtifactRetentionDays: '30' };
+      const args = {
+        uploadOutputsArtifact: true,
+        outputsArtifactName: 'test-artifact',
+        outputsJsonPath: '/test/path',
+        outputsArtifactRetentionDays: '30',
+      };
 
       await createArtifact(args, mockData);
 
-      expect(mockCore.info).toHaveBeenCalledWith('Uploading artifact: test-artifact');
+      expect(mockCore.info).toHaveBeenCalledWith(
+        'Uploading artifact: test-artifact'
+      );
       expect(mockPath.join).toHaveBeenCalledWith('/test/path', 'test-artifact');
-      expect(mockFs.writeFileSync).toHaveBeenCalledWith('/test/path/test-artifact', JSON.stringify(mockData, null, 2), { encoding: 'utf8' });
-      expect(mockArtifactClient.uploadArtifact).toHaveBeenCalledWith('test-artifact', ['/test/path/test-artifact'], '/test/path', { retentionDays: 30, compressionLevel: 0 });
+      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+        '/test/path/test-artifact',
+        JSON.stringify(mockData, null, 2),
+        { encoding: 'utf8' }
+      );
+      expect(mockArtifactClient.uploadArtifact).toHaveBeenCalledWith(
+        'test-artifact',
+        ['/test/path/test-artifact'],
+        '/test/path',
+        { retentionDays: 30, compressionLevel: 0 }
+      );
     });
 
     it('should handle ArtifactNotFoundError during deletion', async () => {
-      const args = { uploadOutputsArtifact: true, outputsArtifactName: 'test', outputsJsonPath: '/test', outputsArtifactRetentionDays: '30' };
-      mockArtifactClient.deleteArtifact.mockRejectedValue(new ArtifactNotFoundError('Not found'));
+      const args = {
+        uploadOutputsArtifact: true,
+        outputsArtifactName: 'test',
+        outputsJsonPath: '/test',
+        outputsArtifactRetentionDays: '30',
+      };
+      mockArtifactClient.deleteArtifact.mockRejectedValue(
+        new ArtifactNotFoundError('Not found')
+      );
 
       await createArtifact(args, mockData);
 
-      expect(mockCore.debug).toHaveBeenCalledWith("Skipping deletion of 'test', it does not exist");
+      expect(mockCore.debug).toHaveBeenCalledWith(
+        "Skipping deletion of 'test', it does not exist"
+      );
       expect(mockArtifactClient.uploadArtifact).toHaveBeenCalled();
     });
 
     it('should handle other errors during deletion', async () => {
-      const args = { uploadOutputsArtifact: true, outputsArtifactName: 'test', outputsJsonPath: '/test', outputsArtifactRetentionDays: '30' };
-      mockArtifactClient.deleteArtifact.mockRejectedValue(new Error('Other error'));
+      const args = {
+        uploadOutputsArtifact: true,
+        outputsArtifactName: 'test',
+        outputsJsonPath: '/test',
+        outputsArtifactRetentionDays: '30',
+      };
+      mockArtifactClient.deleteArtifact.mockRejectedValue(
+        new Error('Other error')
+      );
 
       await createArtifact(args, mockData);
 
-      expect(mockCore.debug).toHaveBeenCalledWith('Unable to delete artifact: Other error');
+      expect(mockCore.debug).toHaveBeenCalledWith(
+        'Unable to delete artifact: Other error'
+      );
       expect(mockArtifactClient.uploadArtifact).toHaveBeenCalled();
     });
   });

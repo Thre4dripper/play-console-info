@@ -20,7 +20,10 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith('tracks', testResult.tracks);
+      expect(mockCore.setOutput).toHaveBeenCalledWith(
+        'tracks',
+        testResult.tracks
+      );
       expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
     });
 
@@ -38,7 +41,10 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith('bundles', testResult.bundles);
+      expect(mockCore.setOutput).toHaveBeenCalledWith(
+        'bundles',
+        testResult.bundles
+      );
       expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
     });
 
@@ -47,7 +53,10 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith('listings', testResult.listings);
+      expect(mockCore.setOutput).toHaveBeenCalledWith(
+        'listings',
+        testResult.listings
+      );
       expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
     });
 
@@ -56,7 +65,10 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith('images', testResult.images);
+      expect(mockCore.setOutput).toHaveBeenCalledWith(
+        'images',
+        testResult.images
+      );
       expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
     });
 
@@ -65,7 +77,10 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith('inapps', testResult.inapps);
+      expect(mockCore.setOutput).toHaveBeenCalledWith(
+        'inapps',
+        testResult.inapps
+      );
       expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
     });
 
@@ -74,7 +89,10 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith('reviews', testResult.reviews);
+      expect(mockCore.setOutput).toHaveBeenCalledWith(
+        'reviews',
+        testResult.reviews
+      );
       expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
     });
 
@@ -83,7 +101,10 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith('voidedPurchases', testResult.voided_purchases);
+      expect(mockCore.setOutput).toHaveBeenCalledWith(
+        'voidedPurchases',
+        testResult.voided_purchases
+      );
       expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
     });
 
@@ -92,7 +113,10 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith('testers', testResult.testers);
+      expect(mockCore.setOutput).toHaveBeenCalledWith(
+        'testers',
+        testResult.testers
+      );
       expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
     });
 
@@ -101,7 +125,10 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith('appDetails', testResult.app_details);
+      expect(mockCore.setOutput).toHaveBeenCalledWith(
+        'appDetails',
+        testResult.app_details
+      );
       expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
     });
 
@@ -110,7 +137,10 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith('expansionFiles', testResult.expansion_files);
+      expect(mockCore.setOutput).toHaveBeenCalledWith(
+        'expansionFiles',
+        testResult.expansion_files
+      );
       expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
     });
   });

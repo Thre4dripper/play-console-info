@@ -1,11 +1,18 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as core from '@actions/core';
-import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
+import {
+  describe,
+  it,
+  expect,
+  jest,
+  beforeEach,
+  afterEach,
+} from '@jest/globals';
 import { ActionError, getExecutablePath, Logger } from '../src/utils/helpers';
 
 jest.mock('os', () => ({
-  platform: jest.fn()
+  platform: jest.fn(),
 }));
 
 jest.mock('@actions/core', () => ({
@@ -14,7 +21,7 @@ jest.mock('@actions/core', () => ({
   warning: jest.fn(),
   error: jest.fn(),
   debug: jest.fn(),
-  notice: jest.fn()
+  notice: jest.fn(),
 }));
 
 const mockOs = jest.mocked(os);
@@ -51,27 +58,38 @@ describe('getExecutablePath', () => {
     const platforms = [
       ['win32', 'play_console_cli.exe'],
       ['darwin', 'play_console_cli'],
-      ['linux', 'play_console_cli']
+      ['linux', 'play_console_cli'],
     ] as const;
 
     platforms.forEach(([platform, expectedFile]) => {
       mockOs.platform.mockReturnValue(platform);
       const result = getExecutablePath();
-      expect(result).toBe(path.join('/test/project', 'cli', 'dist', expectedFile));
+      expect(result).toBe(
+        path.join('/test/project', 'cli', 'dist', expectedFile)
+      );
     });
   });
 
   it('throws ActionError for unsupported platforms', () => {
-    const unsupportedPlatforms = ['freebsd', 'aix', 'sunos', 'unknown'] as const;
+    const unsupportedPlatforms = [
+      'freebsd',
+      'aix',
+      'sunos',
+      'unknown',
+    ] as const;
 
     unsupportedPlatforms.forEach((platform) => {
       mockOs.platform.mockReturnValue(platform as NodeJS.Platform);
 
       expect(() => getExecutablePath()).toThrow(ActionError);
-      expect(() => getExecutablePath()).toThrow(`Unknown platform: ${platform}`);
+      expect(() => getExecutablePath()).toThrow(
+        `Unknown platform: ${platform}`
+      );
     });
 
-    expect(mockCore.setFailed).toHaveBeenCalledTimes(unsupportedPlatforms.length * 2);
+    expect(mockCore.setFailed).toHaveBeenCalledTimes(
+      unsupportedPlatforms.length * 2
+    );
   });
 
   it('uses current working directory in path construction', () => {
@@ -79,7 +97,9 @@ describe('getExecutablePath', () => {
     mockOs.platform.mockReturnValue('linux');
 
     const result = getExecutablePath();
-    expect(result).toBe(path.join('/custom/path', 'cli', 'dist', 'play_console_cli'));
+    expect(result).toBe(
+      path.join('/custom/path', 'cli', 'dist', 'play_console_cli')
+    );
   });
 });
 

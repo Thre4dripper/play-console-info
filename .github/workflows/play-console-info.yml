@@ -320,3 +320,25 @@ jobs:
           echo "::group::Testers Test - ${{ matrix.testers }}"
           echo "Result: ${{ steps.testers.outputs.testers }}"
           echo "::endgroup::"
+
+  test-artifact-uploads:
+    runs-on: ubuntu-latest
+    name: Test Artifact Uploads
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Give Execute Permission
+        run: chmod +x ./cli/dist/play_console_cli
+
+      - name: Test artifact upload
+        id: artifact-upload
+        uses: ./
+        with:
+          package: ${{ secrets.PACKAGE_NAME }}
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          all: 'true'
+          uploadOutputsArtifact: 'true'
+          outputsArtifactName: 'artifact-upload-test'
+          outputsJsonPath: 'output/'
+          outputsArtifactRetentionDays: '3'
