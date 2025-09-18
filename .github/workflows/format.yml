@@ -14,56 +14,8 @@ permissions:
 
 jobs:
   format:
-    name: Format
-    runs-on: ubuntu-latest
-    outputs:
-      should_format: ${{ steps.format.outputs.should_format }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          token: '${{ secrets.GITHUB_TOKEN }}'
-          ref: ${{ github.head_ref }} # Use the PR branch
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-
-      - name: Install dependencies
-        run: yarn --frozen-lockfile
-
-      - name: Run format check
-        id: format
-        run: |
-          yarn format:check || echo "should_format=true" >> $GITHUB_OUTPUT
-
-      - name: Run format and commit changes
-        if: ${{ steps.format.outputs.should_format == 'true' }}
-        run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          yarn format
-
-          # Get the list of changed files
-          CHANGED_FILES=$(git diff --name-only)
-
-          # Prepend the message with the list of changed files
-          CHANGED_FILES="following files: \n$CHANGED_FILES"
-
-          git add .
-
-          # Check if there are any changed files before committing
-          if [ -n "$CHANGED_FILES" ]; then
-            git commit -m "Formatted code in $CHANGED_FILES"
-            git push origin ${{ github.head_ref }}  # Push to PR branch
-          else
-            echo "No files changed, skipping commit."
-          fi
+    uses: thre4dripper/Reusable-Workflows/.github/workflows/format.yml@main
+    with:
+      package-manager: pnpm
+      format-check-command: pnpm format:check
+      format-fix-command: pnpm format:fix
