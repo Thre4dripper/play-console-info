@@ -14,7 +14,8 @@ permissions:
 
 jobs:
   format:
-    uses: thre4dripper/Reusable-Workflows/.github/workflows/format.yml@main
+    name: Code Formatting
+    uses: thre4dripper/Reusable-Atomic-Workflows/.github/workflows/quality-format.yml@main
     with:
       package-manager: pnpm
       format-check-command: pnpm format:check
