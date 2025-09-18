@@ -19,4 +19,5 @@ jobs:
       package-manager: pnpm
       format-check-command: pnpm format:check
       format-fix-command: pnpm format:fix
-    secrets: inherit
+    secrets:
+      workflow-token: ${{ secrets.GITHUB_TOKEN }}
