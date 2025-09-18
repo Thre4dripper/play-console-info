@@ -1,8 +1,10 @@
 .DS_Store
 .idea/
 .venv/
+venv/
 cli/
 dist/
 node_modules/
 coverage/
 **/__pycache__/**
+.github/workflows/**
