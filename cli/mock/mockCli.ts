@@ -1,25 +1,100 @@
 import path from 'path';
 import fs from 'fs';
 import { Command } from 'commander';
+import {
+  TracksResponse,
+  Images,
+  Testers,
+  ResultData,
+  ApksResponse,
+  BundlesResponse,
+  ListingsResponse,
+  InappsResponse,
+  ReviewsResponse,
+  VoidedPurchasesResponse,
+  AppDetails,
+  ExpansionFiles
+} from '../../src/types.js';
+
+// CLI-specific types
+interface CliOptions {
+  package: string;
+  credsPath: string;
+  tracks?: string;
+  apks?: boolean;
+  bundles?: boolean;
+  listings?: boolean;
+  images?: string;
+  inapps?: boolean;
+  reviews?: boolean;
+  voidedPurchases?: boolean;
+  testers?: string;
+  appDetails?: boolean;
+  expansionFiles?: boolean;
+  all?: boolean;
+  imagesLanguage: string;
+  reviewsPages: number;
+  reviewsPageSize: number;
+  json?: boolean;
+}
+
+type ValidTrack = 'internal' | 'alpha' | 'beta' | 'production';
+type ValidImageType =
+  | 'icon'
+  | 'featureGraphic'
+  | 'tvBanner'
+  | 'phoneScreenshots'
+  | 'sevenInchScreenshots'
+  | 'tenInchScreenshots'
+  | 'tvScreenshots'
+  | 'wearScreenshots';
+
+type ResourceType =
+  | 'tracks'
+  | 'apks'
+  | 'bundles'
+  | 'listings'
+  | 'images'
+  | 'inapps'
+  | 'reviews'
+  | 'voided_purchases'
+  | 'testers'
+  | 'app_details'
+  | 'expansion_files';
+
+interface FilteredResults {
+  tracks?: TracksResponse;
+  apks?: ApksResponse;
+  bundles?: BundlesResponse;
+  listings?: ListingsResponse;
+  images?: Images;
+  inapps?: InappsResponse;
+  reviews?: ReviewsResponse;
+  voided_purchases?: VoidedPurchasesResponse;
+  testers?: Testers;
+  app_details?: AppDetails;
+  expansion_files?: ExpansionFiles;
+}
 
 const program = new Command();
 
 // Configure the CLI
 program
-  .name('mockCli.mjs')
+  .name('mockCli.ts')
   .description('Google Play Console Data Fetcher (Mock Version)')
   .version('1.0.0')
   .addHelpText(
     'after',
     `
 Examples:
-  node mockCli.mjs -p com.example.app -c creds.json -A
-  node mockCli.mjs --package com.example.app --creds-path creds.json -t production,beta -i icon,featureGraphic
-  node mockCli.mjs -p com.example.app -c creds.json -t all -i all -j
+  npx ts-node mockCli.ts -p com.example.app -c creds.json -A
+  npx ts-node mockCli.ts --package com.example.app --creds-path creds.json -t production,beta -i icon,featureGraphic
+  npx ts-node mockCli.ts -p com.example.app -c creds.json -t all -i all -j
 
 Notes:
   - For comma-separated inputs, do not use spaces.
   - Use 'all' to select all supported values.
+  - On PowerShell, quote comma-separated values: -t "production,beta"
 `
   );
 
@@ -65,7 +140,7 @@ program
   .option(
     '-P, --reviews-pages <num>',
     'Number of review pages to fetch',
-    (value) => {
+    (value: string): number => {
       const parsed = parseInt(value, 10);
       if (isNaN(parsed) || parsed < 1) {
         throw new Error('--reviews-pages must be a positive integer');
@@ -77,7 +152,7 @@ program
   .option(
     '-S, --reviews-page-size <num>',
     'Reviews per page',
-    (value) => {
+    (value: string): number => {
       const parsed = parseInt(value, 10);
       if (isNaN(parsed) || parsed < 1) {
         throw new Error('--reviews-page-size must be a positive integer');
@@ -89,7 +164,7 @@ program
   .option('-j, --json', 'Output raw JSON instead of formatted tree');
 
 // Custom validation function
-const validateCommaSeperatedOrAll = (value, key) => {
+const validateCommaSeperatedOrAll = (value: string, key: string): string => {
   if (!value || !value.trim()) {
     throw new Error(`--${key} requires a non-empty value`);
   }
@@ -121,8 +196,8 @@ const validateCommaSeperatedOrAll = (value, key) => {
   return trimmed;
 };
 
-const validateTracks = (value) => {
-  const validTracks = ['internal', 'alpha', 'beta', 'production'];
+const validateTracks = (value: string): string => {
+  const validTracks: ValidTrack[] = ['internal', 'alpha', 'beta', 'production'];
   const trimmed = value.trim();
 
   if (trimmed.toLowerCase() === 'all') {
@@ -130,7 +205,7 @@ const validateTracks = (value) => {
   }
 
   const parts = trimmed.split(',').map((p) => p.trim().toLowerCase());
-  const invalidTracks = parts.filter((track) => !validTracks.includes(track));
+  const invalidTracks = parts.filter((track) => !validTracks.includes(track as ValidTrack));
 
   if (invalidTracks.length > 0) {
     throw new Error(
@@ -141,8 +216,8 @@ const validateTracks = (value) => {
   return trimmed;
 };
 
-const validateImages = (value) => {
-  const validImageTypes = [
+const validateImages = (value: string): string => {
+  const validImageTypes: ValidImageType[] = [
     'icon',
     'featureGraphic',
     'tvBanner',
@@ -159,7 +234,7 @@ const validateImages = (value) => {
   }
 
   const parts = trimmed.split(',').map((p) => p.trim());
-  const invalidTypes = parts.filter((type) => !validImageTypes.includes(type));
+  const invalidTypes = parts.filter((type) => !validImageTypes.includes(type as ValidImageType));
 
   if (invalidTypes.length > 0) {
     throw new Error(
@@ -170,8 +245,8 @@ const validateImages = (value) => {
   return trimmed;
 };
 
-const validateTesters = (value) => {
-  const validTracks = ['internal', 'alpha', 'beta', 'production'];
+const validateTesters = (value: string): string => {
+  const validTracks: ValidTrack[] = ['internal', 'alpha', 'beta', 'production'];
   const trimmed = value.trim();
 
   if (trimmed.toLowerCase() === 'all') {
@@ -179,7 +254,7 @@ const validateTesters = (value) => {
   }
 
   const parts = trimmed.split(',').map((p) => p.trim().toLowerCase());
-  const invalidTracks = parts.filter((track) => !validTracks.includes(track));
+  const invalidTracks = parts.filter((track) => !validTracks.includes(track as ValidTrack));
 
   if (invalidTracks.length > 0) {
     throw new Error(
@@ -190,7 +265,7 @@ const validateTesters = (value) => {
   return trimmed;
 };
 
-const filterTracks = (tracksData, selection) => {
+const filterTracks = (tracksData: TracksResponse | undefined, selection: string): TracksResponse => {
   if (!tracksData || !tracksData.tracks) {
     return { kind: 'androidpublisher#tracksListResponse', tracks: [] };
   }
@@ -205,58 +280,58 @@ const filterTracks = (tracksData, selection) => {
   return { ...tracksData, tracks: filtered };
 };
 
-const filterImages = (imagesData, selection) => {
+const filterImages = (imagesData: Images | undefined, selection: string): Partial<Images> => {
   if (!imagesData) {
     return {};
   }
 
   if (selection === 'all') return imagesData;
 
-  const wantedTypes = selection.split(',').map((t) => t.trim());
-  const filtered = {};
+  const wantedTypes = selection.split(',').map((t) => t.trim() as ValidImageType);
+  const filtered: Partial<Images> = {};
 
   wantedTypes.forEach((type) => {
     if (imagesData[type]) {
-      filtered[type] = imagesData[type];
+      (filtered as any)[type] = imagesData[type];
     } else {
       // Add empty structure for requested but non-existent types
-      filtered[type] = { images: [] };
+      (filtered as any)[type] = { images: [] };
     }
   });
 
   return filtered;
 };
 
-const filterTesters = (testersData, selection) => {
+const filterTesters = (testersData: Testers | undefined, selection: string): Partial<Testers> => {
   if (!testersData) {
     return {};
   }
 
   if (selection === 'all') return testersData;
 
-  const wantedTracks = selection.split(',').map((t) => t.trim().toLowerCase());
-  const filtered = {};
+  const wantedTracks = selection.split(',').map((t) => t.trim().toLowerCase() as ValidTrack);
+  const filtered: Partial<Testers> = {};
 
   wantedTracks.forEach((track) => {
     if (testersData[track]) {
-      filtered[track] = testersData[track];
+      (filtered as any)[track] = testersData[track];
     } else {
       // Add empty structure for requested but non-existent tracks
-      filtered[track] = { googleGroups: [] };
+      (filtered as any)[track] = { googleGroups: [] };
     }
   });
 
   return filtered;
 };
 
-const printTreeOutput = (results) => {
+const printTreeOutput = (results: FilteredResults): void => {
   const printSection = (
-    title,
-    data,
-    prefix = '',
-    isLast = true,
-    isRoot = false
-  ) => {
+    title: string | null,
+    data: any,
+    prefix: string = '',
+    isLast: boolean = true,
+    isRoot: boolean = false
+  ): void => {
     const branch = isRoot ? '\x1b[34m● \x1b[0m' : isLast ? '└─╴' : '├─╴';
     const space = isLast ? '    ' : '│   ';
 
@@ -315,11 +390,11 @@ const printTreeOutput = (results) => {
   });
 };
 
-const mock = async () => {
+const mock = async (): Promise<void> => {
   try {
     // Parse arguments using commander
     program.parse();
-    const options = program.opts();
+    const options = program.opts() as CliOptions;
 
     // Check if credentials file exists (custom logic - not handled by Commander.js)
     if (!fs.existsSync(options.credsPath)) {
@@ -348,26 +423,28 @@ const mock = async () => {
       'mock',
       'result.json'
     );
+
     if (!fs.existsSync(resultPath)) {
       console.error('[ERROR] result.json not found in tests/mocks directory');
       process.exit(1);
     }
 
-    let fullData;
+    let fullData: ResultData;
     try {
       const fileContent = fs.readFileSync(resultPath, 'utf8');
       if (fileContent.trim() === '') {
         console.error('[ERROR] result.json is empty');
         process.exit(1);
       }
-      fullData = JSON.parse(fileContent);
+      fullData = JSON.parse(fileContent) as ResultData;
     } catch (e) {
-      console.error('[ERROR] Failed to parse result.json:', e.message);
+      const error = e as Error;
+      console.error('[ERROR] Failed to parse result.json:', error.message);
       process.exit(1);
     }
 
     // Determine requested resources
-    const requested = [];
+    const requested: ResourceType[] = [];
     if (options.all) {
       requested.push(
         'tracks',
@@ -404,7 +481,7 @@ const mock = async () => {
       process.exit(1);
     }
 
-    const results = {};
+    const results: FilteredResults = {};
 
     // Process each requested resource
     requested.forEach((resource) => {
@@ -416,19 +493,19 @@ const mock = async () => {
         }
         case 'images': {
           const imageSelection = options.images || 'all';
-          results.images = filterImages(fullData.images, imageSelection);
+          results.images = filterImages(fullData.images, imageSelection) as Images;
           break;
         }
         case 'testers': {
           const testerSelection = options.testers || 'all';
-          results.testers = filterTesters(fullData.testers, testerSelection);
+          results.testers = filterTesters(fullData.testers, testerSelection) as Testers;
           break;
         }
         default:
           if (fullData[resource]) {
-            results[resource] = fullData[resource];
+            (results as any)[resource] = fullData[resource];
           } else {
-            results[resource] = {};
+            (results as any)[resource] = {};
           }
       }
     });
@@ -495,8 +572,12 @@ const mock = async () => {
         // Capture tree output as string
         const originalConsoleLog = console.log;
         let treeOutput = '';
-        console.log = (str) => {
-          treeOutput += str + '\n';
+        console.log = (str?: string) => {
+          if (str !== undefined) {
+            treeOutput += str + '\n';
+          } else {
+            treeOutput += '\n';
+          }
         };
 
         printTreeOutput(results);
@@ -522,30 +603,31 @@ const mock = async () => {
     }
   } catch (error) {
     // Commander.js will automatically handle and display argument errors
+    const err = error as any;
     if (
-      error.code === 'commander.missingRequiredArgument' ||
-      error.code === 'commander.invalidArgument' ||
-      error.message.includes('required option')
+      err.code === 'commander.missingRequiredArgument' ||
+      err.code === 'commander.invalidArgument' ||
+      err.message?.includes('required option')
     ) {
       process.exit(1);
     }
-    console.error('[ERROR]', error.message);
+    console.error('[ERROR]', err.message);
     process.exit(1);
   }
 };
 
 // Handle uncaught errors gracefully
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', (error: Error) => {
   console.error('[ERROR] Unexpected error:', error.message);
   process.exit(1);
 });
 
-process.on('unhandledRejection', (reason) => {
+process.on('unhandledRejection', (reason: any) => {
   console.error('[ERROR] Unhandled promise rejection:', reason);
   process.exit(1);
 });
 
-mock().catch((error) => {
+mock().catch((error: Error) => {
   console.error('[ERROR]', error.message);
   process.exit(1);
 });
