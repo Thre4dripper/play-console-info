@@ -7,6 +7,6 @@ node_modules/
 *.pyc
 .DS_Store
 **/__pycache__/**
-cli/build
+cli/python/build
 cli/python/play_console_cli.spec
 coverage
