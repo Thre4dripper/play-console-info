@@ -9,7 +9,7 @@ import {
   beforeEach,
   afterEach,
 } from '@jest/globals';
-import { ActionError, getExecutablePath, Logger } from '../src/utils/helpers';
+import { ActionError, getExecutablePath, Logger } from '../../src/utils/helpers';
 
 jest.mock('os', () => ({
   platform: jest.fn(),

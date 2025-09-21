@@ -7,7 +7,7 @@ import {
   getServiceAccountJsonPath,
   getCliArguments,
   getArtifactsInputs,
-} from '../src/utils/inputs';
+} from '../../src/utils/inputs';
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
 // Mock dependencies

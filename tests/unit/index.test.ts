@@ -3,14 +3,14 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 // Mock all dependencies
 const mockRun = jest.fn();
 
-jest.mock('../src/main', () => ({
+jest.mock('../../src/main', () => ({
   __esModule: true,
   default: mockRun,
 }));
-jest.mock('../src/utils/helpers', () => ({
+jest.mock('../../src/utils/helpers', () => ({
   getExecutablePath: jest.fn().mockReturnValue('/path/to/cli'),
 }));
-jest.mock('../src/utils/inputs', () => ({
+jest.mock('../../src/utils/inputs', () => ({
   getServiceAccountJsonPath: jest.fn().mockReturnValue('/path/to/creds.json'),
   getPackage: jest.fn().mockReturnValue('com.example.app'),
   getCliArguments: jest.fn().mockReturnValue(['--extra-arg']),
@@ -39,7 +39,7 @@ describe('index', () => {
   it('should import without throwing errors', () => {
     expect(() => {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
-      require('../src/index');
+      require('../../src');
     }).not.toThrow();
   });
 
@@ -54,7 +54,7 @@ describe('index', () => {
     );
 
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('../src/index');
+    require('../../src');
 
     // Wait a tick for the promise to reject
     await new Promise(process.nextTick);

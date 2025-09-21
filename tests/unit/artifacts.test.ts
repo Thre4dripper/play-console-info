@@ -38,9 +38,9 @@ import * as core from '@actions/core';
 import { ArtifactNotFoundError } from '@actions/artifact';
 import fs from 'fs';
 import path from 'path';
-import { createArtifact } from '../src/utils/artifacts';
-import { ResultData } from '../src/types';
-import mockResultData from './mocks/result.json';
+import { createArtifact } from '../../src/utils/artifacts';
+import { ResultData } from '../../src/types';
+import mockResultData from '../../cli/mock/result.json';
 
 const mockCore = core as jest.Mocked<typeof core>;
 const mockFs = fs as jest.Mocked<typeof fs>;

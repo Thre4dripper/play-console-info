@@ -4,8 +4,14 @@ import path from 'path';
 import { describe, it, expect, afterAll } from '@jest/globals';
 
 describe('mockCli', () => {
-  const mockCliPath = path.join(__dirname, 'mocks', 'mockCli.mjs');
-  const mockCredsPath = path.join(__dirname, 'mocks', 'test-creds.json');
+  const mockCliPath = path.join(__dirname, '..', 'cli', 'mock', 'mockCli.mjs');
+  const mockCredsPath = path.join(
+    __dirname,
+    '..',
+    'cli',
+    'mock',
+    'test-creds.json'
+  );
 
   const runCli = (
     args: string[]
