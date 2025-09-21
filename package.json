@@ -20,8 +20,8 @@
   "license": "MIT",
   "scripts": {
     "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js",
-    "build:cli:windows": "./cli/build-cli.bat",
-    "build:cli:linux": "./cli/build-cli.sh",
+    "build:cli:windows": "cli/python/build-cli.bat",
+    "build:cli:linux": "cli/python/build-cli.sh",
     "clean:cli": "rimraf cli\\build cli\\dist cli\\play_console_cli.spec",
     "start": "npm run build && node dist/index.js",
     "preview": "node dist/index.js",

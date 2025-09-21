@@ -344,8 +344,8 @@ const mock = async () => {
     // Check if result.json exists
     const resultPath = path.join(
       process.cwd(),
-      'tests',
-      'mocks',
+      'cli',
+      'mock',
       'result.json'
     );
     if (!fs.existsSync(resultPath)) {
@@ -436,8 +436,8 @@ const mock = async () => {
     // Streaming implementation
     const resultTxtPath = path.join(
       process.cwd(),
-      'tests',
-      'mocks',
+      'cli',
+      'mock',
       'result.txt'
     );
 

@@ -1,8 +1,8 @@
-import { setOutputs } from '../src/utils/outputs';
-import { ResultData } from '../src/types';
+import { setOutputs } from '../../src/utils/outputs';
+import { ResultData } from '../../src/types';
 import * as core from '@actions/core';
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import result from './mocks/result.json';
+import result from '../../cli/mock/result.json';
 
 // Mock the core module
 jest.mock('@actions/core');

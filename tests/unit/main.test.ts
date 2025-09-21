@@ -1,15 +1,15 @@
 import { spawn } from 'child_process';
 import { EventEmitter } from 'events';
-import run from '../src/main';
-import { setOutputs } from '../src/utils/outputs';
-import { createArtifact } from '../src/utils/artifacts';
-import { ActionError } from '../src/utils/helpers';
+import run from '../../src/main';
+import { setOutputs } from '../../src/utils/outputs';
+import { createArtifact } from '../../src/utils/artifacts';
+import { ActionError } from '../../src/utils/helpers';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 // Mock dependencies
 jest.mock('child_process');
-jest.mock('../src/utils/outputs');
-jest.mock('../src/utils/artifacts');
+jest.mock('../../src/utils/outputs');
+jest.mock('../../src/utils/artifacts');
 jest.mock('@actions/core', () => ({
   setFailed: jest.fn(),
   info: jest.fn(),

@@ -4,8 +4,8 @@
 if not exist venv/Scripts ( virtualenv venv )
 call venv\Scripts\activate
 pip install --upgrade pip
-pip install -r cli\requirements.txt
+pip install -r cli\python\requirements.txt
 
 @REM Use PyInstaller to create a standalone executable
-pyinstaller -F cli\play_console_cli.py --distpath cli\dist --workpath cli\build --specpath cli --name play_console_cli
+pyinstaller -F cli\python\play_console_cli.py --distpath cli\python\dist --workpath cli\python\build --specpath cli\python --name play_console_cli
 
