@@ -1,13 +1,21 @@
 name: Play Console Info - Full Test Suite
 
 on:
-  #  push:
-  #    branches:
-  #      - main
-  #  pull_request:
-  #    branches:
-  #      - main
+#  push:
+#    branches:
+#      - main
+#  pull_request:
+#    branches:
+#      - main
   workflow_dispatch:
+  workflow_call:
+    secrets:
+      packageName:
+        description: 'The package name of the app to test against'
+        required: true
+      serviceAccountJson:
+        description: 'The service account JSON for Google Play API access'
+        required: true
 
 jobs:
   test-basic:
@@ -18,14 +26,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Give Execute Permission
-        run: chmod +x ./cli/dist/play_console_cli
+        run: chmod +x bin/mock/linux/mockCli
 
       - name: Test basic package info
         id: basic
         uses: ./
         with:
-          package: ${{ secrets.PACKAGE_NAME }}
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          package: ${{ secrets.packageName }}
+          serviceAccountJsonPlainText: ${{ secrets.serviceAccountJson }}
           tracks: all
           apks: true
 
@@ -51,8 +59,8 @@ jobs:
         id: all
         uses: ./
         with:
-          package: ${{ secrets.PACKAGE_NAME }}
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          package: ${{ secrets.packageName }}
+          serviceAccountJsonPlainText: ${{ secrets.serviceAccountJson }}
           all: 'true'
           uploadOutputsArtifact: 'true'
           outputsArtifactName: 'all-resources-test'
@@ -100,8 +108,8 @@ jobs:
         id: tracks
         uses: ./
         with:
-          package: ${{ secrets.PACKAGE_NAME }}
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          package: ${{ secrets.packageName }}
+          serviceAccountJsonPlainText: ${{ secrets.serviceAccountJson }}
           tracks: ${{ matrix.tracks }}
 
       - name: Display track results
@@ -131,8 +139,8 @@ jobs:
         id: images
         uses: ./
         with:
-          package: ${{ secrets.PACKAGE_NAME }}
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          package: ${{ secrets.packageName }}
+          serviceAccountJsonPlainText: ${{ secrets.serviceAccountJson }}
           images: ${{ matrix.images }}
           imagesLanguage: ${{ matrix.language }}
 
@@ -162,8 +170,8 @@ jobs:
         id: reviews
         uses: ./
         with:
-          package: ${{ secrets.PACKAGE_NAME }}
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          package: ${{ secrets.packageName }}
+          serviceAccountJsonPlainText: ${{ secrets.serviceAccountJson }}
           reviews: 'true'
           reviewsPages: ${{ matrix.pages }}
           reviewsPageSize: ${{ matrix.pageSize }}
@@ -187,13 +195,13 @@ jobs:
 
       - name: Create service account file
         run: |
-          echo '${{ secrets.SERVICE_ACCOUNT_JSON }}' > service-account.json
+          echo '${{ secrets.serviceAccountJson }}' > service-account.json
 
       - name: Test with file path
         id: file-auth
         uses: ./
         with:
-          package: ${{ secrets.PACKAGE_NAME }}
+          package: ${{ secrets.packageName }}
           serviceAccountJsonPath: service-account.json
           tracks: 'production'
 
@@ -201,8 +209,8 @@ jobs:
         id: plaintext-auth
         uses: ./
         with:
-          package: ${{ secrets.PACKAGE_NAME }}
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          package: ${{ secrets.packageName }}
+          serviceAccountJsonPlainText: ${{ secrets.serviceAccountJson }}
           tracks: 'production'
 
       - name: Compare results
@@ -227,8 +235,8 @@ jobs:
         id: custom-output
         uses: ./
         with:
-          package: ${{ secrets.PACKAGE_NAME }}
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          package: ${{ secrets.packageName }}
+          serviceAccountJsonPlainText: ${{ secrets.serviceAccountJson }}
           all: 'true'
           uploadOutputsArtifact: 'true'
           outputsJsonPath: 'custom-outputs/play-console-data.json'
@@ -273,8 +281,8 @@ jobs:
         id: resource-test
         uses: ./
         with:
-          package: ${{ secrets.PACKAGE_NAME }}
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          package: ${{ secrets.packageName }}
+          serviceAccountJsonPlainText: ${{ secrets.serviceAccountJson }}
           ${{ matrix.resource.name }}: ${{ matrix.resource.value }}
 
       - name: Display resource results
@@ -311,8 +319,8 @@ jobs:
         id: testers
         uses: ./
         with:
-          package: ${{ secrets.PACKAGE_NAME }}
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          package: ${{ secrets.packageName }}
+          serviceAccountJsonPlainText: ${{ secrets.serviceAccountJson }}
           testers: ${{ matrix.testers }}
 
       - name: Display testers results
@@ -335,8 +343,8 @@ jobs:
         id: artifact-upload
         uses: ./
         with:
-          package: ${{ secrets.PACKAGE_NAME }}
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          package: ${{ secrets.packageName }}
+          serviceAccountJsonPlainText: ${{ secrets.serviceAccountJson }}
           all: 'true'
           uploadOutputsArtifact: 'true'
           outputsArtifactName: 'artifact-upload-test'
