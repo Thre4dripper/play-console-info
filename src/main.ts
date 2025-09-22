@@ -1,10 +1,11 @@
 import { ChildProcess, spawn } from 'child_process';
 import { GetResultProps, ResultData, RunProps } from './types';
-import { ActionError } from './utils/helpers';
+import { ActionError, getExecutablePath } from './utils/helpers';
 import { setOutputs } from './utils/outputs';
 import { createArtifact } from './utils/artifacts';
 
-const run = async ({ command, cliArgs, artifactArgs }: RunProps) => {
+const run = async ({ cliArgs, artifactArgs }: RunProps) => {
+  const command = await getExecutablePath(process.env.NODE_ENV === 'test');
   const result = await getResult({ command, cliArgs });
 
   if (result == null) {
