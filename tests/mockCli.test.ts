@@ -4,7 +4,14 @@ import path from 'path';
 import { describe, it, expect, afterAll } from '@jest/globals';
 
 describe('mockCli', () => {
-  const mockCliPath = path.join(__dirname, '..', 'cli', 'mock', 'mockCli.mjs');
+  const mockCliPath = path.join(
+    __dirname,
+    '..',
+    'bin',
+    'mock',
+    'windows',
+    'mockCli.exe'
+  );
   const mockCredsPath = path.join(
     __dirname,
     '..',
@@ -17,7 +24,7 @@ describe('mockCli', () => {
     args: string[]
   ): Promise<{ stdout: string; stderr: string; exitCode: number }> => {
     return new Promise((resolve) => {
-      const child = spawn('node', [mockCliPath, ...args]);
+      const child = spawn(mockCliPath, [...args]);
       let stdout = '';
       let stderr = '';
 

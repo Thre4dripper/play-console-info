@@ -42,8 +42,8 @@
     "test:coverage:check": "c8 jest && c8 check-coverage || echo 'WARNING: Coverage thresholds not met'",
     "test:coverage:strict": "c8 jest && c8 check-coverage",
     "clean:coverage": "c8 clean",
-    "mock-cli": "npx ts-node cli/mock/mockCli.ts",
-    "mock-cli:help": "npx ts-node cli/mock/mockCli.ts --help"
+    "mock-cli": "node cli/mock/mockCli.js",
+    "mock-cli:help": "node cli/mock/mockCli.js --help"
   },
   "dependencies": {
     "@actions/artifact": "^2.3.2",

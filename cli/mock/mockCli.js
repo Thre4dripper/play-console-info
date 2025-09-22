@@ -438,17 +438,17 @@ const mock = async () => {
                     break;
                 }
                 case 'apks': {
-                    Log.progress('Fetching APKs...');
+                    Log.progress('Fetching apks...');
                     results.apks = fullData.apks || {};
                     break;
                 }
                 case 'bundles': {
-                    Log.progress('Fetching App Bundles...');
+                    Log.progress('Fetching bundles...');
                     results.bundles = fullData.bundles || {};
                     break;
                 }
                 case 'listings': {
-                    Log.progress('Fetching store listings...');
+                    Log.progress('Fetching listings...');
                     results.listings = fullData.listings || {};
         
                     break;
