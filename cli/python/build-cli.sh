@@ -8,10 +8,10 @@ cd "$(dirname "$0")/../.."
 mkdir -p "bin/python/linux"
 
 # Create a virtual environment if not already present
-if [ ! -d "venv/bin" ]; then
-  python3 -m venv venv
+if [ ! -d ".venv/bin" ]; then
+  python3 -m venv .venv
 fi
-source venv/bin/activate
+source .venv/bin/activate
 pip install --upgrade pip
 pip install -r cli/python/requirements.txt
 

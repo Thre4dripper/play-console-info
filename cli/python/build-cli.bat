@@ -8,10 +8,10 @@ cd /d "%~dp0..\.."
 if not exist "bin\python\windows" mkdir "bin\python\windows"
 
 :: Create a virtual environment if not already present
-if not exist "venv\Scripts" (
-    python -m venv venv
+if not exist ".venv\Scripts" (
+    python -m venv .venv
 )
-call venv\Scripts\activate.bat
+call .venv\Scripts\activate.bat
 python -m pip install --upgrade pip
 pip install -r cli\python\requirements.txt
 
