@@ -18,12 +18,6 @@
     "resolveJsonModule": true,
     "isolatedModules": true
   },
-  "include": ["src/**/*", "cli/mock/**/*"],
-  "exclude": ["node_modules", "dist"],
-  "ts-node": {
-    "transpileOnly": true,
-    "compilerOptions": {
-      "module": "CommonJS"
-    }
-  }
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
