@@ -60,7 +60,6 @@ describe('index', () => {
     await new Promise(process.nextTick);
 
     expect(mockRun).toHaveBeenCalledWith({
-      command: '/path/to/cli',
       cliArgs: [
         '--creds-path',
         '/path/to/creds.json',
