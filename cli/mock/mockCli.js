@@ -2,6 +2,28 @@ const path = require('path');
 const fs = require('fs');
 const { Command } = require('commander');
 
+class Log {
+    static progress(msg) {
+        process.stderr.write(`[PROGRESS] ${msg}\n`);
+    }
+
+    static error(msg) {
+        process.stderr.write(`[ERROR] ${msg}\n`);
+    }
+
+    static debug(msg) {
+        process.stderr.write(`[DEBUG] ${msg}\n`);
+    }
+
+    static info(msg) {
+        process.stderr.write(`[INFO] ${msg}\n`);
+    }
+
+    static output(msg = '') {
+        process.stdout.write(`${msg}\n`);
+    }
+}
+
 const program = new Command();
 
 // Configure the CLI
@@ -261,7 +283,7 @@ const printTreeOutput = (results) => {
         const space = isLast ? '    ' : '│   ';
 
         if (title) {
-            console.log(`${prefix}${branch}\x1b[1m${title}\x1b[0m`);
+            Log.output(`${prefix}${branch}\x1b[1m${title}\x1b[0m`);
         }
 
         const newPrefix = prefix + (space && !isRoot && title ? space : '');
@@ -270,7 +292,7 @@ const printTreeOutput = (results) => {
             if (Array.isArray(data)) {
                 if (data.length === 0) {
                     const branchVal = isLast ? '└─╴' : '├─╴';
-                    console.log(`${newPrefix}${branchVal}\x1b[2m<empty>\x1b[0m`);
+                    Log.output(`${newPrefix}${branchVal}\x1b[2m<empty>\x1b[0m`);
                 } else {
                     data.forEach((item, idx) => {
                         const last = idx === data.length - 1;
@@ -281,7 +303,7 @@ const printTreeOutput = (results) => {
                 const entries = Object.entries(data);
                 if (entries.length === 0) {
                     const branchVal = isLast ? '└─╴' : '├─╴';
-                    console.log(`${newPrefix}${branchVal}\x1b[2m<empty>\x1b[0m`);
+                    Log.output(`${newPrefix}${branchVal}\x1b[2m<empty>\x1b[0m`);
                 } else {
                     entries.forEach(([key, value], idx) => {
                         const last = idx === entries.length - 1;
@@ -297,21 +319,21 @@ const printTreeOutput = (results) => {
                 const lines = valueStr.split('\n');
                 lines.forEach((line, idx) => {
                     if (idx === 0) {
-                        console.log(`${newPrefix}${branchVal}\x1b[36m${line}\x1b[0m`);
+                        Log.output(`${newPrefix}${branchVal}\x1b[36m${line}\x1b[0m`);
                     } else {
                         const continuationPrefix = newPrefix + (isLast ? '    ' : '│   ');
-                        console.log(`${continuationPrefix}\x1b[36m${line}\x1b[0m`);
+                        Log.output(`${continuationPrefix}\x1b[36m${line}\x1b[0m`);
                     }
                 });
             } else {
-                console.log(`${newPrefix}${branchVal}\x1b[36m${valueStr}\x1b[0m`);
+                Log.output(`${newPrefix}${branchVal}\x1b[36m${valueStr}\x1b[0m`);
             }
         }
     };
 
     Object.entries(results).forEach(([section, content]) => {
         printSection(section, content, '', true, true);
-        console.log();
+        Log.output();
     });
 };
 
@@ -323,7 +345,7 @@ const mock = async () => {
 
         // Check if credentials file exists (custom logic - not handled by Commander.js)
         if (!fs.existsSync(options.credsPath)) {
-            console.error('[ERROR] Credentials file not found:', options.credsPath);
+            Log.error(`Credentials file not found: ${options.credsPath}`);
             process.exit(1);
         }
 
@@ -349,7 +371,7 @@ const mock = async () => {
             'result.json'
         );
         if (!fs.existsSync(resultPath)) {
-            console.error('[ERROR] result.json not found in tests/mocks directory');
+            Log.error('result.json not found in tests/mocks directory');
             process.exit(1);
         }
 
@@ -357,12 +379,12 @@ const mock = async () => {
         try {
             const fileContent = fs.readFileSync(resultPath, 'utf8');
             if (fileContent.trim() === '') {
-                console.error('[ERROR] result.json is empty');
+                Log.error('result.json is empty');
                 process.exit(1);
             }
             fullData = JSON.parse(fileContent);
         } catch (e) {
-            console.error('[ERROR] Failed to parse result.json:', e.message);
+            Log.error(`Failed to parse result.json: ${e.message}`);
             process.exit(1);
         }
 
@@ -397,8 +419,8 @@ const mock = async () => {
         }
 
         if (requested.length === 0) {
-            console.error(
-                '[ERROR] No resources selected. Provide --all or at least one of: --tracks, --apks, --bundles, --listings, --images, --inapps, --reviews, --voided-purchases, --testers, --app-details, --expansion-files'
+            Log.error(
+                'No resources selected. Provide --all or at least one of: --tracks, --apks, --bundles, --listings, --images, --inapps, --reviews, --voided-purchases, --testers, --app-details, --expansion-files'
             );
             console.log('Use --help for usage information');
             process.exit(1);
@@ -406,123 +428,118 @@ const mock = async () => {
 
         const results = {};
 
-        // Process each requested resource
+        // Process each requested resource with detailed progress logging
         requested.forEach((resource) => {
             switch (resource) {
                 case 'tracks': {
+                    Log.progress('Fetching tracks...');
                     const trackSelection = options.tracks || 'all';
                     results.tracks = filterTracks(fullData.tracks, trackSelection);
                     break;
                 }
+                case 'apks': {
+                    Log.progress('Fetching APKs...');
+                    results.apks = fullData.apks || {};
+                    break;
+                }
+                case 'bundles': {
+                    Log.progress('Fetching App Bundles...');
+                    results.bundles = fullData.bundles || {};
+                    break;
+                }
+                case 'listings': {
+                    Log.progress('Fetching store listings...');
+                    results.listings = fullData.listings || {};
+        
+                    break;
+                }
                 case 'images': {
+                    Log.progress('Fetching images...');
                     const imageSelection = options.images || 'all';
+                    
+                    // Get the list of image types to fetch
+                    const allImageTypes = [
+                        'icon', 'featureGraphic', 'tvBanner', 'phoneScreenshots',
+                        'sevenInchScreenshots', 'tenInchScreenshots', 'tvScreenshots', 'wearScreenshots'
+                    ];
+                    const typesToFetch = imageSelection === 'all' ? allImageTypes : imageSelection.split(',').map(t => t.trim());
+                    
+                    // Log progress for each image type
+                    typesToFetch.forEach((type, index) => {
+                        Log.progress(`  Fetching ${type} images (${index + 1}/${typesToFetch.length})...`);
+                    });
+                    
                     results.images = filterImages(fullData.images, imageSelection);
                     break;
                 }
+                case 'inapps': {
+                    Log.progress('Fetching in-app products...');
+                    results.inapps = fullData.inapps || {};
+                    break;
+                }
+                case 'reviews': {
+                    Log.progress(`Fetching reviews (${options.reviewsPages} pages, ${options.reviewsPageSize} per page)...`);
+                    for (let page = 1; page <= options.reviewsPages; page++) {
+                        Log.progress(`Fetching reviews page ${page}/${options.reviewsPages}...`);
+                        if (page === 1) {
+                            Log.progress(`Completed early at page ${page} (no more data)`);
+                            break;
+                        }
+                    }
+                    results.reviews = fullData.reviews || {};
+                    break;
+                }
+                case 'voided_purchases': {
+                    Log.progress(`Fetching voided purchases (${options.reviewsPages} pages, ${options.reviewsPageSize} per page)...`);
+                    for (let page = 1; page <= options.reviewsPages; page++) {
+                        Log.progress(`Fetching voided purchases page ${page}/${options.reviewsPages}...`);
+                        if (page === 1) {
+                            Log.progress(`Completed early at page ${page} (no more data)`);
+                            break;
+                        }
+                    }
+                    results.voided_purchases = fullData.voided_purchases || {};
+                    break;
+                }
                 case 'testers': {
+                    Log.progress('Fetching testers...');
                     const testerSelection = options.testers || 'all';
+                    
+                    if (testerSelection === 'all') {
+                        Log.progress('Fetching testers for all tracks...');
+                    } else {
+                        const tracks = testerSelection.split(',').map(t => t.trim());
+                        tracks.forEach((track, index) => {
+                            Log.progress(`Fetching testers for ${track} track (${index + 1}/${tracks.length})...`);
+                        });
+                    }
+                    
                     results.testers = filterTesters(fullData.testers, testerSelection);
                     break;
                 }
+                case 'app_details': {
+                    Log.progress('Fetching app details...');
+                        results.app_details = fullData.app_details || {};
+                    break;
+                }
+                case 'expansion_files': {
+                    Log.progress('Fetching expansion files...');
+                    results.expansion_files = fullData.expansion_files || {};
+                    break;
+                }
                 default:
-                    if (fullData[resource]) {
-                        results[resource] = fullData[resource];
-                    } else {
-                        results[resource] = {};
-                    }
+                    results[resource] = fullData[resource] || {};
             }
         });
 
-        // Streaming implementation
-        const resultTxtPath = path.join(
-            process.cwd(),
-            'cli',
-            'mock',
-            'result.txt'
-        );
+        // Final completion message
+        Log.info('Completed successfully!');
 
-        // Check if result.txt exists
-        if (!fs.existsSync(resultTxtPath)) {
-            console.error('[ERROR] result.txt not found in tests/mocks directory');
-            process.exit(1);
-        }
-
-        const resultTxtContent = fs.readFileSync(resultTxtPath, 'utf8');
-        const lines = resultTxtContent.split('\n');
-
-        const chunkLimit = 1;
-        let linesCount = 0;
-        let actualOutputStreamed = false;
-        let charIndex = 0;
-
-        // Stream first part of result.txt (up to 25 lines)
-        for (
-            let lineIndex = 0;
-            lineIndex < lines.length && linesCount < 25;
-            lineIndex++
-        ) {
-            const line = lines[lineIndex] + '\n';
-            for (let i = 0; i < line.length; i += chunkLimit) {
-                const limitedChunk = line.slice(i, i + chunkLimit);
-                process.stderr.write(limitedChunk);
-                // await new Promise((resolve) => setTimeout(resolve, 0)); // Small delay for visibility
-            }
-            linesCount++;
-            charIndex += line.length;
-        }
-
-        // After 25 lines, output the actual CLI results
-        if (!actualOutputStreamed) {
-            actualOutputStreamed = true;
-
-            // Show progress messages (to stderr) unless in JSON mode
-            if (!options.json) {
-                requested.forEach((resource) => {
-                    process.stderr.write(`[PROGRESS] Fetching ${resource}...\n`);
-                });
-                process.stderr.write('[INFO] Completed successfully!\n');
-            }
-
-            // Output results to stdout
-            if (options.json) {
-                const jsonOutput = JSON.stringify(results, null, 2);
-                for (let j = 0; j < jsonOutput.length; j += chunkLimit) {
-                    const limitedChunk = jsonOutput.slice(j, j + chunkLimit);
-                    process.stdout.write(limitedChunk);
-                    // await new Promise((resolve) => setTimeout(resolve, 5)); // Faster for actual output
-                }
-            } else {
-                // Capture tree output as string
-                const originalConsoleLog = console.log;
-                let treeOutput = '';
-                console.log = (str) => {
-                    if (str !== undefined) {
-                        treeOutput += str + '\n';
-                    } else {
-                        treeOutput += '\n';
-                    }
-                }
-
-                printTreeOutput(results);
-                console.log = originalConsoleLog;
-
-                // Stream tree output character by character
-                for (let j = 0; j < treeOutput.length; j += chunkLimit) {
-                    const limitedChunk = treeOutput.slice(j, j + chunkLimit);
-                    process.stdout.write(limitedChunk);
-                    // await new Promise((resolve) => setTimeout(resolve, 5)); // Faster for actual output
-                }
-            }
-
-            process.stdout.write('\n');
-        }
-
-        // Continue streaming the rest of result.txt
-        const remainingContent = resultTxtContent.slice(charIndex);
-        for (let i = 0; i < remainingContent.length; i += chunkLimit) {
-            const limitedChunk = remainingContent.slice(i, i + chunkLimit);
-            process.stderr.write(limitedChunk);
-            await new Promise((resolve) => setTimeout(resolve, 10)); // Small delay for visibility
+        // Output results to stdout
+        if (options.json) {
+            Log.output(JSON.stringify(results, null, 2));
+        } else {
+            printTreeOutput(results);
         }
     } catch (error) {
         // Commander.js will automatically handle and display argument errors
@@ -533,23 +550,23 @@ const mock = async () => {
         ) {
             process.exit(1);
         }
-        console.error('[ERROR]', error.message);
+        Log.error(error.message);
         process.exit(1);
     }
 };
 
 // Handle uncaught errors gracefully
 process.on('uncaughtException', (error) => {
-    console.error('[ERROR] Unexpected error:', error.message);
+    Log.error(`Unexpected error: ${error.message}`);
     process.exit(1);
 });
 
 process.on('unhandledRejection', (reason) => {
-    console.error('[ERROR] Unhandled promise rejection:', reason);
+    Log.error(`Unhandled promise rejection: ${reason}`);
     process.exit(1);
 });
 
 mock().catch((error) => {
-    console.error('[ERROR]', error.message);
+    Log.error(error.message);
     process.exit(1);
 });
