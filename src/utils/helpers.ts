@@ -1,6 +1,7 @@
 import path from 'path';
 import os from 'os';
 import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 
 export class ActionError extends Error {
   constructor(message: string) {
@@ -31,15 +32,61 @@ export class Logger {
   }
 }
 
-export const getExecutablePath = (): string => {
-  const basePath = path.join(process.cwd(), 'cli', 'dist');
-  switch (os.platform()) {
-    case 'win32':
-      return path.join(basePath, 'play_console_cli.exe');
+export const getExecutablePath = async (useMock = false): Promise<string> => {
+  const basePath = process.cwd();
+  const platform = os.platform();
+
+  if (useMock) {
+    // For mock/testing purposes
+    switch (platform) {
+      case 'win32': {
+        // For .exe files, no special execution policy is typically needed
+        // But ensure we can run executables in case of restrictive environments
+        return path.join(basePath, 'bin', 'mock', 'windows', 'mockCli.exe');
+      }
+      case 'darwin':
+      case 'linux': {
+        const mockCliPath = path.join(
+          basePath,
+          'bin',
+          'mock',
+          'linux',
+          'mockCli'
+        );
+        await exec.exec('chmod', ['+x', mockCliPath]);
+        return path.join(basePath, 'bin', 'mock', 'linux', 'mockCli');
+      }
+      default:
+        throw new ActionError(`Unknown platform: ${platform}`);
+    }
+  }
+
+  // Real Python CLI binaries
+  switch (platform) {
+    case 'win32': {
+      // For .exe files, no special execution policy is typically needed
+      // But ensure we can run executables in case of restrictive environments
+      return path.join(
+        basePath,
+        'bin',
+        'python',
+        'windows',
+        'play_console_cli.exe'
+      );
+    }
     case 'darwin':
-    case 'linux':
-      return path.join(basePath, 'play_console_cli');
+    case 'linux': {
+      const pythonCliPath = path.join(
+        basePath,
+        'bin',
+        'python',
+        'linux',
+        'play_console_cli'
+      );
+      await exec.exec('chmod', ['+x', pythonCliPath]);
+      return path.join(basePath, 'bin', 'python', 'linux', 'play_console_cli');
+    }
     default:
-      throw new ActionError(`Unknown platform: ${os.platform()}`);
+      throw new ActionError(`Unknown platform: ${platform}`);
   }
 };

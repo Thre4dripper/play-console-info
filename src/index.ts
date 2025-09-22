@@ -1,5 +1,4 @@
 import run from './main';
-import { getExecutablePath } from './utils/helpers';
 import {
   getCliArguments,
   getArtifactsInputs,
@@ -7,7 +6,6 @@ import {
   getServiceAccountJsonPath,
 } from './utils/inputs';
 
-const executablePath = getExecutablePath();
 const serviceAccountJson = getServiceAccountJsonPath();
 const pkg = getPackage();
 
@@ -22,7 +20,7 @@ const cliArgs = [
 
 const artifactArgs = getArtifactsInputs();
 
-run({ command: executablePath, cliArgs, artifactArgs }).catch((err) => {
+run({ cliArgs, artifactArgs }).catch((err) => {
   console.error(err);
   process.exitCode = 1;
 });

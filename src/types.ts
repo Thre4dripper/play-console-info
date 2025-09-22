@@ -10,7 +10,7 @@ export type ArtifactArgs = {
   outputsArtifactRetentionDays: string;
 };
 
-export type RunProps = GetResultProps & {
+export type RunProps = Pick<GetResultProps, 'cliArgs'> & {
   artifactArgs: ArtifactArgs;
 };
 
