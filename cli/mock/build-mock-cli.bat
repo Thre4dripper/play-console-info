@@ -8,8 +8,8 @@ cd /d "%~dp0..\.."
 if not exist "bin\mock\windows" mkdir "bin\mock\windows"
 
 :: Build the binary
-echo Compiling TypeScript to Windows executable...
-bun build --compile --target=bun-windows-x64 .\cli\mock\mockCli.ts --outfile bin\mock\windows\mockCli.exe
+echo Compiling JavaScript to Windows executable...
+bun build --compile --target=bun-windows-x64 .\cli\mock\mockCli.js --outfile bin\mock\windows\mockCli.exe
 
 if %ERRORLEVEL% EQU 0 (
     echo ✅ Mock CLI binary built successfully: bin\mock\windows\mockCli.exe
