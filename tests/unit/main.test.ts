@@ -5,6 +5,7 @@ import { setOutputs } from '../../src/utils/outputs';
 import { createArtifact } from '../../src/utils/artifacts';
 import { ActionError, getExecutablePath } from '../../src/utils/helpers';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+import mockResult from '../../cli/mock/result.json';
 
 // Mock dependencies
 jest.mock('child_process');
@@ -64,42 +65,6 @@ describe('main.ts', () => {
     };
 
     it('should execute successfully with valid JSON output', async () => {
-      const mockResult = {
-        tracks: { kind: 'androidpublisher#tracksListResponse', tracks: [] },
-        apks: { kind: 'androidpublisher#apksListResponse' },
-        bundles: { kind: 'androidpublisher#bundlesListResponse', bundles: [] },
-        listings: {
-          kind: 'androidpublisher#listingsListResponse',
-          listings: [],
-        },
-        images: {
-          icon: { images: [] },
-          featureGraphic: { images: [] },
-          tvBanner: {},
-          phoneScreenshots: { images: [] },
-          sevenInchScreenshots: {},
-          tenInchScreenshots: {},
-          tvScreenshots: {},
-          wearScreenshots: {},
-        },
-        inapps: {
-          kind: 'androidpublisher#inappsListResponse',
-          tokenPagination: { previousPageToken: '' },
-        },
-        reviews: { count: 0, reviews: [] },
-        voided_purchases: { count: 0, voidedPurchases: [] },
-        testers: {
-          internal: {},
-          alpha: {},
-          beta: {},
-          production: { googleGroups: [] },
-        },
-        app_details: {
-          defaultLanguage: 'en-US',
-          contactEmail: 'test@example.com',
-        },
-        expansion_files: { apks: {} },
-      };
       const jsonOutput = JSON.stringify(mockResult);
 
       const runPromise = run(mockRunProps);
@@ -180,42 +145,6 @@ describe('main.ts', () => {
     });
 
     it('should handle chunked JSON data correctly', async () => {
-      const mockResult = {
-        tracks: { kind: 'androidpublisher#tracksListResponse', tracks: [] },
-        apks: { kind: 'androidpublisher#apksListResponse' },
-        bundles: { kind: 'androidpublisher#bundlesListResponse', bundles: [] },
-        listings: {
-          kind: 'androidpublisher#listingsListResponse',
-          listings: [],
-        },
-        images: {
-          icon: { images: [] },
-          featureGraphic: { images: [] },
-          tvBanner: {},
-          phoneScreenshots: { images: [] },
-          sevenInchScreenshots: {},
-          tenInchScreenshots: {},
-          tvScreenshots: {},
-          wearScreenshots: {},
-        },
-        inapps: {
-          kind: 'androidpublisher#inappsListResponse',
-          tokenPagination: { previousPageToken: '' },
-        },
-        reviews: { count: 0, reviews: [] },
-        voided_purchases: { count: 0, voidedPurchases: [] },
-        testers: {
-          internal: {},
-          alpha: {},
-          beta: {},
-          production: { googleGroups: [] },
-        },
-        app_details: {
-          defaultLanguage: 'en-US',
-          contactEmail: 'test@example.com',
-        },
-        expansion_files: { apks: {} },
-      };
       const jsonOutput = JSON.stringify(mockResult);
       const chunk1 = jsonOutput.slice(0, 5);
       const chunk2 = jsonOutput.slice(5);
