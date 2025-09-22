@@ -1,6 +1,7 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 import {
   describe,
   it,
@@ -9,10 +10,18 @@ import {
   beforeEach,
   afterEach,
 } from '@jest/globals';
-import { ActionError, getExecutablePath, Logger } from '../../src/utils/helpers';
+import {
+  ActionError,
+  getExecutablePath,
+  Logger,
+} from '../../src/utils/helpers';
 
 jest.mock('os', () => ({
   platform: jest.fn(),
+}));
+
+jest.mock('@actions/exec', () => ({
+  exec: jest.fn(),
 }));
 
 jest.mock('@actions/core', () => ({
@@ -26,6 +35,7 @@ jest.mock('@actions/core', () => ({
 
 const mockOs = jest.mocked(os);
 const mockCore = jest.mocked(core);
+const mockExec = jest.mocked(exec);
 
 describe('ActionError', () => {
   beforeEach(() => {
@@ -47,30 +57,88 @@ describe('getExecutablePath', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(process, 'cwd').mockReturnValue('/test/project');
+    mockExec.exec.mockResolvedValue(0);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  it('returns correct executable path for all platforms', () => {
-    // Test supported platforms
-    const platforms = [
-      ['win32', 'play_console_cli.exe'],
-      ['darwin', 'play_console_cli'],
-      ['linux', 'play_console_cli'],
-    ] as const;
+  describe('with useMock = false (Python CLI)', () => {
+    it('returns correct executable path for all platforms', async () => {
+      // Test supported platforms
+      const platforms = [
+        ['win32', 'bin/python/windows/play_console_cli.exe'],
+        ['darwin', 'bin/python/linux/play_console_cli'],
+        ['linux', 'bin/python/linux/play_console_cli'],
+      ] as const;
 
-    platforms.forEach(([platform, expectedFile]) => {
-      mockOs.platform.mockReturnValue(platform);
-      const result = getExecutablePath();
-      expect(result).toBe(
-        path.join('/test/project', 'cli', 'dist', expectedFile)
-      );
+      for (const [platform, expectedPath] of platforms) {
+        mockOs.platform.mockReturnValue(platform);
+        const result = await getExecutablePath(false);
+        expect(result).toBe(path.join('/test/project', expectedPath));
+      }
+    });
+
+    it('calls chmod for linux and darwin platforms', async () => {
+      const platforms = ['darwin', 'linux'] as const;
+      
+      for (const platform of platforms) {
+        mockExec.exec.mockClear();
+        mockOs.platform.mockReturnValue(platform);
+        
+        await getExecutablePath(false);
+        
+        expect(mockExec.exec).toHaveBeenCalledWith('chmod', [
+          '+x',
+          path.join('/test/project', 'bin/python/linux/play_console_cli')
+        ]);
+      }
+    });
+
+    it('does not call chmod for windows platform', async () => {
+      mockOs.platform.mockReturnValue('win32');
+      
+      await getExecutablePath(false);
+      
+      expect(mockExec.exec).not.toHaveBeenCalled();
     });
   });
 
-  it('throws ActionError for unsupported platforms', () => {
+  describe('with useMock = true (Mock CLI)', () => {
+    it('returns correct executable path for all platforms', async () => {
+      // Test supported platforms
+      const platforms = [
+        ['win32', 'bin/mock/windows/mockCli.exe'],
+        ['darwin', 'bin/mock/linux/mockCli'],
+        ['linux', 'bin/mock/linux/mockCli'],
+      ] as const;
+
+      for (const [platform, expectedPath] of platforms) {
+        mockOs.platform.mockReturnValue(platform);
+        const result = await getExecutablePath(true);
+        expect(result).toBe(path.join('/test/project', expectedPath));
+      }
+    });
+
+    it('calls chmod for linux and darwin platforms', async () => {
+      const platforms = ['darwin', 'linux'] as const;
+      
+      for (const platform of platforms) {
+        mockExec.exec.mockClear();
+        mockOs.platform.mockReturnValue(platform);
+        
+        await getExecutablePath(true);
+        
+        expect(mockExec.exec).toHaveBeenCalledWith('chmod', [
+          '+x',
+          path.join('/test/project', 'bin/mock/linux/mockCli')
+        ]);
+      }
+    });
+  });
+
+  it('throws ActionError for unsupported platforms', async () => {
     const unsupportedPlatforms = [
       'freebsd',
       'aix',
@@ -78,27 +146,23 @@ describe('getExecutablePath', () => {
       'unknown',
     ] as const;
 
-    unsupportedPlatforms.forEach((platform) => {
+    for (const platform of unsupportedPlatforms) {
       mockOs.platform.mockReturnValue(platform as NodeJS.Platform);
 
-      expect(() => getExecutablePath()).toThrow(ActionError);
-      expect(() => getExecutablePath()).toThrow(
+      await expect(getExecutablePath()).rejects.toThrow(ActionError);
+      await expect(getExecutablePath()).rejects.toThrow(
         `Unknown platform: ${platform}`
       );
-    });
-
-    expect(mockCore.setFailed).toHaveBeenCalledTimes(
-      unsupportedPlatforms.length * 2
-    );
+    }
   });
 
-  it('uses current working directory in path construction', () => {
+  it('uses current working directory in path construction', async () => {
     jest.spyOn(process, 'cwd').mockReturnValue('/custom/path');
     mockOs.platform.mockReturnValue('linux');
 
-    const result = getExecutablePath();
+    const result = await getExecutablePath(false);
     expect(result).toBe(
-      path.join('/custom/path', 'cli', 'dist', 'play_console_cli')
+      path.join('/custom/path', 'bin/python/linux/play_console_cli')
     );
   });
 });

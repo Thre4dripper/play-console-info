@@ -3,13 +3,21 @@ import { EventEmitter } from 'events';
 import run from '../../src/main';
 import { setOutputs } from '../../src/utils/outputs';
 import { createArtifact } from '../../src/utils/artifacts';
-import { ActionError } from '../../src/utils/helpers';
+import { ActionError, getExecutablePath } from '../../src/utils/helpers';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 // Mock dependencies
 jest.mock('child_process');
 jest.mock('../../src/utils/outputs');
 jest.mock('../../src/utils/artifacts');
+jest.mock('../../src/utils/helpers', () => ({
+  ActionError: class ActionError extends Error {
+    constructor(message: string) {
+      super(message);
+    }
+  },
+  getExecutablePath: jest.fn(),
+}));
 jest.mock('@actions/core', () => ({
   setFailed: jest.fn(),
   info: jest.fn(),
@@ -24,6 +32,7 @@ const mockSetOutputs = setOutputs as jest.MockedFunction<typeof setOutputs>;
 const mockCreateArtifact = createArtifact as jest.MockedFunction<
   typeof createArtifact
 >;
+const mockGetExecutablePath = getExecutablePath as jest.MockedFunction<typeof getExecutablePath>;
 
 describe('main.ts', () => {
   let mockChildProcess: any;
@@ -40,11 +49,11 @@ describe('main.ts', () => {
     mockSpawn.mockReturnValue(mockChildProcess);
     mockSetOutputs.mockResolvedValue(undefined);
     mockCreateArtifact.mockResolvedValue(undefined);
+    mockGetExecutablePath.mockResolvedValue('test-command');
   });
 
   describe('run function', () => {
     const mockRunProps = {
-      command: 'test-command',
       cliArgs: ['--arg1', 'value1'],
       artifactArgs: {
         uploadOutputsArtifact: true,
@@ -95,6 +104,9 @@ describe('main.ts', () => {
 
       const runPromise = run(mockRunProps);
 
+      // Wait for getExecutablePath to be called
+      await new Promise(setImmediate);
+
       // Simulate stdout data
       mockChildProcess.stdout.emit('data', jsonOutput);
 
@@ -121,6 +133,9 @@ describe('main.ts', () => {
     it('should throw ActionError when getResult returns null', async () => {
       const runPromise = run(mockRunProps);
 
+      // Wait for getExecutablePath to be called
+      await new Promise(setImmediate);
+
       // Simulate exit with no output (empty jsonBuffer)
       mockChildProcess.emit('exit', 0);
 
@@ -133,6 +148,9 @@ describe('main.ts', () => {
     it('should handle process exit with non-zero code', async () => {
       const runPromise = run(mockRunProps);
 
+      // Wait for getExecutablePath to be called
+      await new Promise(setImmediate);
+
       mockChildProcess.emit('exit', 1);
 
       await expect(runPromise).rejects.toThrow('Process exited with code 1');
@@ -140,6 +158,9 @@ describe('main.ts', () => {
 
     it('should handle JSON parsing errors', async () => {
       const runPromise = run(mockRunProps);
+
+      // Wait for getExecutablePath to be called
+      await new Promise(setImmediate);
 
       // Simulate invalid JSON output
       mockChildProcess.stdout.emit('data', 'invalid-json');
@@ -152,6 +173,7 @@ describe('main.ts', () => {
       const testError = new Error('Process spawn error');
       const runPromise = run(mockRunProps);
 
+      await new Promise(setImmediate);
       mockChildProcess.emit('error', testError);
 
       await expect(runPromise).rejects.toThrow(testError);
@@ -200,6 +222,7 @@ describe('main.ts', () => {
 
       const runPromise = run(mockRunProps);
 
+      await new Promise(setImmediate);
       // Simulate chunked data
       mockChildProcess.stdout.emit('data', chunk1);
       mockChildProcess.stdout.emit('data', chunk2);
@@ -222,6 +245,7 @@ describe('main.ts', () => {
       const runPromise = run(mockRunProps);
       const stderrData = 'Error message';
 
+      await new Promise(setImmediate);
       // Simulate stderr data
       mockChildProcess.stderr.emit('data', stderrData);
       mockChildProcess.emit('exit', 0);
@@ -239,6 +263,7 @@ describe('main.ts', () => {
     it('should set encoding on stdout and stderr', async () => {
       const runPromise = run(mockRunProps);
 
+      await new Promise(setImmediate);
       mockChildProcess.emit('exit', 0);
 
       try {
@@ -254,6 +279,7 @@ describe('main.ts', () => {
     it('should handle empty JSON buffer after trimming', async () => {
       const runPromise = run(mockRunProps);
 
+      await new Promise(setImmediate);
       // Simulate whitespace-only output
       mockChildProcess.stdout.emit('data', '   \n  \t  ');
       mockChildProcess.emit('exit', 0);
@@ -268,6 +294,8 @@ describe('main.ts', () => {
       process.env = { ...originalEnv, TEST_VAR: 'test-value' };
 
       const runPromise = run(mockRunProps);
+      
+      await new Promise(setImmediate);
       mockChildProcess.emit('exit', 0);
 
       try {
