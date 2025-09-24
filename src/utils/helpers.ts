@@ -32,9 +32,17 @@ export class Logger {
   }
 }
 
-export const getExecutablePath = async (useMock = false): Promise<string> => {
-  const basePath = process.cwd();
+export const getExecutablePath = async (useMock: boolean): Promise<string> => {
+  // In GitHub Actions, GITHUB_ACTION_PATH points to the action's directory (where our binaries are)
+  // For tests, use current working directory (this repo has the binaries)
+  const basePath = useMock ? process.cwd() : process.env.GITHUB_ACTION_PATH!;
+
+  console.log('env:', process.env.GITHUB_ACTION_PATH);
+
+  Logger.debug(`Using base path: ${basePath}`);
+
   const platform = os.platform();
+  Logger.debug(`Platform detected: ${platform}`);
 
   if (useMock) {
     // For mock/testing purposes
