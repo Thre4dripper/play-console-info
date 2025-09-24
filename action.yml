@@ -1,117 +1,230 @@
 name: Play Console Info
-description: Fetch Google Play Console data and expose as outputs
+description: >
+  Fetch comprehensive Google Play Console data for your Android app and expose it as GitHub Actions outputs.
+  This action retrieves tracks, APKs, bundles, listings, images, reviews, testers, and more from the Google Play Console API.
 inputs:
   package:
-    description: Android applicationId / package name
+    description: >
+      The Android application ID (package name) for your app as registered in Google Play Console.
+      This is typically in reverse domain format like 'com.example.myapp'.
     required: true
   serviceAccountJsonPath:
     description: >
-      Service account JSON path (string). Use only if you have the file checked in or mounted in the runner.
-      This will be preferred over serviceAccountJsonPlainText if both are provided.
+      Path to the Google Cloud service account JSON key file within your repository or runner environment.
+      This should point to a file containing the service account credentials with Google Play Console API access.
+      If both serviceAccountJsonPath and serviceAccountJsonPlainText are provided, this path will take precedence.
+      Example: 'path/to/service-account.json'
     required: false
   serviceAccountJsonPlainText:
     description: >
-      Service account JSON content as plain text (string). Use only if you can securely store it as a secret.
+      The complete Google Cloud service account JSON key content as a plain text string.
+      This is useful when storing the credentials as a GitHub Secret rather than committing the file.
+      The JSON should include all required fields: type, project_id, private_key_id, private_key, client_email, etc.
       This will be ignored if serviceAccountJsonPath is provided.
     required: false
   # Resources
   tracks:
-    description: "Include tracks ('all' or comma-separated). Supported: internal, alpha, beta, production"
+    description: >
+      Specify which release tracks to include in the output data.
+      Use 'all' to include all tracks, or provide a comma-separated list of specific tracks.
+      Supported tracks: internal, alpha, beta, production.
+      Each track contains release information including version codes, release notes, and status.
+      Example: 'production,beta' or 'all'
     required: false
   apks:
-    description: Include APKs ('true' or 'false')
+    description: >
+      Set to 'true' to include APK information in the output.
+      This retrieves details about uploaded APK files including version codes, file sizes, and binary information.
+      Useful for tracking APK versions and properties across different releases.
     required: false
     default: 'false'
   bundles:
-    description: Include App Bundles ('true' or 'false')
+    description: >
+      Set to 'true' to include Android App Bundle (AAB) information in the output.
+      This retrieves details about uploaded App Bundle files including version codes and bundle properties.
+      App Bundles are the preferred publishing format for optimized app delivery.
     required: false
     default: 'false'
   listings:
-    description: Include store listings ('true' or 'false')
+    description: >
+      Set to 'true' to include store listing information for all supported languages.
+      This retrieves app titles, descriptions, and other localized store listing content.
+      Useful for auditing or backing up your app's store presence across different markets.
     required: false
     default: 'false'
   images:
-    description: "Include images ('all' or comma-separated). Supported: icon, featureGraphic, promoGraphic, tvBanner, phoneScreenshots, sevenInchScreenshots, tenInchScreenshots, tvScreenshots, wearScreenshots"
+    description: >
+      Specify which store listing images to include in the output data.
+      Use 'all' to include all image types, or provide a comma-separated list of specific image types.
+      Supported types: icon, featureGraphic, promoGraphic, tvBanner, phoneScreenshots, sevenInchScreenshots, 
+      tenInchScreenshots, tvScreenshots, wearScreenshots.
+      Example: 'icon,featureGraphic,phoneScreenshots' or 'all'
     required: false
   inapps:
-    description: Include in-app products ('true' or 'false')
+    description: >
+      Set to 'true' to include in-app product information in the output.
+      This retrieves details about in-app purchases, subscriptions, and other monetization products
+      configured for your app, including pricing, status, and localized descriptions.
     required: false
     default: 'false'
   reviews:
-    description: Include reviews ('true' or 'false')
+    description: >
+      Set to 'true' to include user reviews and ratings in the output.
+      This retrieves recent user reviews with ratings, comments, and metadata.
+      Use reviewsPages and reviewsPageSize to control how many reviews are fetched.
     required: false
     default: 'false'
   voidedPurchases:
-    description: Include voided purchases ('true' or 'false')
+    description: >
+      Set to 'true' to include information about voided (refunded) purchases.
+      This retrieves details about cancelled or refunded transactions, useful for
+      financial reconciliation and understanding refund patterns.
     required: false
     default: 'false'
   testers:
-    description: "Include testers ('all' or comma-separated). Supported: internal, alpha, beta, production"
+    description: >
+      Specify which tester groups to include in the output data.
+      Use 'all' to include all tester groups, or provide a comma-separated list of specific tracks.
+      Supported tracks: internal, alpha, beta, production.
+      This retrieves information about users enrolled in testing programs for each track.
+      Example: 'alpha,beta' or 'all'
     required: false
   appDetails:
-    description: Include app details ('true' or 'false')
+    description: >
+      Set to 'true' to include general app details and metadata.
+      This retrieves core app information such as default language, contact email,
+      and other administrative details configured in the Play Console.
     required: false
     default: 'false'
   expansionFiles:
-    description: Include expansion files ('true' or 'false')
+    description: >
+      Set to 'true' to include expansion file information for APKs.
+      Expansion files are additional asset files that can be associated with APKs
+      to exceed the standard APK size limit. This retrieves expansion file metadata and references.
     required: false
     default: 'false'
 
   # Options
   imagesLanguage:
-    description: Language for images (e.g., en-US)
+    description: >
+      Specify the language/locale for retrieving store listing images.
+      Use standard language-country codes (e.g., 'en-US', 'es-ES', 'fr-FR').
+      If not specified, images from the default language will be retrieved.
+      Note that not all image types may be available in all languages.
     required: false
   reviewsPages:
-    description: Number of pages for reviews
+    description: >
+      Number of review pages to fetch when reviews are enabled.
+      Each page contains a number of reviews determined by reviewsPageSize.
+      Higher values retrieve more reviews but increase API usage and response time.
+      Default behavior fetches a reasonable number of recent reviews.
     required: false
   reviewsPageSize:
-    description: Page size for reviews
+    description: >
+      Number of reviews per page when fetching review data.
+      Controls the batch size for review retrieval. Typical values range from 10-100.
+      Larger page sizes reduce API calls but increase memory usage and response time.
+      Must be used in conjunction with reviewsPages to control total review count.
     required: false
   all:
-    description: Set to 'true' to include all supported resources
+    description: >
+      Set to 'true' to automatically include all supported resources in the output.
+      This is equivalent to setting tracks='all', apks='true', bundles='true', listings='true',
+      images='all', inapps='true', reviews='true', voidedPurchases='true', testers='all',
+      appDetails='true', and expansionFiles='true'.
+      Individual resource flags will override this setting if explicitly specified.
     required: false
     default: 'false'
 
   # Output/Artifact options
   uploadOutputsArtifact:
-    description: Set to 'true' to upload the outputs JSON as an artifact
+    description: >
+      Set to 'true' to upload the complete output data as a GitHub Actions artifact.
+      This creates a downloadable JSON file containing all fetched Play Console data,
+      useful for archiving, debugging, or processing the data in subsequent workflow steps.
+      The artifact will be available in the workflow run's artifacts section.
     required: false
     default: 'false'
   outputsJsonPath:
-    description: Optional path to write combined outputs JSON (e.g., outputs/play_console_outputs.json). If empty, a temp path is used when uploading artifacts.
+    description: >
+      Directory path where the combined outputs JSON file should be written.
+      If uploadOutputsArtifact is enabled and this is empty, a temporary path will be used.
+      The file will contain all fetched data in a structured JSON format.
+      Example: 'outputs/' will create 'outputs/play_console_outputs.json'
     required: false
     default: 'artifacts/'
   outputsArtifactName:
-    description: Artifact name when upload_outputs_artifact is true
+    description: >
+      Custom name for the uploaded artifact when uploadOutputsArtifact is enabled.
+      This name will appear in the GitHub Actions artifacts list and be used for the download filename.
+      Should be descriptive and unique within your workflow to avoid conflicts.
     required: false
     default: 'play-console-outputs'
   outputsArtifactRetentionDays:
-    description: Number of days to retain the artifact (1-90)
+    description: >
+      Number of days to retain the uploaded artifact before automatic deletion.
+      Valid range is 1-90 days. Lower values save storage costs, higher values provide
+      longer data retention for historical analysis or debugging purposes.
+      Consider your organization's artifact retention policies when setting this value.
     required: false
     default: '1'
 outputs:
   tracks:
-    description: JSON of tracks
+    description: >
+      JSON containing detailed information about all requested release tracks.
+      Includes track names, releases, version codes, release notes, rollout percentages,
+      and release status for each track (internal, alpha, beta, production).
+      Use JSON.parse() to convert this string output into a JavaScript object.
   apks:
-    description: JSON of apks
+    description: >
+      JSON containing comprehensive APK information including version codes, file sizes,
+      binary SHA1/SHA256 hashes, and native code architectures for each uploaded APK.
+      Useful for tracking APK versions and verifying file integrity across releases.
   bundles:
-    description: JSON of bundles
+    description: >
+      JSON containing Android App Bundle information including version codes and bundle metadata.
+      App Bundles represent the optimized publishing format that enables dynamic delivery
+      and smaller download sizes for end users.
   listings:
-    description: JSON of listings
+    description: >
+      JSON containing store listing information for all configured languages.
+      Includes app titles, short descriptions, full descriptions, and other localized
+      store content that users see when browsing your app in different markets.
   images:
-    description: JSON of listing images
+    description: >
+      JSON containing store listing images organized by type and language.
+      Includes URLs, dimensions, and metadata for icons, feature graphics, screenshots,
+      and other visual assets used in your app's store presence.
   inapps:
-    description: JSON of in-app products
+    description: >
+      JSON containing detailed information about in-app products and subscriptions.
+      Includes product IDs, pricing information, descriptions, purchase types,
+      and status for all monetization products configured for your app.
   reviews:
-    description: JSON of reviews (subset per pagination inputs)
+    description: >
+      JSON containing user reviews and ratings data based on pagination settings.
+      Includes review text, star ratings, reviewer information, response status,
+      and timestamps. The number of reviews depends on reviewsPages and reviewsPageSize inputs.
   voidedPurchases:
-    description: JSON of voided purchases
+    description: >
+      JSON containing information about cancelled, refunded, or voided purchases.
+      Includes transaction details, void reasons, timestamps, and financial impact data
+      useful for reconciliation and understanding refund patterns.
   testers:
-    description: JSON map of tester groups per track
+    description: >
+      JSON containing tester group information organized by release track.
+      Includes tester lists, Google Groups, and user enrollment data for internal testing,
+      alpha, beta, and production testing programs associated with your app.
   appDetails:
-    description: App details
+    description: >
+      JSON containing core app metadata and administrative details.
+      Includes default language settings, contact information, app category,
+      and other fundamental app configuration data from the Play Console.
   expansionFiles:
-    description: Expansion files info per APK
+    description: >
+      JSON containing expansion file information associated with APKs.
+      Includes file references, sizes, and metadata for additional asset files
+      that exceed the standard APK size limits and are delivered separately.
 runs:
   using: node20
   main: dist/index.js
