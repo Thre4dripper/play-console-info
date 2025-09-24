@@ -6,6 +6,15 @@ import result from '../../cli/mock/result.json';
 
 // Mock the core module
 jest.mock('@actions/core');
+jest.mock('../../src/utils/helpers', () => ({
+  Logger: {
+    info: jest.fn(),
+    warning: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+    notice: jest.fn(),
+  },
+}));
 
 describe('setOutputs', () => {
   const mockCore = jest.mocked(core);
@@ -16,7 +25,7 @@ describe('setOutputs', () => {
 
   describe('individual output properties', () => {
     it('sets tracks output when tracks property exists', async () => {
-      const testResult = { tracks: ['alpha', 'beta'] } as ResultData;
+      const testResult = { tracks: ['alpha', 'beta'] } as unknown as ResultData;
 
       await setOutputs(testResult);
 
@@ -28,7 +37,7 @@ describe('setOutputs', () => {
     });
 
     it('sets apks output when apks property exists', async () => {
-      const testResult = { apks: ['apk1', 'apk2'] } as ResultData;
+      const testResult = { apks: ['apk1', 'apk2'] } as unknown as ResultData;
 
       await setOutputs(testResult);
 
@@ -37,7 +46,7 @@ describe('setOutputs', () => {
     });
 
     it('sets bundles output when bundles property exists', async () => {
-      const testResult = { bundles: ['bundle1'] } as ResultData;
+      const testResult = { bundles: ['bundle1'] } as unknown as ResultData;
 
       await setOutputs(testResult);
 
@@ -49,7 +58,7 @@ describe('setOutputs', () => {
     });
 
     it('sets listings output when listings property exists', async () => {
-      const testResult = { listings: ['listing1'] } as ResultData;
+      const testResult = { listings: ['listing1'] } as unknown as ResultData;
 
       await setOutputs(testResult);
 
@@ -61,7 +70,7 @@ describe('setOutputs', () => {
     });
 
     it('sets images output when images property exists', async () => {
-      const testResult = { images: ['image1'] } as ResultData;
+      const testResult = { images: ['image1'] } as unknown as ResultData;
 
       await setOutputs(testResult);
 
@@ -73,7 +82,7 @@ describe('setOutputs', () => {
     });
 
     it('sets inapps output when inapps property exists', async () => {
-      const testResult = { inapps: ['inapp1'] } as ResultData;
+      const testResult = { inapps: ['inapp1'] } as unknown as ResultData;
 
       await setOutputs(testResult);
 
@@ -85,7 +94,7 @@ describe('setOutputs', () => {
     });
 
     it('sets reviews output when reviews property exists', async () => {
-      const testResult = { reviews: ['review1'] } as ResultData;
+      const testResult = { reviews: ['review1'] } as unknown as ResultData;
 
       await setOutputs(testResult);
 
@@ -97,7 +106,7 @@ describe('setOutputs', () => {
     });
 
     it('sets voidedPurchases output when voided_purchases property exists', async () => {
-      const testResult = { voided_purchases: ['purchase1'] } as ResultData;
+      const testResult = { voided_purchases: ['purchase1'] } as unknown as ResultData;
 
       await setOutputs(testResult);
 
@@ -109,7 +118,7 @@ describe('setOutputs', () => {
     });
 
     it('sets testers output when testers property exists', async () => {
-      const testResult = { testers: ['tester1'] } as ResultData;
+      const testResult = { testers: ['tester1'] } as unknown as ResultData;
 
       await setOutputs(testResult);
 
@@ -121,7 +130,7 @@ describe('setOutputs', () => {
     });
 
     it('sets appDetails output when app_details property exists', async () => {
-      const testResult = { app_details: { name: 'test' } } as ResultData;
+      const testResult = { app_details: { name: 'test' } } as unknown as ResultData;
 
       await setOutputs(testResult);
 
@@ -133,7 +142,7 @@ describe('setOutputs', () => {
     });
 
     it('sets expansionFiles output when expansion_files property exists', async () => {
-      const testResult = { expansion_files: ['file1'] } as ResultData;
+      const testResult = { expansion_files: ['file1'] } as unknown as ResultData;
 
       await setOutputs(testResult);
 
@@ -147,7 +156,7 @@ describe('setOutputs', () => {
 
   describe('missing properties', () => {
     it('does not set any outputs when no properties exist', async () => {
-      const emptyResult = {} as ResultData;
+      const emptyResult = {} as unknown as ResultData;
 
       await setOutputs(emptyResult);
 
