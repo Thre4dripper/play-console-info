@@ -202,15 +202,25 @@ describe('inputs utilities', () => {
       mockFs.existsSync.mockReturnValue(false);
     });
 
-    it('should return artifact inputs with defaults', () => {
-      mockCore.getInput.mockReturnValue('');
+    it('should return artifact inputs with defaults from action.yml', () => {
+      // Mock the default values as they would be provided by GitHub Actions from action.yml
+      mockCore.getInput.mockImplementation((name) => {
+        const defaults: Record<string, string> = {
+          uploadOutputsArtifact: 'false',
+          outputsJsonPath: 'artifacts/',
+          outputsArtifactName: 'play-console-outputs',
+          outputsArtifactRetentionDays: '1',
+        };
+        return defaults[name] || '';
+      });
+
       const result = getArtifactsInputs();
 
       expect(result).toEqual({
         uploadOutputsArtifact: false,
-        outputsJsonPath: '/default/artifacts',
-        outputsArtifactName: '',
-        outputsArtifactRetentionDays: '',
+        outputsJsonPath: 'artifacts/',
+        outputsArtifactName: 'play-console-outputs.json',
+        outputsArtifactRetentionDays: '1',
       });
     });
 

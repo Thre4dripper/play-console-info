@@ -18,6 +18,13 @@ jest.mock('../../src/utils/helpers', () => ({
     }
   },
   getExecutablePath: jest.fn(),
+  Logger: {
+    info: jest.fn(),
+    warning: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+    notice: jest.fn(),
+  },
 }));
 jest.mock('@actions/core', () => ({
   setFailed: jest.fn(),

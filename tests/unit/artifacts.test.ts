@@ -6,7 +6,18 @@ const mockArtifactClient: any = {
   deleteArtifact: jest.fn(),
 };
 
+const mockLogger = {
+  info: jest.fn(),
+  warning: jest.fn(),
+  error: jest.fn(),
+  debug: jest.fn(),
+  notice: jest.fn(),
+};
+
 jest.mock('@actions/core');
+jest.mock('../../src/utils/helpers', () => ({
+  Logger: mockLogger,
+}));
 jest.mock('@actions/artifact', () => ({
   DefaultArtifactClient: jest.fn(() => mockArtifactClient),
   ArtifactNotFoundError: class extends Error {
@@ -80,7 +91,7 @@ describe('artifacts utilities', () => {
 
       await createArtifact(args, mockData);
 
-      expect(mockCore.info).toHaveBeenCalledWith(
+      expect(mockLogger.info).toHaveBeenCalledWith(
         'Uploading artifact: test-artifact'
       );
       expect(mockPath.join).toHaveBeenCalledWith('/test/path', 'test-artifact');
@@ -110,7 +121,7 @@ describe('artifacts utilities', () => {
 
       await createArtifact(args, mockData);
 
-      expect(mockCore.debug).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         "Skipping deletion of 'test', it does not exist"
       );
       expect(mockArtifactClient.uploadArtifact).toHaveBeenCalled();
@@ -129,7 +140,7 @@ describe('artifacts utilities', () => {
 
       await createArtifact(args, mockData);
 
-      expect(mockCore.debug).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Unable to delete artifact: Other error'
       );
       expect(mockArtifactClient.uploadArtifact).toHaveBeenCalled();
