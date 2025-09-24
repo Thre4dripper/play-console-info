@@ -82,25 +82,25 @@ describe('getExecutablePath', () => {
 
     it('calls chmod for linux and darwin platforms', async () => {
       const platforms = ['darwin', 'linux'] as const;
-      
+
       for (const platform of platforms) {
         mockExec.exec.mockClear();
         mockOs.platform.mockReturnValue(platform);
-        
+
         await getExecutablePath(false);
-        
+
         expect(mockExec.exec).toHaveBeenCalledWith('chmod', [
           '+x',
-          path.join('/test/project', 'bin/python/linux/play_console_cli')
+          path.join('/test/project', 'bin/python/linux/play_console_cli'),
         ]);
       }
     });
 
     it('does not call chmod for windows platform', async () => {
       mockOs.platform.mockReturnValue('win32');
-      
+
       await getExecutablePath(false);
-      
+
       expect(mockExec.exec).not.toHaveBeenCalled();
     });
   });
@@ -123,16 +123,16 @@ describe('getExecutablePath', () => {
 
     it('calls chmod for linux and darwin platforms', async () => {
       const platforms = ['darwin', 'linux'] as const;
-      
+
       for (const platform of platforms) {
         mockExec.exec.mockClear();
         mockOs.platform.mockReturnValue(platform);
-        
+
         await getExecutablePath(true);
-        
+
         expect(mockExec.exec).toHaveBeenCalledWith('chmod', [
           '+x',
-          path.join('/test/project', 'bin/mock/linux/mockCli')
+          path.join('/test/project', 'bin/mock/linux/mockCli'),
         ]);
       }
     });

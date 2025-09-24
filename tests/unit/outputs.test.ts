@@ -106,7 +106,9 @@ describe('setOutputs', () => {
     });
 
     it('sets voidedPurchases output when voided_purchases property exists', async () => {
-      const testResult = { voided_purchases: ['purchase1'] } as unknown as ResultData;
+      const testResult = {
+        voided_purchases: ['purchase1'],
+      } as unknown as ResultData;
 
       await setOutputs(testResult);
 
@@ -130,7 +132,9 @@ describe('setOutputs', () => {
     });
 
     it('sets appDetails output when app_details property exists', async () => {
-      const testResult = { app_details: { name: 'test' } } as unknown as ResultData;
+      const testResult = {
+        app_details: { name: 'test' },
+      } as unknown as ResultData;
 
       await setOutputs(testResult);
 
@@ -142,7 +146,9 @@ describe('setOutputs', () => {
     });
 
     it('sets expansionFiles output when expansion_files property exists', async () => {
-      const testResult = { expansion_files: ['file1'] } as unknown as ResultData;
+      const testResult = {
+        expansion_files: ['file1'],
+      } as unknown as ResultData;
 
       await setOutputs(testResult);
 
