@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
   workflow_call:
     secrets:
-      packageName:
+      PACKAGE_NAME:
         description: 'The package name of the app to test against'
         required: true
-      serviceAccountJson:
+      SERVICE_ACCOUNT_JSON:
         description: 'The service account JSON for Google Play API access'
         required: true
 
@@ -23,8 +23,8 @@ jobs:
         id: basic
         uses: ./
         with:
-          package: ${{ secrets.packageName }}
-          serviceAccountJsonPlainText: ${{ secrets.serviceAccountJson }}
+          package: ${{ secrets.PACKAGE_NAME }}
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           tracks: all
           apks: true
         env:
@@ -49,8 +49,8 @@ jobs:
         id: all
         uses: ./
         with:
-          package: ${{ secrets.packageName }}
-          serviceAccountJsonPlainText: ${{ secrets.serviceAccountJson }}
+          package: ${{ secrets.PACKAGE_NAME }}
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           all: 'true'
         env:
           NODE_ENV: 'test'
@@ -95,8 +95,8 @@ jobs:
         id: tracks
         uses: ./
         with:
-          package: ${{ secrets.packageName }}
-          serviceAccountJsonPlainText: ${{ secrets.serviceAccountJson }}
+          package: ${{ secrets.PACKAGE_NAME }}
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           tracks: ${{ matrix.tracks }}
         env:
           NODE_ENV: 'test'
@@ -125,8 +125,8 @@ jobs:
         id: images
         uses: ./
         with:
-          package: ${{ secrets.packageName }}
-          serviceAccountJsonPlainText: ${{ secrets.serviceAccountJson }}
+          package: ${{ secrets.PACKAGE_NAME }}
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           images: ${{ matrix.images }}
           imagesLanguage: ${{ matrix.language }}
         env:
@@ -155,8 +155,8 @@ jobs:
         id: reviews
         uses: ./
         with:
-          package: ${{ secrets.packageName }}
-          serviceAccountJsonPlainText: ${{ secrets.serviceAccountJson }}
+          package: ${{ secrets.PACKAGE_NAME }}
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           reviews: 'true'
           reviewsPages: ${{ matrix.pages }}
           reviewsPageSize: ${{ matrix.pageSize }}
@@ -179,13 +179,13 @@ jobs:
 
       - name: Create service account file
         run: |
-          echo '${{ secrets.serviceAccountJson }}' > service-account.json
+          echo '${{ secrets.SERVICE_ACCOUNT_JSON }}' > service-account.json
 
       - name: Test with file path
         id: file-auth
         uses: ./
         with:
-          package: ${{ secrets.packageName }}
+          package: ${{ secrets.PACKAGE_NAME }}
           serviceAccountJsonPath: service-account.json
           tracks: 'production'
         env:
@@ -195,8 +195,8 @@ jobs:
         id: plaintext-auth
         uses: ./
         with:
-          package: ${{ secrets.packageName }}
-          serviceAccountJsonPlainText: ${{ secrets.serviceAccountJson }}
+          package: ${{ secrets.PACKAGE_NAME }}
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           tracks: 'production'
         env:
           NODE_ENV: 'test'
@@ -223,8 +223,8 @@ jobs:
       - name: Test ${{ matrix.resource }}
         uses: ./
         with:
-          package: ${{ secrets.packageName }}
-          serviceAccountJsonPlainText: ${{ secrets.serviceAccountJson }}
+          package: ${{ secrets.PACKAGE_NAME }}
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           apks: ${{ matrix.resource == 'apks' && 'true' || 'false' }}
           bundles: ${{ matrix.resource == 'bundles' && 'true' || 'false' }}
           listings: ${{ matrix.resource == 'listings' && 'true' || 'false' }}
@@ -267,8 +267,8 @@ jobs:
         id: testers
         uses: ./
         with:
-          package: ${{ secrets.packageName }}
-          serviceAccountJsonPlainText: ${{ secrets.serviceAccountJson }}
+          package: ${{ secrets.PACKAGE_NAME }}
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           testers: ${{ matrix.testers }}
         env:
           NODE_ENV: 'test'
@@ -290,8 +290,8 @@ jobs:
         id: artifact-upload
         uses: ./
         with:
-          package: ${{ secrets.packageName }}
-          serviceAccountJsonPlainText: ${{ secrets.serviceAccountJson }}
+          package: ${{ secrets.PACKAGE_NAME }}
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           all: 'true'
           uploadOutputsArtifact: 'true'
           outputsArtifactName: 'artifact-upload-test'
