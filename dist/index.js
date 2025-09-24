@@ -101059,9 +101059,12 @@ var Logger = class {
     core.notice(message);
   }
 };
-var getExecutablePath = async (useMock = false) => {
-  const basePath = process.cwd();
+var getExecutablePath = async (useMock) => {
+  const basePath = useMock ? process.cwd() : process.env.GITHUB_ACTION_PATH;
+  console.log("env:", process.env.GITHUB_ACTION_PATH);
+  Logger.debug(`Using base path: ${basePath}`);
   const platform = import_os.default.platform();
+  Logger.debug(`Platform detected: ${platform}`);
   if (useMock) {
     switch (platform) {
       case "win32": {
@@ -101220,9 +101223,7 @@ var run = async ({ cliArgs: cliArgs2, artifactArgs: artifactArgs2 }) => {
     throw new ActionError("No Result returned from Service Account");
   }
   Logger.info("\u2705 Play Console data retrieved successfully");
-  Logger.info("\u{1F4E4} Setting GitHub Actions outputs...");
   await setOutputs(result);
-  Logger.info("\u{1F4E6} Processing artifacts...");
   await createArtifact(artifactArgs2, result);
   Logger.info("\u{1F389} Play Console Info Action completed successfully");
 };
