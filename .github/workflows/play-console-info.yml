@@ -30,7 +30,7 @@ jobs:
           tracks: all
           apks: true
         env:
-          NODE_ENV: 'test'
+          NODE_ENV: 'mock'
 
       - name: Display basic outputs
         run: |
@@ -57,7 +57,7 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           all: 'true'
         env:
-          NODE_ENV: 'test'
+          NODE_ENV: 'mock'
 
       - name: Display all outputs
         run: |
@@ -105,7 +105,7 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           tracks: ${{ matrix.tracks }}
         env:
-          NODE_ENV: 'test'
+          NODE_ENV: 'mock'
 
       - name: Display track results
         run: |
@@ -138,7 +138,7 @@ jobs:
           images: ${{ matrix.images }}
           imagesLanguage: ${{ matrix.language }}
         env:
-          NODE_ENV: 'test'
+          NODE_ENV: 'mock'
 
       - name: Display image results
         run: |
@@ -171,7 +171,7 @@ jobs:
           reviewsPages: ${{ matrix.pages }}
           reviewsPageSize: ${{ matrix.pageSize }}
         env:
-          NODE_ENV: 'test'
+          NODE_ENV: 'mock'
 
       - name: Display review results
         run: |
@@ -201,7 +201,7 @@ jobs:
           serviceAccountJsonPath: service-account.json
           tracks: 'production'
         env:
-          NODE_ENV: 'test'
+          NODE_ENV: 'mock'
 
       - name: Test with plain text
         id: plaintext-auth
@@ -211,7 +211,7 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           tracks: 'production'
         env:
-          NODE_ENV: 'test'
+          NODE_ENV: 'mock'
 
       - name: Compare results
         run: |
@@ -248,7 +248,7 @@ jobs:
           expansionFiles: ${{ matrix.resource == 'expansionFiles' && 'true' || 'false' }}
         id: resource-test
         env:
-          NODE_ENV: 'test'
+          NODE_ENV: 'mock'
 
       - name: Display resource results
         run: |
@@ -287,7 +287,7 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           testers: ${{ matrix.testers }}
         env:
-          NODE_ENV: 'test'
+          NODE_ENV: 'mock'
 
       - name: Display testers results
         run: |
@@ -317,4 +317,4 @@ jobs:
           outputsJsonPath: 'output/'
           outputsArtifactRetentionDays: '3'
         env:
-          NODE_ENV: 'test'
+          NODE_ENV: 'mock'
