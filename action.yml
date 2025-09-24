@@ -84,7 +84,7 @@ inputs:
   outputsArtifactName:
     description: Artifact name when upload_outputs_artifact is true
     required: false
-    default: 'play-console-outputs.json'
+    default: 'play-console-outputs'
   outputsArtifactRetentionDays:
     description: Number of days to retain the artifact (1-90)
     required: false
