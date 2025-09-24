@@ -231,7 +231,7 @@ export const getArtifactsInputs = (): ArtifactArgs => {
   return {
     uploadOutputsArtifact: artifactsInputs.uploadOutputsArtifact === 'true',
     outputsJsonPath: artifactsInputs.outputsJsonPath,
-    outputsArtifactName: artifactsInputs.outputsArtifactName,
+    outputsArtifactName: artifactsInputs.outputsArtifactName + '.json',
     outputsArtifactRetentionDays: artifactsInputs.outputsArtifactRetentionDays,
   };
 };
