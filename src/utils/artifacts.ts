@@ -42,7 +42,7 @@ export const createArtifact = async (
     retentionDays: +retentionDays,
     compressionLevel: 0,
   });
-  
+
   Logger.info('✅ Artifact uploaded successfully');
 };
 
