@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - name: Test basic package info
         id: basic
@@ -44,6 +46,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - name: Test with all resources enabled
         id: all
@@ -90,6 +94,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - name: Test tracks - ${{ matrix.tracks }}
         id: tracks
@@ -120,6 +126,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - name: Test images - ${{ matrix.images }} (${{ matrix.language }})
         id: images
@@ -150,6 +158,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - name: Test reviews - ${{ matrix.pages }} pages, ${{ matrix.pageSize }} size
         id: reviews
@@ -176,6 +186,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - name: Create service account file
         run: |
@@ -219,6 +231,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - name: Test ${{ matrix.resource }}
         uses: ./
@@ -262,6 +276,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - name: Test testers - ${{ matrix.testers }}
         id: testers
@@ -282,9 +298,12 @@ jobs:
   test-artifact-uploads:
     runs-on: ubuntu-latest
     name: Test Artifact Uploads
+    needs: test-testers
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - name: Test artifact upload
         id: artifact-upload
