@@ -8,7 +8,7 @@ const run = async ({ cliArgs, artifactArgs }: RunProps) => {
   Logger.info('🚀 Starting Play Console Info Action');
 
   Logger.info('📍 Resolving executable path...');
-  const command = await getExecutablePath(process.env.NODE_ENV === 'test');
+  const command = await getExecutablePath(process.env.NODE_ENV === 'mock');
   Logger.debug(`Using executable: ${command}`);
 
   Logger.info('📊 Fetching Play Console data...');
