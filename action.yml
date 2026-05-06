@@ -226,5 +226,5 @@ outputs:
       Includes file references, sizes, and metadata for additional asset files
       that exceed the standard APK size limits and are delivered separately.
 runs:
-  using: node20
+  using: node24
   main: dist/index.js
