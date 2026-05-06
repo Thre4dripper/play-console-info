@@ -17,10 +17,10 @@ pip install -r cli\python\requirements.txt
 
 :: Use PyInstaller to create a standalone executable
 echo Compiling Python to Windows executable...
-PyInstaller -F cli\python\play_console_cli.py --distpath bin\python\windows --workpath cli\python\build --specpath cli\python --name play_console_cli
+PyInstaller -F cli\python\play_console_cli.py --distpath bin\python\windows --workpath cli\python\build --specpath cli\python --name play_console_cli-windows
 
 if %ERRORLEVEL% EQU 0 (
-    echo ✅ Python CLI binary built successfully: bin\python\windows\play_console_cli.exe
+    echo ✅ Python CLI binary built successfully: bin\python\windows\play_console_cli-windows.exe
 ) else (
     echo ❌ Build failed with error code %ERRORLEVEL%
     exit /b %ERRORLEVEL%

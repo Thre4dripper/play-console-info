@@ -9,10 +9,10 @@ if not exist "bin\mock\windows" mkdir "bin\mock\windows"
 
 :: Build the binary
 echo Compiling JavaScript to Windows executable...
-bun build --compile --target=bun-windows-x64 .\cli\mock\mockCli.js --outfile bin\mock\windows\mockCli.exe
+bun build --compile --target=bun-windows-x64 .\cli\mock\mockCli.js --outfile bin\mock\windows\mockCli-windows.exe
 
 if %ERRORLEVEL% EQU 0 (
-    echo ✅ Mock CLI binary built successfully: bin\mock\windows\mockCli.exe
+    echo ✅ Mock CLI binary built successfully: bin\mock\windows\mockCli-windows.exe
 ) else (
     echo ❌ Build failed with error code %ERRORLEVEL%
     exit /b %ERRORLEVEL%
