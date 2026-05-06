@@ -1,9 +1,12 @@
 {
-  "include": ["tests/mocks/**/*.{js,ts,mjs,mts}"],
+  "include": ["src/**/*.{js,ts,mjs,mts}", "cli/mock/mockCli.js"],
   "exclude": [
+    "src/types.ts",
     "**/*.d.ts",
     "tests/**/*.{test,spec}.{js,ts,mjs,mts}",
-    "cli/**/*",
+    "cli/python/**/*",
+    "cli/mock/build-mock-cli-*.sh",
+    "cli/mock/build-mock-cli-*.bat",
     "dist",
     "node_modules",
     ".idea",
