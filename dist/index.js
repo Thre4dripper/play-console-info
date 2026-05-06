@@ -95511,9 +95511,9 @@ var require_dist_node8 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@octokit+plugin-rest-endpoi_f19b37b1e7bd525c9e9af9b5eef5092d/node_modules/@octokit/plugin-rest-endpoint-methods/dist-node/index.js
+// node_modules/.pnpm/@octokit+plugin-rest-endpoint-methods@5.16.2_@octokit+core@3.6.0/node_modules/@octokit/plugin-rest-endpoint-methods/dist-node/index.js
 var require_dist_node9 = __commonJS({
-  "node_modules/.pnpm/@octokit+plugin-rest-endpoi_f19b37b1e7bd525c9e9af9b5eef5092d/node_modules/@octokit/plugin-rest-endpoint-methods/dist-node/index.js"(exports2) {
+  "node_modules/.pnpm/@octokit+plugin-rest-endpoint-methods@5.16.2_@octokit+core@3.6.0/node_modules/@octokit/plugin-rest-endpoint-methods/dist-node/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     function ownKeys2(object, enumerableOnly) {
@@ -101060,27 +101060,24 @@ var Logger = class {
   }
 };
 var getExecutablePath = async (useMock) => {
-  const basePath = useMock ? process.cwd() : process.env.GITHUB_ACTION_PATH;
-  console.log("env:", process.env.GITHUB_ACTION_PATH);
+  const basePath = useMock ? process.cwd() : import_path.default.resolve(__dirname, "../..");
   Logger.debug(`Using base path: ${basePath}`);
   const platform = import_os.default.platform();
   Logger.debug(`Platform detected: ${platform}`);
   if (useMock) {
     switch (platform) {
       case "win32": {
-        return import_path.default.join(basePath, "bin", "mock", "windows", "mockCli.exe");
+        return import_path.default.join(basePath, "bin", "mock", "windows", "mockCli-windows.exe");
       }
-      case "darwin":
-      case "linux": {
-        const mockCliPath = import_path.default.join(
-          basePath,
-          "bin",
-          "mock",
-          "linux",
-          "mockCli"
-        );
+      case "darwin": {
+        const mockCliPath = import_path.default.join(basePath, "bin", "mock", "mac", "mockCli-mac");
         await exec.exec("chmod", ["+x", mockCliPath]);
-        return import_path.default.join(basePath, "bin", "mock", "linux", "mockCli");
+        return mockCliPath;
+      }
+      case "linux": {
+        const mockCliPath = import_path.default.join(basePath, "bin", "mock", "linux", "mockCli-linux");
+        await exec.exec("chmod", ["+x", mockCliPath]);
+        return mockCliPath;
       }
       default:
         throw new ActionError(`Unknown platform: ${platform}`);
@@ -101093,20 +101090,18 @@ var getExecutablePath = async (useMock) => {
         "bin",
         "python",
         "windows",
-        "play_console_cli.exe"
+        "play_console_cli-windows.exe"
       );
     }
-    case "darwin":
-    case "linux": {
-      const pythonCliPath = import_path.default.join(
-        basePath,
-        "bin",
-        "python",
-        "linux",
-        "play_console_cli"
-      );
+    case "darwin": {
+      const pythonCliPath = import_path.default.join(basePath, "bin", "python", "mac", "play_console_cli-mac");
       await exec.exec("chmod", ["+x", pythonCliPath]);
-      return import_path.default.join(basePath, "bin", "python", "linux", "play_console_cli");
+      return pythonCliPath;
+    }
+    case "linux": {
+      const pythonCliPath = import_path.default.join(basePath, "bin", "python", "linux", "play_console_cli-linux");
+      await exec.exec("chmod", ["+x", pythonCliPath]);
+      return pythonCliPath;
     }
     default:
       throw new ActionError(`Unknown platform: ${platform}`);
@@ -101215,7 +101210,7 @@ var deleteArtifactIfExists = async (name) => {
 var run = async ({ cliArgs: cliArgs2, artifactArgs: artifactArgs2 }) => {
   Logger.info("\u{1F680} Starting Play Console Info Action");
   Logger.info("\u{1F4CD} Resolving executable path...");
-  const command = await getExecutablePath(process.env.NODE_ENV === "test");
+  const command = await getExecutablePath(process.env.NODE_ENV === "mock");
   Logger.debug(`Using executable: ${command}`);
   Logger.info("\u{1F4CA} Fetching Play Console data...");
   const result = await getResult({ command, cliArgs: cliArgs2 });
