@@ -2,4 +2,6 @@
 -P ubuntu-latest=catthehacker/ubuntu:act-latest
 --insecure-secrets
 --rm
--j test-basic
+-j test-artifact-uploads
+--container-architecture linux/amd64
+--artifact-server-path ./act-artifacts
