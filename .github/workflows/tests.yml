@@ -42,22 +42,21 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: package.json
-          cache: pnpm
-
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Run Unit Tests
-        run: pnpm exec jest --testPathPattern="tests/unit" --passWithNoTests
+        run: pnpm run test:unit
 
   # ─── Job 2: Mock CLI Tests ────────────────────────────────────────────────
   mock-cli-tests:
@@ -69,22 +68,24 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: package.json
-          cache: pnpm
-
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Make Mock CLI Executable
+        run: chmod +x bin/mock/linux/mockCli-linux bin/python/linux/play_console_cli-linux
+
       - name: Run Mock CLI Tests
-        run: pnpm exec jest --testPathPattern="tests/mockCli" --passWithNoTests
+        run: pnpm run test:mock
 
   # ─── Job 3: Coverage Report (c8) ─────────────────────────────────────────
   coverage:
@@ -99,19 +100,21 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: package.json
-          cache: pnpm
-
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Make Mock CLI Executable
+        run: chmod +x bin/mock/linux/mockCli-linux bin/python/linux/play_console_cli-linux
 
       - name: Run Tests with c8 Coverage
         run: pnpm run test:coverage
