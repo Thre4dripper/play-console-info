@@ -1,6 +1,17 @@
 name: Play Console Info - Full Test Suite
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'cli/**'
+      - 'action.yml'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'tsconfig.json'
+      - '.github/workflows/play-console-info.yml'
   workflow_dispatch:
   workflow_call:
     secrets:
