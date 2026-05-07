@@ -2,7 +2,7 @@
 echo "Building mock CLI binary for macOS..."
 
 # Navigate to project root
-cd "$(dirname "$0")/../.."
+cd "$(dirname "$0")/../.." || exit
 
 # Create bin directory structure if it doesn't exist
 mkdir -p "bin/mock/mac"

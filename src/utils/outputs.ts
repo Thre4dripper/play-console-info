@@ -4,7 +4,7 @@ import { Logger } from './helpers';
 
 export const setOutputs = async (result: ResultData) => {
   const outputs: string[] = [];
-  
+
   // Check for tracks
   if ('tracks' in result) {
     core.setOutput('tracks', result.tracks);
@@ -70,7 +70,7 @@ export const setOutputs = async (result: ResultData) => {
     core.setOutput('expansionFiles', result.expansion_files);
     outputs.push('expansionFiles');
   }
-  
+
   if (outputs.length > 0) {
     Logger.info(`Set outputs for: ${outputs.join(', ')}`);
   } else {

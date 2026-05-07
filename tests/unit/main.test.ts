@@ -40,7 +40,9 @@ const mockSetOutputs = setOutputs as jest.MockedFunction<typeof setOutputs>;
 const mockCreateArtifact = createArtifact as jest.MockedFunction<
   typeof createArtifact
 >;
-const mockGetExecutablePath = getExecutablePath as jest.MockedFunction<typeof getExecutablePath>;
+const mockGetExecutablePath = getExecutablePath as jest.MockedFunction<
+  typeof getExecutablePath
+>;
 
 describe('main.ts', () => {
   let mockChildProcess: any;
@@ -230,7 +232,7 @@ describe('main.ts', () => {
       process.env = { ...originalEnv, TEST_VAR: 'test-value' };
 
       const runPromise = run(mockRunProps);
-      
+
       await new Promise(setImmediate);
       mockChildProcess.emit('exit', 0);
 
