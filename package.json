@@ -56,7 +56,7 @@
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^9.39.4",
     "@eslint/json": "^1.2.0",
-    "@eslint/markdown": "^7.2.0",
+    "@eslint/markdown": "^8.0.1",
     "@jest/globals": "^30.3.0",
     "@types/node": "^25.6.0",
     "c8": "^10.1.3",
