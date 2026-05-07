@@ -3,39 +3,39 @@ const fs = require('fs');
 const { Command } = require('commander');
 
 class Log {
-    static progress(msg) {
-        process.stderr.write(`[PROGRESS] ${msg}\n`);
-    }
+  static progress(msg) {
+    process.stderr.write(`[PROGRESS] ${msg}\n`);
+  }
 
-    static error(msg) {
-        process.stderr.write(`[ERROR] ${msg}\n`);
-    }
+  static error(msg) {
+    process.stderr.write(`[ERROR] ${msg}\n`);
+  }
 
   /* c8 ignore start */
-    static debug(msg) {
-        process.stderr.write(`[DEBUG] ${msg}\n`);
-    }
-    /* c8 ignore stop */
+  static debug(msg) {
+    process.stderr.write(`[DEBUG] ${msg}\n`);
+  }
+  /* c8 ignore stop */
 
-    static info(msg) {
-        process.stderr.write(`[INFO] ${msg}\n`);
-    }
+  static info(msg) {
+    process.stderr.write(`[INFO] ${msg}\n`);
+  }
 
-    static output(msg = '') {
-        process.stdout.write(`${msg}\n`);
-    }
+  static output(msg = '') {
+    process.stdout.write(`${msg}\n`);
+  }
 }
 
 const program = new Command();
 
 // Configure the CLI
 program
-    .name('mockCli.mjs')
-    .description('Google Play Console Data Fetcher (Mock Version)')
-    .version('1.0.0')
-    .addHelpText(
-        'after',
-        `
+  .name('mockCli.mjs')
+  .description('Google Play Console Data Fetcher (Mock Version)')
+  .version('1.0.0')
+  .addHelpText(
+    'after',
+    `
 Examples:
   node mockCli.js -p com.example.app -c creds.json -A
   node mockCli.js --package com.example.app --creds-path creds.json -t production,beta -i icon,featureGraphic
@@ -45,405 +45,400 @@ Notes:
   - For comma-separated inputs, do not use spaces.
   - Use 'all' to select all supported values.
 `
-    );
+  );
 
 // Required arguments
 program
-    .requiredOption('-p, --package <name>', 'Android application package name')
-    .requiredOption(
-        '-c, --creds-path <path>',
-        'Path to Google service account credentials JSON file'
-    );
+  .requiredOption('-p, --package <name>', 'Android application package name')
+  .requiredOption(
+    '-c, --creds-path <path>',
+    'Path to Google service account credentials JSON file'
+  );
 
 // Resource flags
 program
-    .option(
-        '-t, --tracks <tracks>',
-        "Include tracks ('all' or comma-separated track names)"
-    )
-    .option('-a, --apks', 'Include APKs')
-    .option('-b, --bundles', 'Include App Bundles')
-    .option('-l, --listings', 'Include store listings')
-    .option(
-        '-i, --images <images>',
-        "Include images ('all' or comma-separated image types)"
-    )
-    .option('-I, --inapps', 'Include in-app products')
-    .option('-r, --reviews', 'Include reviews')
-    .option('-v, --voided-purchases', 'Include voided purchases')
-    .option(
-        '-T, --testers <testers>',
-        "Include testers ('all' or comma-separated track names)"
-    )
-    .option('-d, --app-details', 'Include app details')
-    .option('-e, --expansion-files', 'Include expansion files')
-    .option('-A, --all', 'Include all supported resources');
+  .option(
+    '-t, --tracks <tracks>',
+    "Include tracks ('all' or comma-separated track names)"
+  )
+  .option('-a, --apks', 'Include APKs')
+  .option('-b, --bundles', 'Include App Bundles')
+  .option('-l, --listings', 'Include store listings')
+  .option(
+    '-i, --images <images>',
+    "Include images ('all' or comma-separated image types)"
+  )
+  .option('-I, --inapps', 'Include in-app products')
+  .option('-r, --reviews', 'Include reviews')
+  .option('-v, --voided-purchases', 'Include voided purchases')
+  .option(
+    '-T, --testers <testers>',
+    "Include testers ('all' or comma-separated track names)"
+  )
+  .option('-d, --app-details', 'Include app details')
+  .option('-e, --expansion-files', 'Include expansion files')
+  .option('-A, --all', 'Include all supported resources');
 
 // Options
 program
-    .option(
-        '-L, --images-language <lang>',
-        'Listing language for images',
-        'en-US'
-    )
-    .option(
-        '-P, --reviews-pages <num>',
-        'Number of review pages to fetch',
-        (value) => {
-            const parsed = parseInt(value, 10);
-            if (isNaN(parsed) || parsed < 1) {
-                throw new Error('--reviews-pages must be a positive integer');
-            }
-            return parsed;
-        },
-        1
-    )
-    .option(
-        '-S, --reviews-page-size <num>',
-        'Reviews per page',
-        (value) => {
-            const parsed = parseInt(value, 10);
-            if (isNaN(parsed) || parsed < 1) {
-                throw new Error('--reviews-page-size must be a positive integer');
-            }
-            return parsed;
-        },
-        100
-    )
-    .option('-j, --json', 'Output raw JSON instead of formatted tree');
+  .option(
+    '-L, --images-language <lang>',
+    'Listing language for images',
+    'en-US'
+  )
+  .option(
+    '-P, --reviews-pages <num>',
+    'Number of review pages to fetch',
+    (value) => {
+      const parsed = parseInt(value, 10);
+      if (isNaN(parsed) || parsed < 1) {
+        throw new Error('--reviews-pages must be a positive integer');
+      }
+      return parsed;
+    },
+    1
+  )
+  .option(
+    '-S, --reviews-page-size <num>',
+    'Reviews per page',
+    (value) => {
+      const parsed = parseInt(value, 10);
+      if (isNaN(parsed) || parsed < 1) {
+        throw new Error('--reviews-page-size must be a positive integer');
+      }
+      return parsed;
+    },
+    100
+  )
+  .option('-j, --json', 'Output raw JSON instead of formatted tree');
 
 // Custom validation function
 const validateCommaSeperatedOrAll = (value, key) => {
   /* c8 ignore start */
-    if (!value || !value.trim()) {
-        throw new Error(`--${key} requires a non-empty value`);
-    }
-    /* c8 ignore stop */
+  if (!value || !value.trim()) {
+    throw new Error(`--${key} requires a non-empty value`);
+  }
+  /* c8 ignore stop */
 
-    const trimmed = value.trim();
-    if (trimmed.toLowerCase() === 'all') {
-        return trimmed; // 'all' is valid
-    }
+  const trimmed = value.trim();
+  if (trimmed.toLowerCase() === 'all') {
+    return trimmed; // 'all' is valid
+  }
 
-    // Check for comma-separated values
-    if (
-        trimmed.includes(',,') ||
-        trimmed.startsWith(',') ||
-        trimmed.endsWith(',')
-    ) {
-        throw new Error(`--${key} has invalid comma placement`);
-    }
+  // Check for comma-separated values
+  if (
+    trimmed.includes(',,') ||
+    trimmed.startsWith(',') ||
+    trimmed.endsWith(',')
+  ) {
+    throw new Error(`--${key} has invalid comma placement`);
+  }
 
   const parts = trimmed
     .split(',')
     .map((p) => p.trim())
     .filter((p) => p.length > 0);
   /* c8 ignore start */
-    if (parts.length === 0) {
-        throw new Error(
-            `--${key} must be 'all' or a comma-separated list of values`
-        );
-    }
-    /* c8 ignore stop */
+  if (parts.length === 0) {
+    throw new Error(
+      `--${key} must be 'all' or a comma-separated list of values`
+    );
+  }
+  /* c8 ignore stop */
 
-    return trimmed;
+  return trimmed;
 };
 
 const validateTracks = (value) => {
-    const validTracks = ['internal', 'alpha', 'beta', 'production'];
-    const trimmed = value.trim();
+  const validTracks = ['internal', 'alpha', 'beta', 'production'];
+  const trimmed = value.trim();
 
-    if (trimmed.toLowerCase() === 'all') {
-        return trimmed;
-    }
-
-    const parts = trimmed.split(',').map((p) => p.trim().toLowerCase());
-    const invalidTracks = parts.filter((track) => !validTracks.includes(track));
-
-    if (invalidTracks.length > 0) {
-        throw new Error(
-            `Invalid track names: ${invalidTracks.join(', ')}. Valid tracks: ${validTracks.join(', ')}`
-        );
-    }
-
+  if (trimmed.toLowerCase() === 'all') {
     return trimmed;
+  }
+
+  const parts = trimmed.split(',').map((p) => p.trim().toLowerCase());
+  const invalidTracks = parts.filter((track) => !validTracks.includes(track));
+
+  if (invalidTracks.length > 0) {
+    throw new Error(
+      `Invalid track names: ${invalidTracks.join(', ')}. Valid tracks: ${validTracks.join(', ')}`
+    );
+  }
+
+  return trimmed;
 };
 
 const validateImages = (value) => {
-    const validImageTypes = [
-        'icon',
-        'featureGraphic',
-        'tvBanner',
-        'phoneScreenshots',
-        'sevenInchScreenshots',
-        'tenInchScreenshots',
-        'tvScreenshots',
-        'wearScreenshots',
-    ];
-    const trimmed = value.trim();
+  const validImageTypes = [
+    'icon',
+    'featureGraphic',
+    'tvBanner',
+    'phoneScreenshots',
+    'sevenInchScreenshots',
+    'tenInchScreenshots',
+    'tvScreenshots',
+    'wearScreenshots',
+  ];
+  const trimmed = value.trim();
 
-    if (trimmed.toLowerCase() === 'all') {
-        return trimmed;
-    }
-
-    const parts = trimmed.split(',').map((p) => p.trim());
-    const invalidTypes = parts.filter((type) => !validImageTypes.includes(type));
-
-    if (invalidTypes.length > 0) {
-        throw new Error(
-            `Invalid image types: ${invalidTypes.join(', ')}. Valid types: ${validImageTypes.join(', ')}`
-        );
-    }
-
+  if (trimmed.toLowerCase() === 'all') {
     return trimmed;
+  }
+
+  const parts = trimmed.split(',').map((p) => p.trim());
+  const invalidTypes = parts.filter((type) => !validImageTypes.includes(type));
+
+  if (invalidTypes.length > 0) {
+    throw new Error(
+      `Invalid image types: ${invalidTypes.join(', ')}. Valid types: ${validImageTypes.join(', ')}`
+    );
+  }
+
+  return trimmed;
 };
 
 const validateTesters = (value) => {
-    const validTracks = ['internal', 'alpha', 'beta', 'production'];
-    const trimmed = value.trim();
+  const validTracks = ['internal', 'alpha', 'beta', 'production'];
+  const trimmed = value.trim();
 
-    if (trimmed.toLowerCase() === 'all') {
-        return trimmed;
-    }
-
-    const parts = trimmed.split(',').map((p) => p.trim().toLowerCase());
-    const invalidTracks = parts.filter((track) => !validTracks.includes(track));
-
-    if (invalidTracks.length > 0) {
-        throw new Error(
-            `Invalid tester track names: ${invalidTracks.join(', ')}. Valid tracks: ${validTracks.join(', ')}`
-        );
-    }
-
+  if (trimmed.toLowerCase() === 'all') {
     return trimmed;
+  }
+
+  const parts = trimmed.split(',').map((p) => p.trim().toLowerCase());
+  const invalidTracks = parts.filter((track) => !validTracks.includes(track));
+
+  if (invalidTracks.length > 0) {
+    throw new Error(
+      `Invalid tester track names: ${invalidTracks.join(', ')}. Valid tracks: ${validTracks.join(', ')}`
+    );
+  }
+
+  return trimmed;
 };
 
 const filterTracks = (tracksData, selection) => {
   /* c8 ignore start */
-    if (!tracksData || !tracksData.tracks) {
-        return { kind: 'androidpublisher#tracksListResponse', tracks: [] };
-    }
-    /* c8 ignore stop */
+  if (!tracksData || !tracksData.tracks) {
+    return { kind: 'androidpublisher#tracksListResponse', tracks: [] };
+  }
+  /* c8 ignore stop */
 
-    if (selection === 'all') return tracksData;
+  if (selection === 'all') return tracksData;
 
-    const wantedTracks = selection.split(',').map((t) => t.trim().toLowerCase());
-    const filtered = tracksData.tracks.filter((track) =>
-        wantedTracks.includes(track.track.toLowerCase())
-    );
+  const wantedTracks = selection.split(',').map((t) => t.trim().toLowerCase());
+  const filtered = tracksData.tracks.filter((track) =>
+    wantedTracks.includes(track.track.toLowerCase())
+  );
 
-    return { ...tracksData, tracks: filtered };
+  return { ...tracksData, tracks: filtered };
 };
 
 const filterImages = (imagesData, selection) => {
   /* c8 ignore start */
-    if (!imagesData) {
-        return {};
-    }
-    /* c8 ignore stop */
+  if (!imagesData) {
+    return {};
+  }
+  /* c8 ignore stop */
 
-    if (selection === 'all') return imagesData;
+  if (selection === 'all') return imagesData;
 
-    const wantedTypes = selection.split(',').map((t) => t.trim());
-    const filtered = {};
+  const wantedTypes = selection.split(',').map((t) => t.trim());
+  const filtered = {};
 
   wantedTypes.forEach((type) => {
     /* c8 ignore start */
-        if (imagesData[type]) {
-            filtered[type] = imagesData[type];
-        } else {
-            // Add empty structure for requested but non-existent types
-            filtered[type] = { images: [] };
-        }
-        /* c8 ignore stop */
-    });
+    if (imagesData[type]) {
+      filtered[type] = imagesData[type];
+    } else {
+      // Add empty structure for requested but non-existent types
+      filtered[type] = { images: [] };
+    }
+    /* c8 ignore stop */
+  });
 
-    return filtered;
+  return filtered;
 };
 
 const filterTesters = (testersData, selection) => {
   /* c8 ignore start */
-    if (!testersData) {
-        return {};
-    }
-    /* c8 ignore stop */
+  if (!testersData) {
+    return {};
+  }
+  /* c8 ignore stop */
 
-    if (selection === 'all') return testersData;
+  if (selection === 'all') return testersData;
 
-    const wantedTracks = selection.split(',').map((t) => t.trim().toLowerCase());
-    const filtered = {};
+  const wantedTracks = selection.split(',').map((t) => t.trim().toLowerCase());
+  const filtered = {};
 
   wantedTracks.forEach((track) => {
     /* c8 ignore start */
-        if (testersData[track]) {
-            filtered[track] = testersData[track];
-        } else {
-            // Add empty structure for requested but non-existent tracks
-            filtered[track] = { googleGroups: [] };
-        }
-        /* c8 ignore stop */
-    });
+    if (testersData[track]) {
+      filtered[track] = testersData[track];
+    } else {
+      // Add empty structure for requested but non-existent tracks
+      filtered[track] = { googleGroups: [] };
+    }
+    /* c8 ignore stop */
+  });
 
-    return filtered;
+  return filtered;
 };
 
 const printTreeOutput = (results) => {
-    const printSection = (
-        title,
-        data,
-        prefix = '',
-        isLast = true,
-        isRoot = false
-    ) => {
-        const branch = isRoot ? '\x1b[34m● \x1b[0m' : isLast ? '└─╴' : '├─╴';
-        const space = isLast ? '    ' : '│   ';
+  const printSection = (
+    title,
+    data,
+    prefix = '',
+    isLast = true,
+    isRoot = false
+  ) => {
+    const branch = isRoot ? '\x1b[34m● \x1b[0m' : isLast ? '└─╴' : '├─╴';
+    const space = isLast ? '    ' : '│   ';
 
-        if (title) {
-            Log.output(`${prefix}${branch}\x1b[1m${title}\x1b[0m`);
-        }
+    if (title) {
+      Log.output(`${prefix}${branch}\x1b[1m${title}\x1b[0m`);
+    }
 
-        const newPrefix = prefix + (space && !isRoot && title ? space : '');
+    const newPrefix = prefix + (space && !isRoot && title ? space : '');
 
     if (typeof data === 'object' && data !== null) {
       if (Array.isArray(data)) {
         if (data.length === 0) {
           /* c8 ignore next */
-                    const branchVal = isLast ? '└─╴' : '├─╴';
-                    Log.output(`${newPrefix}${branchVal}\x1b[2m<empty>\x1b[0m`);
-                } else {
-                    data.forEach((item, idx) => {
-                        const last = idx === data.length - 1;
-                        printSection(`[${idx}]`, item, newPrefix, last);
-                    });
-                }
-            } else {
-                const entries = Object.entries(data);
-                if (entries.length === 0) {
-                    const branchVal = isLast ? '└─╴' : '├─╴';
-                    Log.output(`${newPrefix}${branchVal}\x1b[2m<empty>\x1b[0m`);
-                } else {
-                    entries.forEach(([key, value], idx) => {
-                        const last = idx === entries.length - 1;
-                        printSection(key, value, newPrefix, last);
-                    });
-                }
-            }
+          const branchVal = isLast ? '└─╴' : '├─╴';
+          Log.output(`${newPrefix}${branchVal}\x1b[2m<empty>\x1b[0m`);
         } else {
-            const branchVal = isLast ? '└─╴' : '├─╴';
-            const valueStr = String(data);
-            // Handle multiline strings properly
-            if (valueStr.includes('\n')) {
-                const lines = valueStr.split('\n');
-                lines.forEach((line, idx) => {
-                    if (idx === 0) {
-                        Log.output(`${newPrefix}${branchVal}\x1b[36m${line}\x1b[0m`);
-                    } else {
-                        const continuationPrefix = newPrefix + (isLast ? '    ' : '│   ');
-                        Log.output(`${continuationPrefix}\x1b[36m${line}\x1b[0m`);
-                    }
-                });
-            } else {
-                Log.output(`${newPrefix}${branchVal}\x1b[36m${valueStr}\x1b[0m`);
-            }
+          data.forEach((item, idx) => {
+            const last = idx === data.length - 1;
+            printSection(`[${idx}]`, item, newPrefix, last);
+          });
         }
-    };
+      } else {
+        const entries = Object.entries(data);
+        if (entries.length === 0) {
+          const branchVal = isLast ? '└─╴' : '├─╴';
+          Log.output(`${newPrefix}${branchVal}\x1b[2m<empty>\x1b[0m`);
+        } else {
+          entries.forEach(([key, value], idx) => {
+            const last = idx === entries.length - 1;
+            printSection(key, value, newPrefix, last);
+          });
+        }
+      }
+    } else {
+      const branchVal = isLast ? '└─╴' : '├─╴';
+      const valueStr = String(data);
+      // Handle multiline strings properly
+      if (valueStr.includes('\n')) {
+        const lines = valueStr.split('\n');
+        lines.forEach((line, idx) => {
+          if (idx === 0) {
+            Log.output(`${newPrefix}${branchVal}\x1b[36m${line}\x1b[0m`);
+          } else {
+            const continuationPrefix = newPrefix + (isLast ? '    ' : '│   ');
+            Log.output(`${continuationPrefix}\x1b[36m${line}\x1b[0m`);
+          }
+        });
+      } else {
+        Log.output(`${newPrefix}${branchVal}\x1b[36m${valueStr}\x1b[0m`);
+      }
+    }
+  };
 
-    Object.entries(results).forEach(([section, content]) => {
-        printSection(section, content, '', true, true);
-        Log.output();
-    });
+  Object.entries(results).forEach(([section, content]) => {
+    printSection(section, content, '', true, true);
+    Log.output();
+  });
 };
 
 const mock = async () => {
+  try {
+    // Parse arguments using commander
+    program.parse();
+    const options = program.opts();
+
+    // Check if credentials file exists (custom logic - not handled by Commander.js)
+    if (!fs.existsSync(options.credsPath)) {
+      Log.error(`Credentials file not found: ${options.credsPath}`);
+      process.exit(1);
+    }
+
+    // Validate comma-separated arguments if they exist (custom logic for format and valid values)
+    if (options.tracks) {
+      options.tracks = validateCommaSeperatedOrAll(options.tracks, 'tracks');
+      options.tracks = validateTracks(options.tracks);
+    }
+    if (options.images) {
+      options.images = validateCommaSeperatedOrAll(options.images, 'images');
+      options.images = validateImages(options.images);
+    }
+    if (options.testers) {
+      options.testers = validateCommaSeperatedOrAll(options.testers, 'testers');
+      options.testers = validateTesters(options.testers);
+    }
+
+    // Check if result.json exists
+    const resultPath = path.join(process.cwd(), 'cli', 'mock', 'result.json');
+    if (!fs.existsSync(resultPath)) {
+      Log.error('result.json not found in tests/mocks directory');
+      process.exit(1);
+    }
+
+    let fullData;
     try {
-        // Parse arguments using commander
-        program.parse();
-        const options = program.opts();
+      const fileContent = fs.readFileSync(resultPath, 'utf8');
+      if (fileContent.trim() === '') {
+        Log.error('result.json is empty');
+        process.exit(1);
+      }
+      fullData = JSON.parse(fileContent);
+    } catch (e) {
+      Log.error(`Failed to parse result.json: ${e.message}`);
+      process.exit(1);
+    }
 
-        // Check if credentials file exists (custom logic - not handled by Commander.js)
-        if (!fs.existsSync(options.credsPath)) {
-            Log.error(`Credentials file not found: ${options.credsPath}`);
-            process.exit(1);
-        }
+    // Determine requested resources
+    const requested = [];
+    if (options.all) {
+      requested.push(
+        'tracks',
+        'apks',
+        'bundles',
+        'listings',
+        'images',
+        'inapps',
+        'reviews',
+        'voided_purchases',
+        'testers',
+        'app_details',
+        'expansion_files'
+      );
+    } else {
+      if (options.tracks) requested.push('tracks');
+      if (options.apks) requested.push('apks');
+      if (options.bundles) requested.push('bundles');
+      if (options.listings) requested.push('listings');
+      if (options.images) requested.push('images');
+      if (options.inapps) requested.push('inapps');
+      if (options.reviews) requested.push('reviews');
+      if (options.voidedPurchases) requested.push('voided_purchases');
+      if (options.testers) requested.push('testers');
+      if (options.appDetails) requested.push('app_details');
+      if (options.expansionFiles) requested.push('expansion_files');
+    }
 
-        // Validate comma-separated arguments if they exist (custom logic for format and valid values)
-        if (options.tracks) {
-            options.tracks = validateCommaSeperatedOrAll(options.tracks, 'tracks');
-            options.tracks = validateTracks(options.tracks);
-        }
-        if (options.images) {
-            options.images = validateCommaSeperatedOrAll(options.images, 'images');
-            options.images = validateImages(options.images);
-        }
-        if (options.testers) {
-            options.testers = validateCommaSeperatedOrAll(options.testers, 'testers');
-            options.testers = validateTesters(options.testers);
-        }
+    if (requested.length === 0) {
+      Log.error(
+        'No resources selected. Provide --all or at least one of: --tracks, --apks, --bundles, --listings, --images, --inapps, --reviews, --voided-purchases, --testers, --app-details, --expansion-files'
+      );
+      console.log('Use --help for usage information');
+      process.exit(1);
+    }
 
-        // Check if result.json exists
-        const resultPath = path.join(
-            process.cwd(),
-            'cli',
-            'mock',
-            'result.json'
-        );
-        if (!fs.existsSync(resultPath)) {
-            Log.error('result.json not found in tests/mocks directory');
-            process.exit(1);
-        }
-
-        let fullData;
-        try {
-            const fileContent = fs.readFileSync(resultPath, 'utf8');
-            if (fileContent.trim() === '') {
-                Log.error('result.json is empty');
-                process.exit(1);
-            }
-            fullData = JSON.parse(fileContent);
-        } catch (e) {
-            Log.error(`Failed to parse result.json: ${e.message}`);
-            process.exit(1);
-        }
-
-        // Determine requested resources
-        const requested = [];
-        if (options.all) {
-            requested.push(
-                'tracks',
-                'apks',
-                'bundles',
-                'listings',
-                'images',
-                'inapps',
-                'reviews',
-                'voided_purchases',
-                'testers',
-                'app_details',
-                'expansion_files'
-            );
-        } else {
-            if (options.tracks) requested.push('tracks');
-            if (options.apks) requested.push('apks');
-            if (options.bundles) requested.push('bundles');
-            if (options.listings) requested.push('listings');
-            if (options.images) requested.push('images');
-            if (options.inapps) requested.push('inapps');
-            if (options.reviews) requested.push('reviews');
-            if (options.voidedPurchases) requested.push('voided_purchases');
-            if (options.testers) requested.push('testers');
-            if (options.appDetails) requested.push('app_details');
-            if (options.expansionFiles) requested.push('expansion_files');
-        }
-
-        if (requested.length === 0) {
-            Log.error(
-                'No resources selected. Provide --all or at least one of: --tracks, --apks, --bundles, --listings, --images, --inapps, --reviews, --voided-purchases, --testers, --app-details, --expansion-files'
-            );
-            console.log('Use --help for usage information');
-            process.exit(1);
-        }
-
-        const results = {};
+    const results = {};
 
     // Process each requested resource with detailed progress logging
     requested.forEach((resource) => {
@@ -566,14 +561,14 @@ const mock = async () => {
           break;
         }
         /* c8 ignore start */
-                default:
-                    results[resource] = fullData[resource] || {};
-                /* c8 ignore stop */
+        default:
+          results[resource] = fullData[resource] || {};
+        /* c8 ignore stop */
       }
     });
 
-        // Final completion message
-        Log.info('Completed successfully!');
+    // Final completion message
+    Log.info('Completed successfully!');
 
     // Output results to stdout
     if (options.json) {
@@ -584,14 +579,14 @@ const mock = async () => {
   } catch (error) {
     // Commander.js will automatically handle and display argument errors
     /* c8 ignore start */
-        if (
-            error.code === 'commander.missingRequiredArgument' ||
-            error.code === 'commander.invalidArgument' ||
-            error.message.includes('required option')
-        ) {
-            process.exit(1);
-        }
-        /* c8 ignore stop */
+    if (
+      error.code === 'commander.missingRequiredArgument' ||
+      error.code === 'commander.invalidArgument' ||
+      error.message.includes('required option')
+    ) {
+      process.exit(1);
+    }
+    /* c8 ignore stop */
     Log.error(error.message);
     process.exit(1);
   }
@@ -600,21 +595,21 @@ const mock = async () => {
 // Handle uncaught errors gracefully
 process.on('uncaughtException', (error) => {
   /* c8 ignore start */
-    Log.error(`Unexpected error: ${error.message}`);
-    process.exit(1);
-    /* c8 ignore stop */
+  Log.error(`Unexpected error: ${error.message}`);
+  process.exit(1);
+  /* c8 ignore stop */
 });
 
 process.on('unhandledRejection', (reason) => {
   /* c8 ignore start */
-    Log.error(`Unhandled promise rejection: ${reason}`);
-    process.exit(1);
-    /* c8 ignore stop */
+  Log.error(`Unhandled promise rejection: ${reason}`);
+  process.exit(1);
+  /* c8 ignore stop */
 });
 
 mock().catch((error) => {
   /* c8 ignore start */
-    Log.error(error.message);
-    process.exit(1);
-    /* c8 ignore stop */
+  Log.error(error.message);
+  process.exit(1);
+  /* c8 ignore stop */
 });

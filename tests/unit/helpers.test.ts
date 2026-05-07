@@ -68,9 +68,15 @@ describe('getExecutablePath', () => {
     it('returns correct executable path for all platforms', async () => {
       // useMock=false resolves basePath via __dirname (not cwd), so check suffix only
       const platforms = [
-        ['win32', path.join('bin', 'python', 'windows', 'play_console_cli-windows.exe')],
+        [
+          'win32',
+          path.join('bin', 'python', 'windows', 'play_console_cli-windows.exe'),
+        ],
         ['darwin', path.join('bin', 'python', 'mac', 'play_console_cli-mac')],
-        ['linux', path.join('bin', 'python', 'linux', 'play_console_cli-linux')],
+        [
+          'linux',
+          path.join('bin', 'python', 'linux', 'play_console_cli-linux'),
+        ],
       ] as const;
 
       for (const [platform, expectedSuffix] of platforms) {
@@ -84,7 +90,10 @@ describe('getExecutablePath', () => {
       // darwin→mac, linux→linux; basePath is __dirname-based so check suffix
       const platformPaths = [
         ['darwin', path.join('bin', 'python', 'mac', 'play_console_cli-mac')],
-        ['linux', path.join('bin', 'python', 'linux', 'play_console_cli-linux')],
+        [
+          'linux',
+          path.join('bin', 'python', 'linux', 'play_console_cli-linux'),
+        ],
       ] as const;
 
       for (const [platform, expectedSuffix] of platformPaths) {
@@ -128,8 +137,14 @@ describe('getExecutablePath', () => {
     it('calls chmod for linux and darwin platforms', async () => {
       // darwin→mac, linux→linux; cwd is mocked so exact path works
       const platformPaths = [
-        ['darwin', path.join('/test/project', 'bin', 'mock', 'mac', 'mockCli-mac')],
-        ['linux', path.join('/test/project', 'bin', 'mock', 'linux', 'mockCli-linux')],
+        [
+          'darwin',
+          path.join('/test/project', 'bin', 'mock', 'mac', 'mockCli-mac'),
+        ],
+        [
+          'linux',
+          path.join('/test/project', 'bin', 'mock', 'linux', 'mockCli-linux'),
+        ],
       ] as const;
 
       for (const [platform, expectedPath] of platformPaths) {
@@ -138,7 +153,10 @@ describe('getExecutablePath', () => {
 
         await getExecutablePath(true);
 
-        expect(mockExec.exec).toHaveBeenCalledWith('chmod', ['+x', expectedPath]);
+        expect(mockExec.exec).toHaveBeenCalledWith('chmod', [
+          '+x',
+          expectedPath,
+        ]);
       }
     });
   });

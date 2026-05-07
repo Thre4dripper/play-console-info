@@ -5,9 +5,22 @@ import { describe, it, expect, afterAll } from '@jest/globals';
 
 describe('mockCli', () => {
   const platform = process.platform;
-  const mockCliDir = platform === 'win32' ? 'windows' : platform === 'darwin' ? 'mac' : 'linux';
-  const mockCliBin = platform === 'win32' ? 'mockCli-windows.exe' : platform === 'darwin' ? 'mockCli-mac' : 'mockCli-linux';
-  const mockCliPath = path.join(__dirname, '..', 'bin', 'mock', mockCliDir, mockCliBin);
+  const mockCliDir =
+    platform === 'win32' ? 'windows' : platform === 'darwin' ? 'mac' : 'linux';
+  const mockCliBin =
+    platform === 'win32'
+      ? 'mockCli-windows.exe'
+      : platform === 'darwin'
+        ? 'mockCli-mac'
+        : 'mockCli-linux';
+  const mockCliPath = path.join(
+    __dirname,
+    '..',
+    'bin',
+    'mock',
+    mockCliDir,
+    mockCliBin
+  );
   const mockCredsPath = path.join(
     __dirname,
     '..',
