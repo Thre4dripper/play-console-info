@@ -1,28 +1,9 @@
 name: CodeQL Security Analysis
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'src/**'
-      - 'cli/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'tsconfig.json'
-      - '.github/workflows/codeql.yml'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'src/**'
-      - 'cli/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'tsconfig.json'
-  schedule:
-    # Run every Monday at 08:00 UTC
-    - cron: '0 8 * * 1'
+  # Disabled: Code scanning requires GitHub Advanced Security for private repos
+  # Re-enable triggers below when the repo is public or GHAS is available
+  workflow_dispatch:
 
 permissions:
   contents: read
