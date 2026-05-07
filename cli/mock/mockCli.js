@@ -11,7 +11,7 @@ class Log {
         process.stderr.write(`[ERROR] ${msg}\n`);
     }
 
-    /* c8 ignore start */
+  /* c8 ignore start */
     static debug(msg) {
         process.stderr.write(`[DEBUG] ${msg}\n`);
     }
@@ -114,7 +114,7 @@ program
 
 // Custom validation function
 const validateCommaSeperatedOrAll = (value, key) => {
-    /* c8 ignore start */
+  /* c8 ignore start */
     if (!value || !value.trim()) {
         throw new Error(`--${key} requires a non-empty value`);
     }
@@ -134,11 +134,11 @@ const validateCommaSeperatedOrAll = (value, key) => {
         throw new Error(`--${key} has invalid comma placement`);
     }
 
-    const parts = trimmed
-        .split(',')
-        .map((p) => p.trim())
-        .filter((p) => p.length > 0);
-    /* c8 ignore start */
+  const parts = trimmed
+    .split(',')
+    .map((p) => p.trim())
+    .filter((p) => p.length > 0);
+  /* c8 ignore start */
     if (parts.length === 0) {
         throw new Error(
             `--${key} must be 'all' or a comma-separated list of values`
@@ -219,7 +219,7 @@ const validateTesters = (value) => {
 };
 
 const filterTracks = (tracksData, selection) => {
-    /* c8 ignore start */
+  /* c8 ignore start */
     if (!tracksData || !tracksData.tracks) {
         return { kind: 'androidpublisher#tracksListResponse', tracks: [] };
     }
@@ -236,7 +236,7 @@ const filterTracks = (tracksData, selection) => {
 };
 
 const filterImages = (imagesData, selection) => {
-    /* c8 ignore start */
+  /* c8 ignore start */
     if (!imagesData) {
         return {};
     }
@@ -247,8 +247,8 @@ const filterImages = (imagesData, selection) => {
     const wantedTypes = selection.split(',').map((t) => t.trim());
     const filtered = {};
 
-    wantedTypes.forEach((type) => {
-        /* c8 ignore start */
+  wantedTypes.forEach((type) => {
+    /* c8 ignore start */
         if (imagesData[type]) {
             filtered[type] = imagesData[type];
         } else {
@@ -262,7 +262,7 @@ const filterImages = (imagesData, selection) => {
 };
 
 const filterTesters = (testersData, selection) => {
-    /* c8 ignore start */
+  /* c8 ignore start */
     if (!testersData) {
         return {};
     }
@@ -273,8 +273,8 @@ const filterTesters = (testersData, selection) => {
     const wantedTracks = selection.split(',').map((t) => t.trim().toLowerCase());
     const filtered = {};
 
-    wantedTracks.forEach((track) => {
-        /* c8 ignore start */
+  wantedTracks.forEach((track) => {
+    /* c8 ignore start */
         if (testersData[track]) {
             filtered[track] = testersData[track];
         } else {
@@ -304,10 +304,10 @@ const printTreeOutput = (results) => {
 
         const newPrefix = prefix + (space && !isRoot && title ? space : '');
 
-        if (typeof data === 'object' && data !== null) {
-            if (Array.isArray(data)) {
-                if (data.length === 0) {
-                    /* c8 ignore next */
+    if (typeof data === 'object' && data !== null) {
+      if (Array.isArray(data)) {
+        if (data.length === 0) {
+          /* c8 ignore next */
                     const branchVal = isLast ? '└─╴' : '├─╴';
                     Log.output(`${newPrefix}${branchVal}\x1b[2m<empty>\x1b[0m`);
                 } else {
@@ -445,124 +445,145 @@ const mock = async () => {
 
         const results = {};
 
-        // Process each requested resource with detailed progress logging
-        requested.forEach((resource) => {
-            switch (resource) {
-                case 'tracks': {
-                    Log.progress('Fetching tracks...');
-                    const trackSelection = options.tracks || 'all';
-                    results.tracks = filterTracks(fullData.tracks, trackSelection);
-                    break;
-                }
-                case 'apks': {
-                    Log.progress('Fetching apks...');
-                    results.apks = fullData.apks || {};
-                    break;
-                }
-                case 'bundles': {
-                    Log.progress('Fetching bundles...');
-                    results.bundles = fullData.bundles || {};
-                    break;
-                }
-                case 'listings': {
-                    Log.progress('Fetching listings...');
-                    results.listings = fullData.listings || {};
-        
-                    break;
-                }
-                case 'images': {
-                    Log.progress('Fetching images...');
-                    const imageSelection = options.images || 'all';
-                    
-                    // Get the list of image types to fetch
-                    const allImageTypes = [
-                        'icon', 'featureGraphic', 'tvBanner', 'phoneScreenshots',
-                        'sevenInchScreenshots', 'tenInchScreenshots', 'tvScreenshots', 'wearScreenshots'
-                    ];
-                    const typesToFetch = imageSelection === 'all' ? allImageTypes : imageSelection.split(',').map(t => t.trim());
-                    
-                    // Log progress for each image type
-                    typesToFetch.forEach((type, index) => {
-                        Log.progress(`  Fetching ${type} images (${index + 1}/${typesToFetch.length})...`);
-                    });
-                    
-                    results.images = filterImages(fullData.images, imageSelection);
-                    break;
-                }
-                case 'inapps': {
-                    Log.progress('Fetching in-app products...');
-                    results.inapps = fullData.inapps || {};
-                    break;
-                }
-                case 'reviews': {
-                    Log.progress(`Fetching reviews (${options.reviewsPages} pages, ${options.reviewsPageSize} per page)...`);
-                    for (let page = 1; page <= options.reviewsPages; page++) {
-                        Log.progress(`Fetching reviews page ${page}/${options.reviewsPages}...`);
-                        if (page === 1) {
-                            Log.progress(`Completed early at page ${page} (no more data)`);
-                            break;
-                        }
-                    }
-                    results.reviews = fullData.reviews || {};
-                    break;
-                }
-                case 'voided_purchases': {
-                    Log.progress(`Fetching voided purchases (${options.reviewsPages} pages, ${options.reviewsPageSize} per page)...`);
-                    for (let page = 1; page <= options.reviewsPages; page++) {
-                        Log.progress(`Fetching voided purchases page ${page}/${options.reviewsPages}...`);
-                        if (page === 1) {
-                            Log.progress(`Completed early at page ${page} (no more data)`);
-                            break;
-                        }
-                    }
-                    results.voided_purchases = fullData.voided_purchases || {};
-                    break;
-                }
-                case 'testers': {
-                    Log.progress('Fetching testers...');
-                    const testerSelection = options.testers || 'all';
-                    
-                    if (testerSelection === 'all') {
-                        Log.progress('Fetching testers for all tracks...');
-                    } else {
-                        const tracks = testerSelection.split(',').map(t => t.trim());
-                        tracks.forEach((track, index) => {
-                            Log.progress(`Fetching testers for ${track} track (${index + 1}/${tracks.length})...`);
-                        });
-                    }
-                    
-                    results.testers = filterTesters(fullData.testers, testerSelection);
-                    break;
-                }
-                case 'app_details': {
-                    Log.progress('Fetching app details...');
-                        results.app_details = fullData.app_details || {};
-                    break;
-                }
-                case 'expansion_files': {
-                    Log.progress('Fetching expansion files...');
-                    results.expansion_files = fullData.expansion_files || {};
-                    break;
-                }
-                /* c8 ignore start */
+    // Process each requested resource with detailed progress logging
+    requested.forEach((resource) => {
+      switch (resource) {
+        case 'tracks': {
+          Log.progress('Fetching tracks...');
+          const trackSelection = options.tracks || 'all';
+          results.tracks = filterTracks(fullData.tracks, trackSelection);
+          break;
+        }
+        case 'apks': {
+          Log.progress('Fetching apks...');
+          results.apks = fullData.apks || {};
+          break;
+        }
+        case 'bundles': {
+          Log.progress('Fetching bundles...');
+          results.bundles = fullData.bundles || {};
+          break;
+        }
+        case 'listings': {
+          Log.progress('Fetching listings...');
+          results.listings = fullData.listings || {};
+
+          break;
+        }
+        case 'images': {
+          Log.progress('Fetching images...');
+          const imageSelection = options.images || 'all';
+
+          // Get the list of image types to fetch
+          const allImageTypes = [
+            'icon',
+            'featureGraphic',
+            'tvBanner',
+            'phoneScreenshots',
+            'sevenInchScreenshots',
+            'tenInchScreenshots',
+            'tvScreenshots',
+            'wearScreenshots',
+          ];
+          const typesToFetch =
+            imageSelection === 'all'
+              ? allImageTypes
+              : imageSelection.split(',').map((t) => t.trim());
+
+          // Log progress for each image type
+          typesToFetch.forEach((type, index) => {
+            Log.progress(
+              `  Fetching ${type} images (${index + 1}/${typesToFetch.length})...`
+            );
+          });
+
+          results.images = filterImages(fullData.images, imageSelection);
+          break;
+        }
+        case 'inapps': {
+          Log.progress('Fetching in-app products...');
+          results.inapps = fullData.inapps || {};
+          break;
+        }
+        case 'reviews': {
+          Log.progress(
+            `Fetching reviews (${options.reviewsPages} pages, ${options.reviewsPageSize} per page)...`
+          );
+          for (let page = 1; page <= options.reviewsPages; page++) {
+            Log.progress(
+              `Fetching reviews page ${page}/${options.reviewsPages}...`
+            );
+            if (page === 1) {
+              Log.progress(`Completed early at page ${page} (no more data)`);
+              break;
+            }
+          }
+          results.reviews = fullData.reviews || {};
+          break;
+        }
+        case 'voided_purchases': {
+          Log.progress(
+            `Fetching voided purchases (${options.reviewsPages} pages, ${options.reviewsPageSize} per page)...`
+          );
+          for (let page = 1; page <= options.reviewsPages; page++) {
+            Log.progress(
+              `Fetching voided purchases page ${page}/${options.reviewsPages}...`
+            );
+            if (page === 1) {
+              Log.progress(`Completed early at page ${page} (no more data)`);
+              break;
+            }
+          }
+          results.voided_purchases = fullData.voided_purchases || {};
+          break;
+        }
+        case 'testers': {
+          Log.progress('Fetching testers...');
+          const testerSelection = options.testers || 'all';
+
+          if (testerSelection === 'all') {
+            Log.progress('Fetching testers for all tracks...');
+          } else {
+            const tracks = testerSelection.split(',').map((t) => t.trim());
+            tracks.forEach((track, index) => {
+              Log.progress(
+                `Fetching testers for ${track} track (${index + 1}/${tracks.length})...`
+              );
+            });
+          }
+
+          results.testers = filterTesters(fullData.testers, testerSelection);
+          break;
+        }
+        case 'app_details': {
+          Log.progress('Fetching app details...');
+          results.app_details = fullData.app_details || {};
+          break;
+        }
+        case 'expansion_files': {
+          Log.progress('Fetching expansion files...');
+          results.expansion_files = fullData.expansion_files || {};
+          break;
+        }
+        /* c8 ignore start */
                 default:
                     results[resource] = fullData[resource] || {};
                 /* c8 ignore stop */
-            }
-        });
+      }
+    });
 
         // Final completion message
         Log.info('Completed successfully!');
 
-        // Output results to stdout
-        if (options.json) {
-            Log.output(JSON.stringify(results, null, 2));
-        } else {
-            printTreeOutput(results);
-        }
-    } catch (error) {
-        // Commander.js will automatically handle and display argument errors
-        /* c8 ignore start */
+    // Output results to stdout
+    if (options.json) {
+      Log.output(JSON.stringify(results, null, 2));
+    } else {
+      printTreeOutput(results);
+    }
+  } catch (error) {
+    // Commander.js will automatically handle and display argument errors
+    /* c8 ignore start */
         if (
             error.code === 'commander.missingRequiredArgument' ||
             error.code === 'commander.invalidArgument' ||
@@ -571,28 +592,28 @@ const mock = async () => {
             process.exit(1);
         }
         /* c8 ignore stop */
-        Log.error(error.message);
-        process.exit(1);
-    }
+    Log.error(error.message);
+    process.exit(1);
+  }
 };
 
 // Handle uncaught errors gracefully
 process.on('uncaughtException', (error) => {
-    /* c8 ignore start */
+  /* c8 ignore start */
     Log.error(`Unexpected error: ${error.message}`);
     process.exit(1);
     /* c8 ignore stop */
 });
 
 process.on('unhandledRejection', (reason) => {
-    /* c8 ignore start */
+  /* c8 ignore start */
     Log.error(`Unhandled promise rejection: ${reason}`);
     process.exit(1);
     /* c8 ignore stop */
 });
 
 mock().catch((error) => {
-    /* c8 ignore start */
+  /* c8 ignore start */
     Log.error(error.message);
     process.exit(1);
     /* c8 ignore stop */
