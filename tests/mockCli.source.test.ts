@@ -187,13 +187,19 @@ describe('mockCli (JS source)', () => {
         args: string[]
       ): Promise<{ stdout: string; stderr: string; exitCode: number }> =>
         new Promise((resolve) => {
-          const child = spawn(process.execPath, [mockCliPath, ...args], { cwd });
+          const child = spawn(process.execPath, [mockCliPath, ...args], {
+            cwd,
+          });
           let stdout = '';
           let stderr = '';
           child.stdout.on('data', (d) => (stdout += d.toString()));
           child.stderr.on('data', (d) => (stderr += d.toString()));
-          child.on('close', (code) => resolve({ stdout, stderr, exitCode: code || 0 }));
-          child.on('error', (error) => resolve({ stdout, stderr: error.message, exitCode: 1 }));
+          child.on('close', (code) =>
+            resolve({ stdout, stderr, exitCode: code || 0 })
+          );
+          child.on('error', (error) =>
+            resolve({ stdout, stderr: error.message, exitCode: 1 })
+          );
         });
 
       const result = await runCliFrom(tmpDir, [

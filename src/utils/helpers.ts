@@ -35,9 +35,7 @@ export class Logger {
 export const getExecutablePath = async (useMock: boolean): Promise<string> => {
   // For mock/tests: use current working directory (this repo has the binaries)
   // For production: use the action directory (where dist/index.js is running from)
-  const basePath = useMock
-    ? process.cwd()
-    : path.resolve(__dirname, '../..');  // Go up from dist/ to action root
+  const basePath = useMock ? process.cwd() : path.resolve(__dirname, '../..'); // Go up from dist/ to action root
 
   Logger.debug(`Using base path: ${basePath}`);
 
@@ -50,15 +48,33 @@ export const getExecutablePath = async (useMock: boolean): Promise<string> => {
       case 'win32': {
         // For .exe files, no special execution policy is typically needed
         // But ensure we can run executables in case of restrictive environments
-        return path.join(basePath, 'bin', 'mock', 'windows', 'mockCli-windows.exe');
+        return path.join(
+          basePath,
+          'bin',
+          'mock',
+          'windows',
+          'mockCli-windows.exe'
+        );
       }
       case 'darwin': {
-        const mockCliPath = path.join(basePath, 'bin', 'mock', 'mac', 'mockCli-mac');
+        const mockCliPath = path.join(
+          basePath,
+          'bin',
+          'mock',
+          'mac',
+          'mockCli-mac'
+        );
         await exec.exec('chmod', ['+x', mockCliPath]);
         return mockCliPath;
       }
       case 'linux': {
-        const mockCliPath = path.join(basePath, 'bin', 'mock', 'linux', 'mockCli-linux');
+        const mockCliPath = path.join(
+          basePath,
+          'bin',
+          'mock',
+          'linux',
+          'mockCli-linux'
+        );
         await exec.exec('chmod', ['+x', mockCliPath]);
         return mockCliPath;
       }
@@ -81,12 +97,24 @@ export const getExecutablePath = async (useMock: boolean): Promise<string> => {
       );
     }
     case 'darwin': {
-      const pythonCliPath = path.join(basePath, 'bin', 'python', 'mac', 'play_console_cli-mac');
+      const pythonCliPath = path.join(
+        basePath,
+        'bin',
+        'python',
+        'mac',
+        'play_console_cli-mac'
+      );
       await exec.exec('chmod', ['+x', pythonCliPath]);
       return pythonCliPath;
     }
     case 'linux': {
-      const pythonCliPath = path.join(basePath, 'bin', 'python', 'linux', 'play_console_cli-linux');
+      const pythonCliPath = path.join(
+        basePath,
+        'bin',
+        'python',
+        'linux',
+        'play_console_cli-linux'
+      );
       await exec.exec('chmod', ['+x', pythonCliPath]);
       return pythonCliPath;
     }
