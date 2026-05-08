@@ -11,3 +11,4 @@ cli/python/build
 cli/python/*.spec
 coverage
 bin/
+.actrc
