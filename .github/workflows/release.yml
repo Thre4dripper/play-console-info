@@ -206,9 +206,9 @@ jobs:
           PREV_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
 
           if [ -n "$PREV_TAG" ]; then
-            COMMITS=$(git log "$PREV_TAG"..HEAD --no-merges --pretty=format:"- %s (%h)" 2>/dev/null)
+            COMMITS=$(git log "$PREV_TAG"..HEAD --pretty=format:"- %s (%h)" 2>/dev/null)
           else
-            COMMITS=$(git log --no-merges --pretty=format:"- %s (%h)" 2>/dev/null)
+            COMMITS=$(git log --pretty=format:"- %s (%h)" 2>/dev/null)
           fi
 
           if [ -n "$COMMITS" ]; then
