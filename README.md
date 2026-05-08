@@ -26,206 +26,29 @@ Use whichever layer you need. The CLI is self-contained.
 ## Table of Contents
 
 - [Table of Contents](#table-of-contents)
-- [🖥️ The CLI](#️-the-cli)
-  - [📦 Download a Binary](#-download-a-binary)
-  - [CLI Flags](#cli-flags)
-    - [Required](#required)
-    - [Resources — pick what you want](#resources--pick-what-you-want)
-    - [Options](#options)
-  - [Output Modes](#output-modes)
-  - [CLI Examples](#cli-examples)
-  - [Build From Source](#build-from-source)
 - [⚡ The GitHub Action](#-the-github-action)
   - [🚀 Quick Start](#-quick-start)
   - [Service Account Setup](#service-account-setup)
   - [Inputs](#inputs)
     - [Authentication](#authentication)
     - [Resources](#resources)
-    - [Options](#options-1)
+    - [Options](#options)
     - [Artifact Upload](#artifact-upload)
   - [Outputs](#outputs)
   - [Action Examples](#action-examples)
+- [🖥️ The CLI](#️-the-cli)
+  - [📦 Download a Binary](#-download-a-binary)
+  - [CLI Flags](#cli-flags)
+    - [Required](#required)
+    - [Resources — pick what you want](#resources--pick-what-you-want)
+    - [Options](#options-1)
+  - [Output Modes](#output-modes)
+  - [CLI Examples](#cli-examples)
+  - [Build From Source](#build-from-source)
 - [📐 Output Shape Reference](#-output-shape-reference)
 - [🔒 Security](#-security)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
-
----
-
-## 🖥️ The CLI
-
-The Play Console CLI is the engine that makes everything work. It is a compiled native binary — no Python runtime, no dependencies, no installation. Download it, point it at your credentials, and it hands you back JSON.
-
-```
-play_console_cli -p com.example.myapp -c service-account.json -A
-```
-
-### 📦 Download a Binary
-
-Pre-compiled binaries are attached to every [GitHub Release](../../releases/latest) as assets. Pick the one that matches your platform:
-
-<!-- DOWNLOAD-LINKS-START -->
-
-| Platform | Architecture          | Download                                                                                                                                          |
-| -------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Linux    | x64                   | [`play_console_cli-linux-x64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-linux-x64)             |
-| Linux    | arm64                 | [`play_console_cli-linux-arm64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-linux-arm64)         |
-| macOS    | arm64 (Apple Silicon) | [`play_console_cli-mac-arm64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-mac-arm64)             |
-| Windows  | x64                   | [`play_console_cli-windows-x64.exe`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-windows-x64.exe) |
-
-<!-- DOWNLOAD-LINKS-END -->
-
-> **Note:** macOS Intel (x64) is not supported — only Apple Silicon (arm64) builds are provided.
-
-**Linux / macOS:**
-
-```sh
-# Example: Linux x64 — replace the filename with your platform's binary from the table above
-curl -L https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-linux-x64 \
-  -o play_console_cli
-
-chmod +x play_console_cli
-./play_console_cli --help
-```
-
-**Windows (PowerShell):**
-
-```powershell
-Invoke-WebRequest `
-  -Uri "https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-windows-x64.exe" `
-  -OutFile "play_console_cli.exe"
-
-.\play_console_cli.exe --help
-```
-
----
-
-### CLI Flags
-
-#### Required
-
-| Flag                      | Description                                               |
-| ------------------------- | --------------------------------------------------------- |
-| `-p, --package <name>`    | Android package name, e.g. `com.example.myapp`            |
-| `-c, --creds-path <path>` | Path to your Google service account credentials JSON file |
-
-#### Resources — pick what you want
-
-| Flag                     | Description                                                          |
-| ------------------------ | -------------------------------------------------------------------- |
-| `-A, --all`              | Fetch every supported resource                                       |
-| `-t, --tracks <tracks>`  | `all` or comma-separated: `production,beta,alpha,internal`           |
-| `-a, --apks`             | APK metadata                                                         |
-| `-b, --bundles`          | App Bundle metadata (version codes, SHA1, SHA256)                    |
-| `-l, --listings`         | Store listings for all languages                                     |
-| `-i, --images <types>`   | `all` or comma-separated: `icon,featureGraphic,phoneScreenshots,...` |
-| `-I, --inapps`           | In-app products and subscriptions                                    |
-| `-r, --reviews`          | User reviews and ratings                                             |
-| `-v, --voided-purchases` | Voided/refunded purchase records                                     |
-| `-T, --testers <tracks>` | Tester group membership — `all` or comma-separated tracks            |
-| `-d, --app-details`      | Core app metadata (default language, contact email)                  |
-| `-e, --expansion-files`  | Expansion file references for APKs                                   |
-
-#### Options
-
-| Flag                           | Default | Description                           |
-| ------------------------------ | ------- | ------------------------------------- |
-| `-L, --images-language <lang>` | `en-US` | Language code for image retrieval     |
-| `-P, --reviews-pages <n>`      | `1`     | Number of review pages to fetch       |
-| `-S, --reviews-page-size <n>`  | `100`   | Reviews per page                      |
-| `-j, --json`                   | —       | Output raw JSON to stdout (see below) |
-
----
-
-### Output Modes
-
-The CLI has two output modes, designed to compose cleanly in any environment.
-
-**Default — human-readable tree** (written to `stderr`)
-
-Without `-j`, the CLI renders a colored tree view of the response. Great for interactive use and debugging.
-
-```
-● tracks
-    └─╴ production
-        ├─╴ name          Release 2.4.0
-        ├─╴ versionCodes  ["240"]
-        └─╴ status        completed
-
-● bundles
-    ├─╴ [0]
-    │   ├─╴ versionCode   240
-    │   ├─╴ sha1          aabb1122...
-    │   └─╴ sha256        0011aabb...
-    └─╴ [1]
-        └─╴ versionCode   239
-```
-
-**JSON mode** — machine-readable (written to `stdout`)
-
-With `-j`, the complete response is written as formatted JSON to `stdout`. Progress and error messages still go to `stderr`, so they never pollute your pipeline.
-
-```sh
-# Pipe directly to jq — logs go to stderr, JSON goes straight through
-./play_console_cli -p com.example.myapp -c creds.json -t production -b -j | \
-  jq '.bundles | sort_by(.versionCode) | last | .sha256'
-
-# Suppress logs entirely, capture clean JSON
-./play_console_cli -p com.example.myapp -c creds.json -A -j 2>/dev/null > output.json
-```
-
-> **stdout = JSON. stderr = logs.** The separation is strict and intentional — the CLI is designed to live inside pipelines.
-
----
-
-### CLI Examples
-
-```sh
-# Fetch all tracks and bundles
-./play_console_cli -p com.example.myapp -c creds.json -t all -b -j
-
-# Fetch production track only
-./play_console_cli -p com.example.myapp -c creds.json -t production -j
-
-# Fetch store icon and feature graphic for French listings
-./play_console_cli -p com.example.myapp -c creds.json -i icon,featureGraphic -L fr-FR -j
-
-# Fetch last 200 reviews (2 pages × 100)
-./play_console_cli -p com.example.myapp -c creds.json -r -P 2 -S 100 -j
-
-# Dump everything to a file, no logs
-./play_console_cli -p com.example.myapp -c creds.json -A -j 2>/dev/null > play-console-dump.json
-
-# Interactive tree view — no -j flag
-./play_console_cli -p com.example.myapp -c creds.json -t all -l -d
-```
-
----
-
-### Build From Source
-
-If you want to compile the CLI yourself rather than using a release binary:
-
-```sh
-git clone https://github.com/Thre4dripper/play-console-info.git
-cd play-console-info
-
-# Set up Python environment
-python -m venv .venv && source .venv/bin/activate
-pip install -r cli/python/requirements.txt
-
-# Run directly without compiling
-python cli/python/play_console_cli.py -p com.example.myapp -c creds.json -A -j
-
-# Compile to a native binary (uses PyInstaller)
-pnpm build:cli:mac         # macOS (detects x64 or arm64 automatically)
-pnpm build:cli:linux       # Linux
-pnpm build:cli:windows     # Windows
-
-# Or target a specific architecture
-pnpm build:cli:linux:x64
-pnpm build:cli:linux:arm64
-```
 
 ---
 
@@ -510,6 +333,183 @@ Titles, descriptions, and image URLs for every market — saved as a downloadabl
 
 ---
 
+## 🖥️ The CLI
+
+The Play Console CLI is the engine that makes everything work. It is a compiled native binary — no Python runtime, no dependencies, no installation. Download it, point it at your credentials, and it hands you back JSON.
+
+```
+play_console_cli -p com.example.myapp -c service-account.json -A
+```
+
+### 📦 Download a Binary
+
+Pre-compiled binaries are attached to every [GitHub Release](../../releases/latest) as assets. Pick the one that matches your platform:
+
+<!-- DOWNLOAD-LINKS-START -->
+
+| Platform | Architecture          | Download                                                                                                                                          |
+| -------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Linux    | x64                   | [`play_console_cli-linux-x64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-linux-x64)             |
+| Linux    | arm64                 | [`play_console_cli-linux-arm64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-linux-arm64)         |
+| macOS    | arm64 (Apple Silicon) | [`play_console_cli-mac-arm64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-mac-arm64)             |
+| Windows  | x64                   | [`play_console_cli-windows-x64.exe`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-windows-x64.exe) |
+
+<!-- DOWNLOAD-LINKS-END -->
+
+> **Note:** macOS Intel (x64) is not supported — only Apple Silicon (arm64) builds are provided.
+
+**Linux / macOS:**
+
+```sh
+# Example: Linux x64 — replace the filename with your platform's binary from the table above
+curl -L https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-linux-x64 \
+  -o play_console_cli
+
+chmod +x play_console_cli
+./play_console_cli --help
+```
+
+**Windows (PowerShell):**
+
+```powershell
+Invoke-WebRequest `
+  -Uri "https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-windows-x64.exe" `
+  -OutFile "play_console_cli.exe"
+
+.\play_console_cli.exe --help
+```
+
+---
+
+### CLI Flags
+
+#### Required
+
+| Flag                      | Description                                               |
+| ------------------------- | --------------------------------------------------------- |
+| `-p, --package <name>`    | Android package name, e.g. `com.example.myapp`            |
+| `-c, --creds-path <path>` | Path to your Google service account credentials JSON file |
+
+#### Resources — pick what you want
+
+| Flag                     | Description                                                          |
+| ------------------------ | -------------------------------------------------------------------- |
+| `-A, --all`              | Fetch every supported resource                                       |
+| `-t, --tracks <tracks>`  | `all` or comma-separated: `production,beta,alpha,internal`           |
+| `-a, --apks`             | APK metadata                                                         |
+| `-b, --bundles`          | App Bundle metadata (version codes, SHA1, SHA256)                    |
+| `-l, --listings`         | Store listings for all languages                                     |
+| `-i, --images <types>`   | `all` or comma-separated: `icon,featureGraphic,phoneScreenshots,...` |
+| `-I, --inapps`           | In-app products and subscriptions                                    |
+| `-r, --reviews`          | User reviews and ratings                                             |
+| `-v, --voided-purchases` | Voided/refunded purchase records                                     |
+| `-T, --testers <tracks>` | Tester group membership — `all` or comma-separated tracks            |
+| `-d, --app-details`      | Core app metadata (default language, contact email)                  |
+| `-e, --expansion-files`  | Expansion file references for APKs                                   |
+
+#### Options
+
+| Flag                           | Default | Description                           |
+| ------------------------------ | ------- | ------------------------------------- |
+| `-L, --images-language <lang>` | `en-US` | Language code for image retrieval     |
+| `-P, --reviews-pages <n>`      | `1`     | Number of review pages to fetch       |
+| `-S, --reviews-page-size <n>`  | `100`   | Reviews per page                      |
+| `-j, --json`                   | —       | Output raw JSON to stdout (see below) |
+
+---
+
+### Output Modes
+
+The CLI has two output modes, designed to compose cleanly in any environment.
+
+**Default — human-readable tree** (written to `stderr`)
+
+Without `-j`, the CLI renders a colored tree view of the response. Great for interactive use and debugging.
+
+```
+● tracks
+    └─╴ production
+        ├─╴ name          Release 2.4.0
+        ├─╴ versionCodes  ["240"]
+        └─╴ status        completed
+
+● bundles
+    ├─╴ [0]
+    │   ├─╴ versionCode   240
+    │   ├─╴ sha1          aabb1122...
+    │   └─╴ sha256        0011aabb...
+    └─╴ [1]
+        └─╴ versionCode   239
+```
+
+**JSON mode** — machine-readable (written to `stdout`)
+
+With `-j`, the complete response is written as formatted JSON to `stdout`. Progress and error messages still go to `stderr`, so they never pollute your pipeline.
+
+```sh
+# Pipe directly to jq — logs go to stderr, JSON goes straight through
+./play_console_cli -p com.example.myapp -c creds.json -t production -b -j | \
+  jq '.bundles | sort_by(.versionCode) | last | .sha256'
+
+# Suppress logs entirely, capture clean JSON
+./play_console_cli -p com.example.myapp -c creds.json -A -j 2>/dev/null > output.json
+```
+
+> **stdout = JSON. stderr = logs.** The separation is strict and intentional — the CLI is designed to live inside pipelines.
+
+---
+
+### CLI Examples
+
+```sh
+# Fetch all tracks and bundles
+./play_console_cli -p com.example.myapp -c creds.json -t all -b -j
+
+# Fetch production track only
+./play_console_cli -p com.example.myapp -c creds.json -t production -j
+
+# Fetch store icon and feature graphic for French listings
+./play_console_cli -p com.example.myapp -c creds.json -i icon,featureGraphic -L fr-FR -j
+
+# Fetch last 200 reviews (2 pages × 100)
+./play_console_cli -p com.example.myapp -c creds.json -r -P 2 -S 100 -j
+
+# Dump everything to a file, no logs
+./play_console_cli -p com.example.myapp -c creds.json -A -j 2>/dev/null > play-console-dump.json
+
+# Interactive tree view — no -j flag
+./play_console_cli -p com.example.myapp -c creds.json -t all -l -d
+```
+
+---
+
+### Build From Source
+
+If you want to compile the CLI yourself rather than using a release binary:
+
+```sh
+git clone https://github.com/Thre4dripper/play-console-info.git
+cd play-console-info
+
+# Set up Python environment
+python -m venv .venv && source .venv/bin/activate
+pip install -r cli/python/requirements.txt
+
+# Run directly without compiling
+python cli/python/play_console_cli.py -p com.example.myapp -c creds.json -A -j
+
+# Compile to a native binary (uses PyInstaller)
+pnpm build:cli:mac         # macOS (detects x64 or arm64 automatically)
+pnpm build:cli:linux       # Linux
+pnpm build:cli:windows     # Windows
+
+# Or target a specific architecture
+pnpm build:cli:linux:x64
+pnpm build:cli:linux:arm64
+```
+
+---
+
 ## 📐 Output Shape Reference
 
 All responses follow the [Google Play Developer Publishing API v3](https://developers.google.com/android-publisher/api-ref/rest) structure. Only the most commonly used fields are shown.
@@ -630,6 +630,8 @@ All responses follow the [Google Play Developer Publishing API v3](https://devel
 - Grant your service account **read-only** Play Console access. This tool only reads — it never publishes, modifies tracks, or submits changes.
 - Pin the action to a specific release tag (e.g. `@v1.2.0`) rather than a branch to protect against unexpected upstream changes.
 
+To report a vulnerability privately, see [SECURITY.md](SECURITY.md).
+
 ---
 
 ## 🤝 Contributing
@@ -646,14 +648,25 @@ pnpm build:cli:mac     # compile the CLI binary for macOS
 
 `pnpm test:unit` and `pnpm typecheck` must pass before opening a PR. CI enforces both.
 
+- See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow.
+- See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community standards.
+
 ---
 
 ## 📄 License
 
-MIT © [Ijlal Ahmad](https://github.com/Thre4dripper)
+[MIT](LICENSE) — do whatever you want, just keep the notice.
 
 ---
 
 <div align="center">
-  <sub>Built because this problem was real, and nobody else had fixed it.</sub>
+
+### If this action saved you time, a ⭐ star goes a long way.
+
+[![GitHub stars](https://img.shields.io/github/stars/Thre4dripper/play-console-info?style=social)](https://github.com/Thre4dripper/play-console-info/stargazers)&nbsp;
+[![GitHub forks](https://img.shields.io/github/forks/Thre4dripper/play-console-info?style=social)](https://github.com/Thre4dripper/play-console-info/network/members)&nbsp;
+[![GitHub watchers](https://img.shields.io/github/watchers/Thre4dripper/play-console-info?style=social)](https://github.com/Thre4dripper/play-console-info/watchers)
+
+<sub>Built because this gap in Android release pipelines was real, and nobody else had fixed it.</sub>
+
 </div>
