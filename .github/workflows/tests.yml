@@ -41,8 +41,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
-        with:
-          lfs: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -60,17 +58,45 @@ jobs:
       - name: Run Unit Tests
         run: pnpm run test:unit
 
-  # ─── Job 2: Mock CLI Tests ────────────────────────────────────────────────
-  mock-cli-tests:
-    name: Mock CLI Tests
+  # ─── Job 2: Build Mock CLI binary (linux x64, used by mock + coverage) ───
+  build-mock-cli:
+    name: Build Mock CLI (linux-x64)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
-          lfs: true
+          node-version-file: package.json
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Build Mock CLI binary
+        run: bash cli/mock/build-mock-cli-linux.sh x64
+
+      - name: Upload Mock CLI artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: mock-cli-linux-x64
+          path: bin/mock/linux/mockCli-linux-x64
+          retention-days: 1
+          if-no-files-found: error
+
+  # ─── Job 3: Mock CLI Tests ────────────────────────────────────────────────
+  mock-cli-tests:
+    name: Mock CLI Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: build-mock-cli
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -85,13 +111,19 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Download Mock CLI binary
+        uses: actions/download-artifact@v7
+        with:
+          name: mock-cli-linux-x64
+          path: bin/mock/linux
+
       - name: Make Mock CLI Executable
-        run: chmod +x bin/mock/linux/mockCli-linux-x64 bin/python/linux/play_console_cli-linux-x64
+        run: chmod +x bin/mock/linux/mockCli-linux-x64
 
       - name: Run Mock CLI Tests
         run: pnpm run test:mock
 
-  # ─── Job 3: Coverage Report (c8) ─────────────────────────────────────────
+  # ─── Job 4: Coverage Report (c8) ─────────────────────────────────────────
   coverage:
     name: Coverage Report (c8)
     runs-on: ubuntu-latest
@@ -103,8 +135,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
-        with:
-          lfs: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -119,8 +149,14 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Download Mock CLI binary
+        uses: actions/download-artifact@v7
+        with:
+          name: mock-cli-linux-x64
+          path: bin/mock/linux
+
       - name: Make Mock CLI Executable
-        run: chmod +x bin/mock/linux/mockCli-linux-x64 bin/python/linux/play_console_cli-linux-x64
+        run: chmod +x bin/mock/linux/mockCli-linux-x64
 
       - name: Run Tests with c8 Coverage
         run: pnpm run test:coverage

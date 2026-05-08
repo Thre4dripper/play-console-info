@@ -1,0 +1,15 @@
+name: 'Setup Mock CLI'
+description: 'Downloads the prebuilt mock CLI artifact into bin/mock/linux/ and makes it executable'
+
+runs:
+  using: composite
+  steps:
+    - name: Download Mock CLI binary
+      uses: actions/download-artifact@v6
+      with:
+        name: mock-cli-linux-x64
+        path: bin/mock/linux
+
+    - name: Make Mock CLI executable
+      shell: bash
+      run: chmod +x bin/mock/linux/mockCli-linux-x64

@@ -23,14 +23,44 @@ on:
         required: true
 
 jobs:
-  test-basic:
+  # ─── Build Mock CLI binary once, reused by all test jobs ─────────────────
+  build-mock-cli:
     runs-on: ubuntu-latest
-    name: Test Basic Functionality
+    name: Build Mock CLI (linux-x64)
+    timeout-minutes: 10
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
-          lfs: true
+          node-version-file: package.json
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Build Mock CLI binary
+        run: bash cli/mock/build-mock-cli-linux.sh x64
+
+      - name: Upload Mock CLI artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: mock-cli-linux-x64
+          path: bin/mock/linux/mockCli-linux-x64
+          retention-days: 1
+          if-no-files-found: error
+
+  test-basic:
+    runs-on: ubuntu-latest
+    name: Test Basic Functionality
+    needs: build-mock-cli
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Setup Mock CLI
+        uses: ./.github/actions/setup-mock-cli
 
       - name: Test basic package info
         id: basic
@@ -57,8 +87,9 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
-        with:
-          lfs: true
+
+      - name: Setup Mock CLI
+        uses: ./.github/actions/setup-mock-cli
 
       - name: Test with all resources enabled
         id: all
@@ -91,7 +122,6 @@ jobs:
     name: Test Specific Tracks
     needs: test-all-resources
     strategy:
-#      max-parallel: 1
       matrix:
         tracks:
           [
@@ -105,8 +135,9 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
-        with:
-          lfs: true
+
+      - name: Setup Mock CLI
+        uses: ./.github/actions/setup-mock-cli
 
       - name: Test tracks - ${{ matrix.tracks }}
         id: tracks
@@ -129,7 +160,6 @@ jobs:
     name: Test Image Options
     needs: test-specific-tracks
     strategy:
-#      max-parallel: 1
       matrix:
         images:
           ['icon', 'featureGraphic', 'phoneScreenshots', 'icon,featureGraphic']
@@ -137,8 +167,9 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
-        with:
-          lfs: true
+
+      - name: Setup Mock CLI
+        uses: ./.github/actions/setup-mock-cli
 
       - name: Test images - ${{ matrix.images }} (${{ matrix.language }})
         id: images
@@ -162,15 +193,15 @@ jobs:
     name: Test Reviews Pagination
     needs: test-image-options
     strategy:
-#      max-parallel: 1
       matrix:
         pages: ['1', '2', '3']
         pageSize: ['50', '100', '200']
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
-        with:
-          lfs: true
+
+      - name: Setup Mock CLI
+        uses: ./.github/actions/setup-mock-cli
 
       - name: Test reviews - ${{ matrix.pages }} pages, ${{ matrix.pageSize }} size
         id: reviews
@@ -197,8 +228,9 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
-        with:
-          lfs: true
+
+      - name: Setup Mock CLI
+        uses: ./.github/actions/setup-mock-cli
 
       - name: Create service account file
         run: |
@@ -236,14 +268,23 @@ jobs:
     name: Test Individual Resources
     needs: test-file-vs-plaintext
     strategy:
-#      max-parallel: 1
       matrix:
-        resource: ['apks', 'bundles', 'listings', 'inapps', 'voidedPurchases', 'appDetails', 'expansionFiles']
+        resource:
+          [
+            'apks',
+            'bundles',
+            'listings',
+            'inapps',
+            'voidedPurchases',
+            'appDetails',
+            'expansionFiles',
+          ]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
-        with:
-          lfs: true
+
+      - name: Setup Mock CLI
+        uses: ./.github/actions/setup-mock-cli
 
       - name: Test ${{ matrix.resource }}
         uses: ./
@@ -280,15 +321,15 @@ jobs:
     name: Test Testers
     needs: test-individual-resources
     strategy:
-#      max-parallel: 1
       matrix:
         testers:
           ['internal', 'alpha', 'beta', 'production', 'all', 'internal,alpha']
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
-        with:
-          lfs: true
+
+      - name: Setup Mock CLI
+        uses: ./.github/actions/setup-mock-cli
 
       - name: Test testers - ${{ matrix.testers }}
         id: testers
@@ -313,8 +354,9 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
-        with:
-          lfs: true
+
+      - name: Setup Mock CLI
+        uses: ./.github/actions/setup-mock-cli
 
       - name: Test artifact upload
         id: artifact-upload
