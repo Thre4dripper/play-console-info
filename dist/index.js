@@ -104059,9 +104059,12 @@ var getBinarySpec = (useMock) => {
       };
     }
     case "darwin": {
-      const fileName = `${baseName}-mac-${arch}`;
+      if (arch !== "arm64") {
+        throw new ActionError("macOS x64 is not supported \u2014 only arm64 binaries are published");
+      }
+      const fileName = `${baseName}-mac-arm64`;
       return {
-        toolName: `${kind}-cli-mac-${arch}`,
+        toolName: `${kind}-cli-mac-arm64`,
         fileName,
         localSubDir: ["bin", kind, "mac"],
         needsChmod: true

@@ -51,10 +51,6 @@ jobs:
             os: ubuntu-latest # Bun cross-compiles — no arm64 runner needed
             artifact-path: bin/mock/linux/mockCli-linux-arm64
           - platform: mac
-            arch: x64
-            os: macos-latest
-            artifact-path: bin/mock/mac/mockCli-mac-x64
-          - platform: mac
             arch: arm64
             os: macos-latest
             artifact-path: bin/mock/mac/mockCli-mac-arm64
@@ -114,10 +110,6 @@ jobs:
             arch: arm64
             os: ubuntu-24.04-arm # native arm64 Linux runner
             artifact-path: bin/python/linux/play_console_cli-linux-arm64
-          - platform: mac
-            arch: x64
-            os: macos-13
-            artifact-path: bin/python/mac/play_console_cli-mac-x64
           - platform: mac
             arch: arm64
             os: macos-latest

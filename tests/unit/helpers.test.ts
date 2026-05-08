@@ -85,14 +85,13 @@ describe('getExecutablePath', () => {
   });
 
   describe('with useMock = true (Mock CLI, local resolution)', () => {
-    it('returns correct x64 executable path for all platforms', async () => {
+      it('returns correct x64 executable path for supported x64 platforms', async () => {
       mockOs.arch.mockReturnValue('x64');
       const platforms = [
         [
           'win32',
           path.join('bin', 'mock', 'windows', 'mockCli-windows-x64.exe'),
         ],
-        ['darwin', path.join('bin', 'mock', 'mac', 'mockCli-mac-x64')],
         ['linux', path.join('bin', 'mock', 'linux', 'mockCli-linux-x64')],
       ] as const;
 
@@ -117,6 +116,18 @@ describe('getExecutablePath', () => {
       }
     });
 
+    it('throws for macOS x64', async () => {
+      mockOs.platform.mockReturnValue('darwin');
+      mockOs.arch.mockReturnValue('x64');
+
+      await expect(getExecutablePath(true)).rejects.toThrow(
+        'macOS x64 is not supported — only arm64 binaries are published'
+      );
+      expect(mockCore.setFailed).toHaveBeenCalledWith(
+        'macOS x64 is not supported — only arm64 binaries are published'
+      );
+    });
+
     it('windows always uses x64 suffix regardless of arch', async () => {
       mockOs.platform.mockReturnValue('win32');
       mockOs.arch.mockReturnValue('arm64');
@@ -133,14 +144,15 @@ describe('getExecutablePath', () => {
     });
 
     it('calls chmod for linux and darwin platforms only', async () => {
-      mockOs.arch.mockReturnValue('x64');
       const platformPaths = [
         [
           'darwin',
-          path.join('/test/project', 'bin', 'mock', 'mac', 'mockCli-mac-x64'),
+          'arm64',
+          path.join('/test/project', 'bin', 'mock', 'mac', 'mockCli-mac-arm64'),
         ],
         [
           'linux',
+          'x64',
           path.join(
             '/test/project',
             'bin',
@@ -151,9 +163,10 @@ describe('getExecutablePath', () => {
         ],
       ] as const;
 
-      for (const [platform, expectedPath] of platformPaths) {
+      for (const [platform, arch, expectedPath] of platformPaths) {
         mockExec.exec.mockClear();
         mockOs.platform.mockReturnValue(platform);
+        mockOs.arch.mockReturnValue(arch);
 
         await getExecutablePath(true);
 
