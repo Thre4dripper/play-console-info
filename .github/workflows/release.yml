@@ -154,10 +154,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download all binary artifacts
+      - name: Download Python binary artifacts
         uses: actions/download-artifact@v7
         with:
           path: release-assets
+          pattern: python-*
           merge-multiple: true
 
       - name: Get version
