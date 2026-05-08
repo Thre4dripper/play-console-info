@@ -22,18 +22,20 @@ elif [ "$ARCH_SUFFIX" = "x64" ]; then
   TARGET_ARCH="x86_64"
 fi
 
+VENV_DIR="cli/python/.venv-mac-$ARCH_SUFFIX"
+
 mkdir -p "bin/python/mac"
 
 # Create a virtual environment if not already present
-if [ ! -d ".venv/bin" ]; then
-  python3 -m venv .venv
+if [ ! -x "$VENV_DIR/bin/python" ]; then
+  python3 -m venv "$VENV_DIR"
 fi
-.venv/bin/python -m pip install --upgrade pip
-.venv/bin/python -m pip install -r cli/python/requirements.txt
+"$VENV_DIR/bin/python" -m pip install --upgrade pip
+"$VENV_DIR/bin/python" -m pip install -r cli/python/requirements.txt
 
 # Use PyInstaller to create a standalone executable
 echo "Compiling Python to macOS $ARCH_SUFFIX executable..."
-.venv/bin/python -m PyInstaller -F cli/python/play_console_cli.py \
+"$VENV_DIR/bin/python" -m PyInstaller -F cli/python/play_console_cli.py \
   --distpath "bin/python/mac" \
   --workpath cli/python/build \
   --specpath cli/python \
