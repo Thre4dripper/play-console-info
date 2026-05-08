@@ -11,7 +11,7 @@
 
 ---
 
-There is a gap in every Android release pipeline. You can *push* to the Play Store but you cannot *read* back what it knows. No official tooling exists. Teams end up with bespoke scripts that rot, fragile curl commands against a complex API, or just doing it manually.
+There is a gap in every Android release pipeline. You can _push_ to the Play Store but you cannot _read_ back what it knows. No official tooling exists. Teams end up with bespoke scripts that rot, fragile curl commands against a complex API, or just doing it manually.
 
 This project fixes that — and it does it at two levels.
 
@@ -65,12 +65,14 @@ play_console_cli -p com.example.myapp -c service-account.json -A
 Pre-compiled binaries are attached to every [GitHub Release](../../releases/latest) as assets. Pick the one that matches your platform:
 
 <!-- DOWNLOAD-LINKS-START -->
-| Platform | Architecture | Download |
-|---|---|---|
-| Linux | x64 | [`play_console_cli-linux-x64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.0/play_console_cli-linux-x64) |
-| Linux | arm64 | [`play_console_cli-linux-arm64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.0/play_console_cli-linux-arm64) |
-| macOS | arm64 (Apple Silicon) | [`play_console_cli-mac-arm64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.0/play_console_cli-mac-arm64) |
-| Windows | x64 | [`play_console_cli-windows-x64.exe`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.0/play_console_cli-windows-x64.exe) |
+
+| Platform | Architecture          | Download                                                                                                                                          |
+| -------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Linux    | x64                   | [`play_console_cli-linux-x64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-linux-x64)             |
+| Linux    | arm64                 | [`play_console_cli-linux-arm64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-linux-arm64)         |
+| macOS    | arm64 (Apple Silicon) | [`play_console_cli-mac-arm64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-mac-arm64)             |
+| Windows  | x64                   | [`play_console_cli-windows-x64.exe`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-windows-x64.exe) |
+
 <!-- DOWNLOAD-LINKS-END -->
 
 > **Note:** macOS Intel (x64) is not supported — only Apple Silicon (arm64) builds are provided.
@@ -102,36 +104,36 @@ Invoke-WebRequest `
 
 #### Required
 
-| Flag | Description |
-|---|---|
-| `-p, --package <name>` | Android package name, e.g. `com.example.myapp` |
+| Flag                      | Description                                               |
+| ------------------------- | --------------------------------------------------------- |
+| `-p, --package <name>`    | Android package name, e.g. `com.example.myapp`            |
 | `-c, --creds-path <path>` | Path to your Google service account credentials JSON file |
 
 #### Resources — pick what you want
 
-| Flag | Description |
-|---|---|
-| `-A, --all` | Fetch every supported resource |
-| `-t, --tracks <tracks>` | `all` or comma-separated: `production,beta,alpha,internal` |
-| `-a, --apks` | APK metadata |
-| `-b, --bundles` | App Bundle metadata (version codes, SHA1, SHA256) |
-| `-l, --listings` | Store listings for all languages |
-| `-i, --images <types>` | `all` or comma-separated: `icon,featureGraphic,phoneScreenshots,...` |
-| `-I, --inapps` | In-app products and subscriptions |
-| `-r, --reviews` | User reviews and ratings |
-| `-v, --voided-purchases` | Voided/refunded purchase records |
-| `-T, --testers <tracks>` | Tester group membership — `all` or comma-separated tracks |
-| `-d, --app-details` | Core app metadata (default language, contact email) |
-| `-e, --expansion-files` | Expansion file references for APKs |
+| Flag                     | Description                                                          |
+| ------------------------ | -------------------------------------------------------------------- |
+| `-A, --all`              | Fetch every supported resource                                       |
+| `-t, --tracks <tracks>`  | `all` or comma-separated: `production,beta,alpha,internal`           |
+| `-a, --apks`             | APK metadata                                                         |
+| `-b, --bundles`          | App Bundle metadata (version codes, SHA1, SHA256)                    |
+| `-l, --listings`         | Store listings for all languages                                     |
+| `-i, --images <types>`   | `all` or comma-separated: `icon,featureGraphic,phoneScreenshots,...` |
+| `-I, --inapps`           | In-app products and subscriptions                                    |
+| `-r, --reviews`          | User reviews and ratings                                             |
+| `-v, --voided-purchases` | Voided/refunded purchase records                                     |
+| `-T, --testers <tracks>` | Tester group membership — `all` or comma-separated tracks            |
+| `-d, --app-details`      | Core app metadata (default language, contact email)                  |
+| `-e, --expansion-files`  | Expansion file references for APKs                                   |
 
 #### Options
 
-| Flag | Default | Description |
-|---|---|---|
-| `-L, --images-language <lang>` | `en-US` | Language code for image retrieval |
-| `-P, --reviews-pages <n>` | `1` | Number of review pages to fetch |
-| `-S, --reviews-page-size <n>` | `100` | Reviews per page |
-| `-j, --json` | — | Output raw JSON to stdout (see below) |
+| Flag                           | Default | Description                           |
+| ------------------------------ | ------- | ------------------------------------- |
+| `-L, --images-language <lang>` | `en-US` | Language code for image retrieval     |
+| `-P, --reviews-pages <n>`      | `1`     | Number of review pages to fetch       |
+| `-S, --reviews-page-size <n>`  | `100`   | Reviews per page                      |
+| `-j, --json`                   | —       | Output raw JSON to stdout (see below) |
 
 ---
 
@@ -287,45 +289,45 @@ In [Play Console → Setup → API access](https://play.google.com/console/devel
 
 #### Authentication
 
-| Input | Required | Description |
-|---|---|---|
-| `package` | ✅ | Android application ID, e.g. `com.example.myapp` |
+| Input                         | Required        | Description                                                      |
+| ----------------------------- | --------------- | ---------------------------------------------------------------- |
+| `package`                     | ✅              | Android application ID, e.g. `com.example.myapp`                 |
 | `serviceAccountJsonPlainText` | ⚠️ one of these | Full service account JSON as a string — store in a GitHub Secret |
-| `serviceAccountJsonPath` | ⚠️ one of these | Path to the service account JSON file on the runner |
+| `serviceAccountJsonPath`      | ⚠️ one of these | Path to the service account JSON file on the runner              |
 
 #### Resources
 
-| Input | Type | Default | Description |
-|---|---|---|---|
-| `all` | boolean | `false` | Fetch every supported resource |
-| `tracks` | string | — | `all` or comma-separated: `production,beta,alpha,internal` |
-| `apks` | boolean | `false` | APK metadata |
-| `bundles` | boolean | `false` | App Bundle metadata |
-| `listings` | boolean | `false` | Store listings for all languages |
-| `images` | string | — | `all` or comma-separated image types |
-| `inapps` | boolean | `false` | In-app products and subscriptions |
-| `reviews` | boolean | `false` | User reviews and ratings |
-| `voidedPurchases` | boolean | `false` | Voided/refunded purchase records |
-| `testers` | string | — | `all` or comma-separated tracks |
-| `appDetails` | boolean | `false` | Core app metadata |
-| `expansionFiles` | boolean | `false` | APK expansion file references |
+| Input             | Type    | Default | Description                                                |
+| ----------------- | ------- | ------- | ---------------------------------------------------------- |
+| `all`             | boolean | `false` | Fetch every supported resource                             |
+| `tracks`          | string  | —       | `all` or comma-separated: `production,beta,alpha,internal` |
+| `apks`            | boolean | `false` | APK metadata                                               |
+| `bundles`         | boolean | `false` | App Bundle metadata                                        |
+| `listings`        | boolean | `false` | Store listings for all languages                           |
+| `images`          | string  | —       | `all` or comma-separated image types                       |
+| `inapps`          | boolean | `false` | In-app products and subscriptions                          |
+| `reviews`         | boolean | `false` | User reviews and ratings                                   |
+| `voidedPurchases` | boolean | `false` | Voided/refunded purchase records                           |
+| `testers`         | string  | —       | `all` or comma-separated tracks                            |
+| `appDetails`      | boolean | `false` | Core app metadata                                          |
+| `expansionFiles`  | boolean | `false` | APK expansion file references                              |
 
 #### Options
 
-| Input | Default | Description |
-|---|---|---|
-| `imagesLanguage` | — | Language code for image retrieval, e.g. `en-US` |
-| `reviewsPages` | — | Number of review pages to fetch |
-| `reviewsPageSize` | — | Reviews per page |
+| Input             | Default | Description                                     |
+| ----------------- | ------- | ----------------------------------------------- |
+| `imagesLanguage`  | —       | Language code for image retrieval, e.g. `en-US` |
+| `reviewsPages`    | —       | Number of review pages to fetch                 |
+| `reviewsPageSize` | —       | Reviews per page                                |
 
 #### Artifact Upload
 
-| Input | Default | Description |
-|---|---|---|
-| `uploadOutputsArtifact` | `false` | Upload the full JSON response as a workflow artifact |
-| `outputsJsonPath` | `artifacts/` | Directory to write the JSON file before upload |
-| `outputsArtifactName` | `play-console-outputs` | Artifact name in the workflow run |
-| `outputsArtifactRetentionDays` | `1` | Days to keep the artifact (1–90) |
+| Input                          | Default                | Description                                          |
+| ------------------------------ | ---------------------- | ---------------------------------------------------- |
+| `uploadOutputsArtifact`        | `false`                | Upload the full JSON response as a workflow artifact |
+| `outputsJsonPath`              | `artifacts/`           | Directory to write the JSON file before upload       |
+| `outputsArtifactName`          | `play-console-outputs` | Artifact name in the workflow run                    |
+| `outputsArtifactRetentionDays` | `1`                    | Days to keep the artifact (1–90)                     |
 
 ---
 
@@ -333,19 +335,19 @@ In [Play Console → Setup → API access](https://play.google.com/console/devel
 
 Every resource you request becomes a named step output containing a JSON string. Access them with `${{ steps.<id>.outputs.<name> }}`.
 
-| Output | Description |
-|---|---|
-| `tracks` | Track data — releases, version codes, release notes, status, rollout percentage |
-| `apks` | APK metadata — version codes, file sizes, SHA1/SHA256 |
-| `bundles` | App Bundle metadata — version codes, SHA1, SHA256 |
-| `listings` | Store listings for all languages — title, short/full description |
-| `images` | Store images by type — URLs, dimensions, SHA hashes |
-| `inapps` | In-app products — IDs, pricing, purchase types, status |
-| `reviews` | User reviews — ratings, text, timestamps, reply status |
-| `voidedPurchases` | Voided purchases — transaction IDs, void reasons |
-| `testers` | Tester group membership per track |
-| `appDetails` | App metadata — default language, contact email |
-| `expansionFiles` | Expansion file references and sizes |
+| Output            | Description                                                                     |
+| ----------------- | ------------------------------------------------------------------------------- |
+| `tracks`          | Track data — releases, version codes, release notes, status, rollout percentage |
+| `apks`            | APK metadata — version codes, file sizes, SHA1/SHA256                           |
+| `bundles`         | App Bundle metadata — version codes, SHA1, SHA256                               |
+| `listings`        | Store listings for all languages — title, short/full description                |
+| `images`          | Store images by type — URLs, dimensions, SHA hashes                             |
+| `inapps`          | In-app products — IDs, pricing, purchase types, status                          |
+| `reviews`         | User reviews — ratings, text, timestamps, reply status                          |
+| `voidedPurchases` | Voided purchases — transaction IDs, void reasons                                |
+| `testers`         | Tester group membership per track                                               |
+| `appDetails`      | App metadata — default language, contact email                                  |
+| `expansionFiles`  | Expansion file references and sizes                                             |
 
 > All outputs are JSON strings. Parse them with `jq` in shell steps or `JSON.parse()` in script steps.
 
@@ -527,7 +529,10 @@ All responses follow the [Google Play Developer Publishing API v3](https://devel
           "versionCodes": ["240"],
           "status": "completed",
           "releaseNotes": [
-            { "language": "en-US", "text": "Bug fixes and performance improvements." }
+            {
+              "language": "en-US",
+              "text": "Bug fixes and performance improvements."
+            }
           ]
         }
       ]
