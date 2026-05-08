@@ -68,10 +68,10 @@ Pre-compiled binaries are attached to every [GitHub Release](../../releases/late
 
 | Platform | Architecture          | Download                                                                                                                                          |
 | -------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Linux    | x64                   | [`play_console_cli-linux-x64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.0/play_console_cli-linux-x64)             |
-| Linux    | arm64                 | [`play_console_cli-linux-arm64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.0/play_console_cli-linux-arm64)         |
-| macOS    | arm64 (Apple Silicon) | [`play_console_cli-mac-arm64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.0/play_console_cli-mac-arm64)             |
-| Windows  | x64                   | [`play_console_cli-windows-x64.exe`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.0/play_console_cli-windows-x64.exe) |
+| Linux    | x64                   | [`play_console_cli-linux-x64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-linux-x64)             |
+| Linux    | arm64                 | [`play_console_cli-linux-arm64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-linux-arm64)         |
+| macOS    | arm64 (Apple Silicon) | [`play_console_cli-mac-arm64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-mac-arm64)             |
+| Windows  | x64                   | [`play_console_cli-windows-x64.exe`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-windows-x64.exe) |
 
 <!-- DOWNLOAD-LINKS-END -->
 
