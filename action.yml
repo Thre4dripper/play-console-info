@@ -1,7 +1,9 @@
 name: Play Console Info
-description: >
-  Fetch comprehensive Google Play Console data for your Android app and expose it as GitHub Actions outputs.
-  This action retrieves tracks, APKs, bundles, listings, images, reviews, testers, and more from the Google Play Console API.
+description: >-
+  Fetch tracks, APKs, bundles, listings, and more from Google Play Console and expose them as Actions outputs.
+branding:
+  icon: smartphone
+  color: green
 inputs:
   package:
     description: >
