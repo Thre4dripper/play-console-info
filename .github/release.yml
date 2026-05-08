@@ -1,0 +1,11 @@
+changelog:
+  categories:
+    - title: "📦 Dependency Updates"
+      labels:
+        - dependencies
+        - javascript
+        - github_actions
+        - python
+  exclude:
+    labels:
+      - skip-changelog

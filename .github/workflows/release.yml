@@ -197,11 +197,31 @@ jobs:
           pattern: python-*
           merge-multiple: true
 
-      - name: Get version
+      - name: Get version and changelog
         id: version
         run: |
           VERSION=$(node -p "require('./package.json').version")
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+          PREV_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
+
+          if [ -n "$PREV_TAG" ]; then
+            COMMITS=$(git log "$PREV_TAG"..HEAD --no-merges --pretty=format:"- %s (%h)" 2>/dev/null)
+          else
+            COMMITS=$(git log --no-merges --pretty=format:"- %s (%h)" 2>/dev/null)
+          fi
+
+          if [ -n "$COMMITS" ]; then
+            BODY="## 🔨 Changes"$'\n'"$COMMITS"
+          else
+            BODY=""
+          fi
+
+          {
+            echo "BODY<<EOF"
+            echo "$BODY"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -210,6 +230,7 @@ jobs:
         with:
           tag_name: v${{ steps.version.outputs.VERSION }}
           name: Release v${{ steps.version.outputs.VERSION }}
+          body: ${{ steps.version.outputs.BODY }}
           generate_release_notes: true
           draft: false
           prerelease: false
