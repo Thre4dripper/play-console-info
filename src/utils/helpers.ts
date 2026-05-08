@@ -40,7 +40,8 @@ export const getExecutablePath = async (useMock: boolean): Promise<string> => {
   Logger.debug(`Using base path: ${basePath}`);
 
   const platform = os.platform();
-  Logger.debug(`Platform detected: ${platform}`);
+  const arch = os.arch() === 'arm64' ? 'arm64' : 'x64';
+  Logger.debug(`Platform detected: ${platform}, arch: ${arch}`);
 
   if (useMock) {
     // For mock/testing purposes
@@ -53,7 +54,7 @@ export const getExecutablePath = async (useMock: boolean): Promise<string> => {
           'bin',
           'mock',
           'windows',
-          'mockCli-windows.exe'
+          'mockCli-windows-x64.exe'
         );
       }
       case 'darwin': {
@@ -62,7 +63,7 @@ export const getExecutablePath = async (useMock: boolean): Promise<string> => {
           'bin',
           'mock',
           'mac',
-          'mockCli-mac'
+          `mockCli-mac-${arch}`
         );
         await exec.exec('chmod', ['+x', mockCliPath]);
         return mockCliPath;
@@ -73,7 +74,7 @@ export const getExecutablePath = async (useMock: boolean): Promise<string> => {
           'bin',
           'mock',
           'linux',
-          'mockCli-linux'
+          `mockCli-linux-${arch}`
         );
         await exec.exec('chmod', ['+x', mockCliPath]);
         return mockCliPath;
@@ -93,7 +94,7 @@ export const getExecutablePath = async (useMock: boolean): Promise<string> => {
         'bin',
         'python',
         'windows',
-        'play_console_cli-windows.exe'
+        'play_console_cli-windows-x64.exe'
       );
     }
     case 'darwin': {
@@ -102,7 +103,7 @@ export const getExecutablePath = async (useMock: boolean): Promise<string> => {
         'bin',
         'python',
         'mac',
-        'play_console_cli-mac'
+        `play_console_cli-mac-${arch}`
       );
       await exec.exec('chmod', ['+x', pythonCliPath]);
       return pythonCliPath;
@@ -113,7 +114,7 @@ export const getExecutablePath = async (useMock: boolean): Promise<string> => {
         'bin',
         'python',
         'linux',
-        'play_console_cli-linux'
+        `play_console_cli-linux-${arch}`
       );
       await exec.exec('chmod', ['+x', pythonCliPath]);
       return pythonCliPath;
