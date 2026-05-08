@@ -235,3 +235,34 @@ jobs:
           draft: false
           prerelease: false
           files: release-assets/*
+
+  update-readme:
+    name: Update README Download Links
+    needs: create-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update download links in README
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          # Update versioned download links
+          sed -i "s|releases/download/v[0-9]*\.[0-9]*\.[0-9]*/|releases/download/v${VERSION}/|g" README.md
+          # Update static release badge
+          sed -i "s|release-v[0-9]*\.[0-9]*\.[0-9]*-3DDC84|release-v${VERSION}-3DDC84|g" README.md
+          echo "Updated README to v${VERSION}"
+
+      - name: Commit updated README
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git diff --staged --quiet || git commit -m "chore: update README download links to v${VERSION} [skip ci]"
+          git push

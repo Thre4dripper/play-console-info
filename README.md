@@ -1,6 +1,13 @@
-# Play Console Info
-
-> Fetch anything from Google Play Console — as a GitHub Action, or as a standalone CLI binary you can use anywhere.
+<div align="center">
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/androidstudio/androidstudio-original.svg" width="90" alt="Android" />
+  <h1>Play Console Info</h1>
+  <p>Fetch anything from Google Play Console — as a GitHub Action, or as a standalone CLI binary you can use anywhere.</p>
+  <br/>
+  <a href="../../releases"><img src="https://img.shields.io/badge/release-v1.0.1-3DDC84?style=flat-square" alt="Latest Release" /></a>&nbsp;
+  <img src="https://img.shields.io/badge/Platforms-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey?style=flat-square" alt="Platforms" />&nbsp;
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />&nbsp;
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License" /></a>
+</div>
 
 ---
 
@@ -18,26 +25,34 @@ Use whichever layer you need. The CLI is self-contained.
 
 ## Table of Contents
 
-- [The CLI](#the-cli)
-  - [Download a Binary](#download-a-binary)
+- [Table of Contents](#table-of-contents)
+- [🖥️ The CLI](#️-the-cli)
+  - [📦 Download a Binary](#-download-a-binary)
   - [CLI Flags](#cli-flags)
+    - [Required](#required)
+    - [Resources — pick what you want](#resources--pick-what-you-want)
+    - [Options](#options)
   - [Output Modes](#output-modes)
   - [CLI Examples](#cli-examples)
   - [Build From Source](#build-from-source)
-- [The GitHub Action](#the-github-action)
-  - [Quick Start](#quick-start)
+- [⚡ The GitHub Action](#-the-github-action)
+  - [🚀 Quick Start](#-quick-start)
   - [Service Account Setup](#service-account-setup)
   - [Inputs](#inputs)
+    - [Authentication](#authentication)
+    - [Resources](#resources)
+    - [Options](#options-1)
+    - [Artifact Upload](#artifact-upload)
   - [Outputs](#outputs)
   - [Action Examples](#action-examples)
-- [Output Shape Reference](#output-shape-reference)
-- [Security](#security)
-- [Contributing](#contributing)
-- [License](#license)
+- [📐 Output Shape Reference](#-output-shape-reference)
+- [🔒 Security](#-security)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
 
 ---
 
-## The CLI
+## 🖥️ The CLI
 
 The Play Console CLI is the engine that makes everything work. It is a compiled native binary — no Python runtime, no dependencies, no installation. Download it, point it at your credentials, and it hands you back JSON.
 
@@ -45,23 +60,26 @@ The Play Console CLI is the engine that makes everything work. It is a compiled 
 play_console_cli -p com.example.myapp -c service-account.json -A
 ```
 
-### Download a Binary
+### 📦 Download a Binary
 
 Pre-compiled binaries are attached to every [GitHub Release](../../releases/latest) as assets. Pick the one that matches your platform:
 
-| Platform | Architecture | Asset name |
+<!-- DOWNLOAD-LINKS-START -->
+| Platform | Architecture | Download |
 |---|---|---|
-| Linux | x64 | `play_console_cli-linux-x64` |
-| Linux | arm64 | `play_console_cli-linux-arm64` |
-| macOS | x64 (Intel) | `play_console_cli-mac-x64` |
-| macOS | arm64 (Apple Silicon) | `play_console_cli-mac-arm64` |
-| Windows | x64 | `play_console_cli-windows-x64.exe` |
+| Linux | x64 | [`play_console_cli-linux-x64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.0/play_console_cli-linux-x64) |
+| Linux | arm64 | [`play_console_cli-linux-arm64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.0/play_console_cli-linux-arm64) |
+| macOS | arm64 (Apple Silicon) | [`play_console_cli-mac-arm64`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.0/play_console_cli-mac-arm64) |
+| Windows | x64 | [`play_console_cli-windows-x64.exe`](https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.0/play_console_cli-windows-x64.exe) |
+<!-- DOWNLOAD-LINKS-END -->
+
+> **Note:** macOS Intel (x64) is not supported — only Apple Silicon (arm64) builds are provided.
 
 **Linux / macOS:**
 
 ```sh
-# Replace <asset-name> with your platform's binary from the table above
-curl -L https://github.com/ijlal-ahmad/play-console-info/releases/latest/download/<asset-name> \
+# Example: Linux x64 — replace the filename with your platform's binary from the table above
+curl -L https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-linux-x64 \
   -o play_console_cli
 
 chmod +x play_console_cli
@@ -72,7 +90,7 @@ chmod +x play_console_cli
 
 ```powershell
 Invoke-WebRequest `
-  -Uri "https://github.com/ijlal-ahmad/play-console-info/releases/latest/download/play_console_cli-windows-x64.exe" `
+  -Uri "https://github.com/Thre4dripper/play-console-info/releases/download/v1.0.1/play_console_cli-windows-x64.exe" `
   -OutFile "play_console_cli.exe"
 
 .\play_console_cli.exe --help
@@ -187,7 +205,7 @@ With `-j`, the complete response is written as formatted JSON to `stdout`. Progr
 If you want to compile the CLI yourself rather than using a release binary:
 
 ```sh
-git clone https://github.com/ijlal-ahmad/play-console-info.git
+git clone https://github.com/Thre4dripper/play-console-info.git
 cd play-console-info
 
 # Set up Python environment
@@ -209,15 +227,15 @@ pnpm build:cli:linux:arm64
 
 ---
 
-## The GitHub Action
+## ⚡ The GitHub Action
 
 The action wraps the CLI and makes it available declaratively inside a GitHub Actions workflow. Credentials come from Secrets, every resource you request becomes a named step output, and the whole thing wires into your existing CI in a handful of lines.
 
-### Quick Start
+### 🚀 Quick Start
 
 ```yaml
 - name: Fetch Play Console data
-  uses: ijlal-ahmad/play-console-info@v1
+  uses: Thre4dripper/play-console-info@v1
   id: play
   with:
     package: com.example.myapp
@@ -335,7 +353,7 @@ Every resource you request becomes a named step output containing a JSON string.
 
 ### Action Examples
 
-<details>
+<details open>
 <summary><strong>Check your production track on every PR</strong></summary>
 
 ```yaml
@@ -349,7 +367,7 @@ jobs:
   check-production:
     runs-on: ubuntu-latest
     steps:
-      - uses: ijlal-ahmad/play-console-info@v1
+      - uses: Thre4dripper/play-console-info@v1
         id: play
         with:
           package: com.example.myapp
@@ -376,7 +394,7 @@ jobs:
 
 </details>
 
-<details>
+<details open>
 <summary><strong>Monitor reviews and alert on Slack</strong></summary>
 
 ```yaml
@@ -390,7 +408,7 @@ jobs:
   review-alert:
     runs-on: ubuntu-latest
     steps:
-      - uses: ijlal-ahmad/play-console-info@v1
+      - uses: Thre4dripper/play-console-info@v1
         id: play
         with:
           package: com.example.myapp
@@ -418,11 +436,11 @@ jobs:
 
 </details>
 
-<details>
+<details open>
 <summary><strong>Verify bundle SHA256 after uploading</strong></summary>
 
 ```yaml
-- uses: ijlal-ahmad/play-console-info@v1
+- uses: Thre4dripper/play-console-info@v1
   id: play
   with:
     package: com.example.myapp
@@ -444,11 +462,11 @@ jobs:
 
 </details>
 
-<details>
+<details open>
 <summary><strong>Snapshot store listings as a workflow artifact</strong></summary>
 
 ```yaml
-- uses: ijlal-ahmad/play-console-info@v1
+- uses: Thre4dripper/play-console-info@v1
   with:
     package: com.example.myapp
     serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
@@ -463,11 +481,11 @@ Titles, descriptions, and image URLs for every market — saved as a downloadabl
 
 </details>
 
-<details>
+<details open>
 <summary><strong>Gate a build promotion on tester enrollment</strong></summary>
 
 ```yaml
-- uses: ijlal-ahmad/play-console-info@v1
+- uses: Thre4dripper/play-console-info@v1
   id: play
   with:
     package: com.example.myapp
@@ -490,7 +508,7 @@ Titles, descriptions, and image URLs for every market — saved as a downloadabl
 
 ---
 
-## Output Shape Reference
+## 📐 Output Shape Reference
 
 All responses follow the [Google Play Developer Publishing API v3](https://developers.google.com/android-publisher/api-ref/rest) structure. Only the most commonly used fields are shown.
 
@@ -600,7 +618,7 @@ All responses follow the [Google Play Developer Publishing API v3](https://devel
 
 ---
 
-## Security
+## 🔒 Security
 
 - Never commit your service account JSON file. Use GitHub Secrets for the action, and environment variables or a secrets manager for the CLI.
 - When `serviceAccountJsonPlainText` is used, the action writes the credential to a temporary file on the runner for the duration of the job only. It does not persist after the runner is cleaned up.
@@ -609,7 +627,7 @@ All responses follow the [Google Play Developer Publishing API v3](https://devel
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 The action is TypeScript. The CLI is Python, compiled to a native binary with PyInstaller. Tests use Jest with ts-jest.
 
@@ -625,9 +643,9 @@ pnpm build:cli:mac     # compile the CLI binary for macOS
 
 ---
 
-## License
+## 📄 License
 
-MIT © [Ijlal Ahmad](https://github.com/ijlal-ahmad)
+MIT © [Ijlal Ahmad](https://github.com/Thre4dripper)
 
 ---
 
