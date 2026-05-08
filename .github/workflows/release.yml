@@ -32,3 +32,117 @@ jobs:
     needs: [type-check, lint-check, unit-tests]
     uses: ./.github/workflows/play-console-info.yml
     secrets: inherit
+
+  build-mock-binaries:
+    name: Build Mock CLI (${{ matrix.platform }})
+    needs: [type-check, lint-check, unit-tests]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            os: ubuntu-latest
+            artifact-path: bin/mock/linux/mockCli-linux
+          - platform: mac
+            os: macos-latest
+            artifact-path: bin/mock/mac/mockCli-mac
+          - platform: windows
+            os: windows-latest
+            artifact-path: bin/mock/windows/mockCli-windows.exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Build binary (Unix)
+        if: matrix.platform != 'windows'
+        run: bash cli/mock/build-mock-cli-${{ matrix.platform }}.sh
+
+      - name: Build binary (Windows)
+        if: matrix.platform == 'windows'
+        shell: cmd
+        run: cli\mock\build-mock-cli-windows.bat
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mock-${{ matrix.platform }}
+          path: ${{ matrix.artifact-path }}
+
+  build-python-binaries:
+    name: Build Python CLI (${{ matrix.platform }})
+    needs: [type-check, lint-check, unit-tests]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            os: ubuntu-latest
+            artifact-path: bin/python/linux/play_console_cli-linux
+          - platform: mac
+            os: macos-latest
+            artifact-path: bin/python/mac/play_console_cli-mac
+          - platform: windows
+            os: windows-latest
+            artifact-path: bin/python/windows/play_console_cli-windows.exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build binary (Unix)
+        if: matrix.platform != 'windows'
+        run: bash cli/python/build-cli-${{ matrix.platform }}.sh
+
+      - name: Build binary (Windows)
+        if: matrix.platform == 'windows'
+        shell: cmd
+        run: cli\python\build-cli-windows.bat
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-${{ matrix.platform }}
+          path: ${{ matrix.artifact-path }}
+
+  create-release:
+    name: Create Release
+    needs: [test-play-console-cli, build-mock-binaries, build-python-binaries]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all binary artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          name: Release v${{ steps.version.outputs.VERSION }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          files: release-assets/*
