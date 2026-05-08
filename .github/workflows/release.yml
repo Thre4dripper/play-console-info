@@ -12,11 +12,8 @@ permissions:
 jobs:
   unit-tests:
     name: Unit Tests
-    uses: thre4dripper/Reusable-Atomic-Workflows/.github/workflows/test-unit.yml@main
-    with:
-      package-manager: pnpm
-      test-command: pnpm test:unit
-      coverage-command: pnpm run test:unit:coverage
+    uses: ./.github/workflows/tests.yml
+    secrets: inherit
 
   lint-check:
     name: Lint Check
