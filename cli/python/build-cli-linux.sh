@@ -4,7 +4,14 @@ echo "Building Python CLI binary for Linux..."
 # Navigate to project root
 cd "$(dirname "$0")/../.." || exit
 
-# Create bin directory structure if it doesn't exist
+# PyInstaller builds natively only — detect current arch
+RAW_ARCH=$(uname -m)
+if [ "$RAW_ARCH" = "arm64" ] || [ "$RAW_ARCH" = "aarch64" ]; then
+    ARCH_SUFFIX="arm64"
+else
+    ARCH_SUFFIX="x64"
+fi
+
 mkdir -p "bin/python/linux"
 
 # Create a virtual environment if not already present
@@ -16,16 +23,16 @@ pip install --upgrade pip
 pip install -r cli/python/requirements.txt
 
 # Use PyInstaller to create a standalone executable
-echo "Compiling Python to Linux executable..."
+echo "Compiling Python to Linux $ARCH_SUFFIX executable..."
 PyInstaller -F cli/python/play_console_cli.py \
-  --distpath bin/python/linux \
+  --distpath "bin/python/linux" \
   --workpath cli/python/build \
   --specpath cli/python \
-  --name play_console_cli-linux
+  --name "play_console_cli-linux-$ARCH_SUFFIX"
 
 if [ $? -eq 0 ]; then
-    echo "✅ Python CLI binary built successfully: bin/python/linux/play_console_cli-linux"
-    chmod +x "bin/python/linux/play_console_cli-linux"
+    echo "✅ Python CLI binary built successfully: bin/python/linux/play_console_cli-linux-$ARCH_SUFFIX"
+    chmod +x "bin/python/linux/play_console_cli-linux-$ARCH_SUFFIX"
 else
     echo "❌ Build failed"
     exit 1
