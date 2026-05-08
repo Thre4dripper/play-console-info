@@ -88,7 +88,10 @@ describe('getExecutablePath', () => {
     it('returns correct x64 executable path for all platforms', async () => {
       mockOs.arch.mockReturnValue('x64');
       const platforms = [
-        ['win32', path.join('bin', 'mock', 'windows', 'mockCli-windows-x64.exe')],
+        [
+          'win32',
+          path.join('bin', 'mock', 'windows', 'mockCli-windows-x64.exe'),
+        ],
         ['darwin', path.join('bin', 'mock', 'mac', 'mockCli-mac-x64')],
         ['linux', path.join('bin', 'mock', 'linux', 'mockCli-linux-x64')],
       ] as const;
@@ -119,15 +122,33 @@ describe('getExecutablePath', () => {
       mockOs.arch.mockReturnValue('arm64');
       const result = await getExecutablePath(true);
       expect(result).toBe(
-        path.join('/test/project', 'bin', 'mock', 'windows', 'mockCli-windows-x64.exe')
+        path.join(
+          '/test/project',
+          'bin',
+          'mock',
+          'windows',
+          'mockCli-windows-x64.exe'
+        )
       );
     });
 
     it('calls chmod for linux and darwin platforms only', async () => {
       mockOs.arch.mockReturnValue('x64');
       const platformPaths = [
-        ['darwin', path.join('/test/project', 'bin', 'mock', 'mac', 'mockCli-mac-x64')],
-        ['linux', path.join('/test/project', 'bin', 'mock', 'linux', 'mockCli-linux-x64')],
+        [
+          'darwin',
+          path.join('/test/project', 'bin', 'mock', 'mac', 'mockCli-mac-x64'),
+        ],
+        [
+          'linux',
+          path.join(
+            '/test/project',
+            'bin',
+            'mock',
+            'linux',
+            'mockCli-linux-x64'
+          ),
+        ],
       ] as const;
 
       for (const [platform, expectedPath] of platformPaths) {
@@ -136,7 +157,10 @@ describe('getExecutablePath', () => {
 
         await getExecutablePath(true);
 
-        expect(mockExec.exec).toHaveBeenCalledWith('chmod', ['+x', expectedPath]);
+        expect(mockExec.exec).toHaveBeenCalledWith('chmod', [
+          '+x',
+          expectedPath,
+        ]);
       }
 
       mockExec.exec.mockClear();
@@ -217,7 +241,9 @@ describe('getExecutablePath', () => {
       mockOs.arch.mockReturnValue('arm64');
       mockTc.find.mockReturnValue('');
       mockTc.downloadTool.mockResolvedValue('/tmp/downloaded-file');
-      mockTc.cacheFile.mockResolvedValue('/runner/cache/python-cli-mac-arm64/9.9.9');
+      mockTc.cacheFile.mockResolvedValue(
+        '/runner/cache/python-cli-mac-arm64/9.9.9'
+      );
 
       const result = await getExecutablePath(false);
 
