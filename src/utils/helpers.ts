@@ -2,6 +2,7 @@ import path from 'path';
 import os from 'os';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+import * as tc from '@actions/tool-cache';
 
 export class ActionError extends Error {
   constructor(message: string) {
@@ -32,94 +33,149 @@ export class Logger {
   }
 }
 
-export const getExecutablePath = async (useMock: boolean): Promise<string> => {
-  // For mock/tests: use current working directory (this repo has the binaries)
-  // For production: use the action directory (where dist/index.js is running from)
-  const basePath = useMock ? process.cwd() : path.resolve(__dirname, '../..'); // Go up from dist/ to action root
+// Repository slug used to construct release-asset download URLs.
+// Override via env var for forks / testing.
+const RELEASE_REPO =
+  process.env.PLAY_CONSOLE_RELEASE_REPO ?? 'Thre4dripper/play-console-info';
 
-  Logger.debug(`Using base path: ${basePath}`);
+type BinarySpec = {
+  /** Tool-cache identifier (folder name under runner tool cache) */
+  toolName: string;
+  /** Filename of the binary as published in the GitHub Release */
+  fileName: string;
+  /** Subdirectory under bin/ used for local resolution (legacy / mock / dev) */
+  localSubDir: string[];
+  /** Whether the binary needs `chmod +x` after being placed on disk */
+  needsChmod: boolean;
+};
 
+/**
+ * Compute the binary specification (filename, tool-cache name, local fallback
+ * path) for the current platform and architecture.
+ */
+const getBinarySpec = (useMock: boolean): BinarySpec => {
   const platform = os.platform();
   const arch = os.arch() === 'arm64' ? 'arm64' : 'x64';
   Logger.debug(`Platform detected: ${platform}, arch: ${arch}`);
 
-  if (useMock) {
-    // For mock/testing purposes
-    switch (platform) {
-      case 'win32': {
-        // For .exe files, no special execution policy is typically needed
-        // But ensure we can run executables in case of restrictive environments
-        return path.join(
-          basePath,
-          'bin',
-          'mock',
-          'windows',
-          'mockCli-windows-x64.exe'
-        );
-      }
-      case 'darwin': {
-        const mockCliPath = path.join(
-          basePath,
-          'bin',
-          'mock',
-          'mac',
-          `mockCli-mac-${arch}`
-        );
-        await exec.exec('chmod', ['+x', mockCliPath]);
-        return mockCliPath;
-      }
-      case 'linux': {
-        const mockCliPath = path.join(
-          basePath,
-          'bin',
-          'mock',
-          'linux',
-          `mockCli-linux-${arch}`
-        );
-        await exec.exec('chmod', ['+x', mockCliPath]);
-        return mockCliPath;
-      }
-      default:
-        throw new ActionError(`Unknown platform: ${platform}`);
-    }
-  }
+  const kind = useMock ? 'mock' : 'python';
+  const baseName = useMock ? 'mockCli' : 'play_console_cli';
 
-  // Real Python CLI binaries
   switch (platform) {
     case 'win32': {
-      // For .exe files, no special execution policy is typically needed
-      // But ensure we can run executables in case of restrictive environments
-      return path.join(
-        basePath,
-        'bin',
-        'python',
-        'windows',
-        'play_console_cli-windows-x64.exe'
-      );
+      // Windows binaries are only published as x64.
+      const fileName = `${baseName}-windows-x64.exe`;
+      return {
+        toolName: `${kind}-cli-windows-x64`,
+        fileName,
+        localSubDir: ['bin', kind, 'windows'],
+        needsChmod: false,
+      };
     }
     case 'darwin': {
-      const pythonCliPath = path.join(
-        basePath,
-        'bin',
-        'python',
-        'mac',
-        `play_console_cli-mac-${arch}`
-      );
-      await exec.exec('chmod', ['+x', pythonCliPath]);
-      return pythonCliPath;
+      const fileName = `${baseName}-mac-${arch}`;
+      return {
+        toolName: `${kind}-cli-mac-${arch}`,
+        fileName,
+        localSubDir: ['bin', kind, 'mac'],
+        needsChmod: true,
+      };
     }
     case 'linux': {
-      const pythonCliPath = path.join(
-        basePath,
-        'bin',
-        'python',
-        'linux',
-        `play_console_cli-linux-${arch}`
-      );
-      await exec.exec('chmod', ['+x', pythonCliPath]);
-      return pythonCliPath;
+      const fileName = `${baseName}-linux-${arch}`;
+      return {
+        toolName: `${kind}-cli-linux-${arch}`,
+        fileName,
+        localSubDir: ['bin', kind, 'linux'],
+        needsChmod: true,
+      };
     }
     default:
       throw new ActionError(`Unknown platform: ${platform}`);
   }
+};
+
+/**
+ * Read the action's published version. The action ships its `package.json`
+ * alongside `dist/`, so reading it at runtime tells us which release tag to
+ * fetch binaries from. Set `PLAY_CONSOLE_RELEASE_TAG` to override (useful for
+ * pinning a specific release during development).
+ */
+const getActionVersion = (): string => {
+  const override = process.env.PLAY_CONSOLE_RELEASE_TAG;
+  if (override) {
+    return override.startsWith('v') ? override.slice(1) : override;
+  }
+
+  // dist/index.js is bundled at action root, so package.json sits one level up
+  // from the bundled file's __dirname.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const pkg = require(path.resolve(__dirname, '../../package.json')) as {
+    version: string;
+  };
+  return pkg.version;
+};
+
+/**
+ * Download the binary for this platform from the corresponding GitHub Release
+ * and cache it via @actions/tool-cache so subsequent runs reuse it.
+ */
+const downloadFromRelease = async (spec: BinarySpec): Promise<string> => {
+  const version = getActionVersion();
+  const tag = `v${version}`;
+
+  // Reuse cached copy if present
+  const cached = tc.find(spec.toolName, version);
+  if (cached) {
+    Logger.debug(`Using cached binary at ${cached}`);
+    return path.join(cached, spec.fileName);
+  }
+
+  const url = `https://github.com/${RELEASE_REPO}/releases/download/${tag}/${spec.fileName}`;
+  Logger.info(`⬇️  Downloading binary from ${url}`);
+
+  const downloadedPath = await tc.downloadTool(url);
+  const cachedDir = await tc.cacheFile(
+    downloadedPath,
+    spec.fileName,
+    spec.toolName,
+    version
+  );
+
+  return path.join(cachedDir, spec.fileName);
+};
+
+/**
+ * Resolve the path of a binary that is expected to live on the local
+ * filesystem (development mode, mock CLI tests, or an explicit override via
+ * the `PLAY_CONSOLE_BIN_DIR` env var).
+ */
+const resolveLocalBinary = (spec: BinarySpec, baseDir: string): string => {
+  return path.join(baseDir, ...spec.localSubDir, spec.fileName);
+};
+
+export const getExecutablePath = async (useMock: boolean): Promise<string> => {
+  const spec = getBinarySpec(useMock);
+
+  // Local binary resolution paths:
+  //   - useMock=true             → mock CLI lives in this repo's bin/ (tests)
+  //   - PLAY_CONSOLE_BIN_DIR set → explicit override (CI integration tests)
+  // Otherwise we download the matching release asset on demand.
+  const overrideDir = process.env.PLAY_CONSOLE_BIN_DIR;
+  let binaryPath: string;
+
+  if (useMock) {
+    binaryPath = resolveLocalBinary(spec, process.cwd());
+  } else if (overrideDir) {
+    Logger.debug(`Using local binary override directory: ${overrideDir}`);
+    binaryPath = resolveLocalBinary(spec, overrideDir);
+  } else {
+    binaryPath = await downloadFromRelease(spec);
+  }
+
+  if (spec.needsChmod) {
+    await exec.exec('chmod', ['+x', binaryPath]);
+  }
+
+  return binaryPath;
 };
