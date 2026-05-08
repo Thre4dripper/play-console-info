@@ -101067,15 +101067,33 @@ var getExecutablePath = async (useMock) => {
   if (useMock) {
     switch (platform) {
       case "win32": {
-        return import_path.default.join(basePath, "bin", "mock", "windows", "mockCli-windows.exe");
+        return import_path.default.join(
+          basePath,
+          "bin",
+          "mock",
+          "windows",
+          "mockCli-windows.exe"
+        );
       }
       case "darwin": {
-        const mockCliPath = import_path.default.join(basePath, "bin", "mock", "mac", "mockCli-mac");
+        const mockCliPath = import_path.default.join(
+          basePath,
+          "bin",
+          "mock",
+          "mac",
+          "mockCli-mac"
+        );
         await exec.exec("chmod", ["+x", mockCliPath]);
         return mockCliPath;
       }
       case "linux": {
-        const mockCliPath = import_path.default.join(basePath, "bin", "mock", "linux", "mockCli-linux");
+        const mockCliPath = import_path.default.join(
+          basePath,
+          "bin",
+          "mock",
+          "linux",
+          "mockCli-linux"
+        );
         await exec.exec("chmod", ["+x", mockCliPath]);
         return mockCliPath;
       }
@@ -101094,12 +101112,24 @@ var getExecutablePath = async (useMock) => {
       );
     }
     case "darwin": {
-      const pythonCliPath = import_path.default.join(basePath, "bin", "python", "mac", "play_console_cli-mac");
+      const pythonCliPath = import_path.default.join(
+        basePath,
+        "bin",
+        "python",
+        "mac",
+        "play_console_cli-mac"
+      );
       await exec.exec("chmod", ["+x", pythonCliPath]);
       return pythonCliPath;
     }
     case "linux": {
-      const pythonCliPath = import_path.default.join(basePath, "bin", "python", "linux", "play_console_cli-linux");
+      const pythonCliPath = import_path.default.join(
+        basePath,
+        "bin",
+        "python",
+        "linux",
+        "play_console_cli-linux"
+      );
       await exec.exec("chmod", ["+x", pythonCliPath]);
       return pythonCliPath;
     }
