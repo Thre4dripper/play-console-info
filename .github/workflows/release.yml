@@ -149,6 +149,12 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Cache Python venv
+        uses: actions/cache@v4
+        with:
+          path: cli/python/.venv-${{ matrix.platform }}-${{ matrix.arch }}
+          key: venv-${{ matrix.platform }}-${{ matrix.arch }}-${{ hashFiles('cli/python/requirements.txt') }}
+
       - name: Build binary (Unix)
         if: matrix.platform != 'windows'
         run: bash cli/python/build-cli-${{ matrix.platform }}.sh ${{ matrix.arch }}
