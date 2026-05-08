@@ -10,3 +10,4 @@ node_modules/
 cli/python/build
 cli/python/play_console_cli.spec
 coverage
+bin/
