@@ -41,6 +41,7 @@
     "test:mock": "jest --testPathPatterns=tests/mockCli --passWithNoTests",
     "test:watch": "jest --watch",
     "test:coverage": "c8 jest",
+    "test:unit:coverage": "c8 jest --testPathPatterns=tests/unit --passWithNoTests",
     "test:coverage:strict": "c8 jest && c8 check-coverage",
     "clean:coverage": "c8 clean",
     "mock-cli": "node cli/mock/mockCli.js",

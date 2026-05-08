@@ -11,8 +11,8 @@ jobs:
     uses: thre4dripper/Reusable-Atomic-Workflows/.github/workflows/test-unit.yml@main
     with:
       package-manager: pnpm
-      test-command: pnpm test
-      coverage-command: pnpm run test:coverage
+      test-command: pnpm test:unit
+      coverage-command: pnpm run test:unit:coverage
 
   lint-check:
     name: Lint Check
