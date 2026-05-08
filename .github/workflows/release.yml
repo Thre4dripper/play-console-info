@@ -100,7 +100,7 @@ jobs:
 
   build-python-binaries:
     name: Build Python CLI (${{ matrix.platform }}-${{ matrix.arch }})
-    # needs: [type-check, lint-check, unit-tests]
+    needs: [type-check, lint-check, unit-tests]
     timeout-minutes: 20
     strategy:
       fail-fast: true
