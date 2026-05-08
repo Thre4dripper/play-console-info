@@ -138,7 +138,7 @@ jobs:
 
       - name: Build binary (Unix)
         if: matrix.platform != 'windows'
-        run: bash cli/python/build-cli-${{ matrix.platform }}.sh
+        run: bash cli/python/build-cli-${{ matrix.platform }}.sh ${{ matrix.arch }}
 
       - name: Build binary (Windows)
         if: matrix.platform == 'windows'
