@@ -18,6 +18,7 @@ import {
 
 jest.mock('os', () => ({
   platform: jest.fn(),
+  arch: jest.fn(),
 }));
 
 jest.mock('@actions/exec', () => ({
@@ -58,6 +59,7 @@ describe('getExecutablePath', () => {
     jest.clearAllMocks();
     jest.spyOn(process, 'cwd').mockReturnValue('/test/project');
     mockExec.exec.mockResolvedValue(0);
+    mockOs.arch.mockReturnValue('x64');
   });
 
   afterEach(() => {
@@ -65,18 +67,15 @@ describe('getExecutablePath', () => {
   });
 
   describe('with useMock = false (Python CLI)', () => {
-    it('returns correct executable path for all platforms', async () => {
-      // useMock=false resolves basePath via __dirname (not cwd), so check suffix only
+    it('returns correct x64 executable path for all platforms', async () => {
+      mockOs.arch.mockReturnValue('x64');
       const platforms = [
         [
           'win32',
-          path.join('bin', 'python', 'windows', 'play_console_cli-windows.exe'),
+          path.join('bin', 'python', 'windows', 'play_console_cli-windows-x64.exe'),
         ],
-        ['darwin', path.join('bin', 'python', 'mac', 'play_console_cli-mac')],
-        [
-          'linux',
-          path.join('bin', 'python', 'linux', 'play_console_cli-linux'),
-        ],
+        ['darwin', path.join('bin', 'python', 'mac', 'play_console_cli-mac-x64')],
+        ['linux', path.join('bin', 'python', 'linux', 'play_console_cli-linux-x64')],
       ] as const;
 
       for (const [platform, expectedSuffix] of platforms) {
@@ -86,14 +85,32 @@ describe('getExecutablePath', () => {
       }
     });
 
+    it('returns correct arm64 executable path for linux and darwin', async () => {
+      mockOs.arch.mockReturnValue('arm64');
+      const platforms = [
+        ['darwin', path.join('bin', 'python', 'mac', 'play_console_cli-mac-arm64')],
+        ['linux', path.join('bin', 'python', 'linux', 'play_console_cli-linux-arm64')],
+      ] as const;
+
+      for (const [platform, expectedSuffix] of platforms) {
+        mockOs.platform.mockReturnValue(platform);
+        const result = await getExecutablePath(false);
+        expect(result).toContain(expectedSuffix);
+      }
+    });
+
+    it('windows always uses x64 suffix regardless of arch', async () => {
+      mockOs.platform.mockReturnValue('win32');
+      mockOs.arch.mockReturnValue('arm64');
+      const result = await getExecutablePath(false);
+      expect(result).toContain('play_console_cli-windows-x64.exe');
+    });
+
     it('calls chmod for linux and darwin platforms', async () => {
-      // darwin→mac, linux→linux; basePath is __dirname-based so check suffix
+      mockOs.arch.mockReturnValue('x64');
       const platformPaths = [
-        ['darwin', path.join('bin', 'python', 'mac', 'play_console_cli-mac')],
-        [
-          'linux',
-          path.join('bin', 'python', 'linux', 'play_console_cli-linux'),
-        ],
+        ['darwin', path.join('bin', 'python', 'mac', 'play_console_cli-mac-x64')],
+        ['linux', path.join('bin', 'python', 'linux', 'play_console_cli-linux-x64')],
       ] as const;
 
       for (const [platform, expectedSuffix] of platformPaths) {
@@ -109,6 +126,18 @@ describe('getExecutablePath', () => {
       }
     });
 
+    it('calls chmod with arm64 path on arm64 arch', async () => {
+      mockOs.arch.mockReturnValue('arm64');
+      mockOs.platform.mockReturnValue('linux');
+
+      await getExecutablePath(false);
+
+      expect(mockExec.exec).toHaveBeenCalledWith('chmod', [
+        '+x',
+        expect.stringContaining(path.join('bin', 'python', 'linux', 'play_console_cli-linux-arm64')),
+      ]);
+    });
+
     it('does not call chmod for windows platform', async () => {
       mockOs.platform.mockReturnValue('win32');
 
@@ -119,12 +148,12 @@ describe('getExecutablePath', () => {
   });
 
   describe('with useMock = true (Mock CLI)', () => {
-    it('returns correct executable path for all platforms', async () => {
-      // useMock=true uses process.cwd() so exact path matching works
+    it('returns correct x64 executable path for all platforms', async () => {
+      mockOs.arch.mockReturnValue('x64');
       const platforms = [
-        ['win32', path.join('bin', 'mock', 'windows', 'mockCli-windows.exe')],
-        ['darwin', path.join('bin', 'mock', 'mac', 'mockCli-mac')],
-        ['linux', path.join('bin', 'mock', 'linux', 'mockCli-linux')],
+        ['win32', path.join('bin', 'mock', 'windows', 'mockCli-windows-x64.exe')],
+        ['darwin', path.join('bin', 'mock', 'mac', 'mockCli-mac-x64')],
+        ['linux', path.join('bin', 'mock', 'linux', 'mockCli-linux-x64')],
       ] as const;
 
       for (const [platform, expectedPath] of platforms) {
@@ -134,17 +163,34 @@ describe('getExecutablePath', () => {
       }
     });
 
+    it('returns correct arm64 executable path for linux and darwin', async () => {
+      mockOs.arch.mockReturnValue('arm64');
+      const platforms = [
+        ['darwin', path.join('bin', 'mock', 'mac', 'mockCli-mac-arm64')],
+        ['linux', path.join('bin', 'mock', 'linux', 'mockCli-linux-arm64')],
+      ] as const;
+
+      for (const [platform, expectedPath] of platforms) {
+        mockOs.platform.mockReturnValue(platform);
+        const result = await getExecutablePath(true);
+        expect(result).toBe(path.join('/test/project', expectedPath));
+      }
+    });
+
+    it('windows always uses x64 suffix regardless of arch', async () => {
+      mockOs.platform.mockReturnValue('win32');
+      mockOs.arch.mockReturnValue('arm64');
+      const result = await getExecutablePath(true);
+      expect(result).toBe(
+        path.join('/test/project', 'bin', 'mock', 'windows', 'mockCli-windows-x64.exe')
+      );
+    });
+
     it('calls chmod for linux and darwin platforms', async () => {
-      // darwin→mac, linux→linux; cwd is mocked so exact path works
+      mockOs.arch.mockReturnValue('x64');
       const platformPaths = [
-        [
-          'darwin',
-          path.join('/test/project', 'bin', 'mock', 'mac', 'mockCli-mac'),
-        ],
-        [
-          'linux',
-          path.join('/test/project', 'bin', 'mock', 'linux', 'mockCli-linux'),
-        ],
+        ['darwin', path.join('/test/project', 'bin', 'mock', 'mac', 'mockCli-mac-x64')],
+        ['linux', path.join('/test/project', 'bin', 'mock', 'linux', 'mockCli-linux-x64')],
       ] as const;
 
       for (const [platform, expectedPath] of platformPaths) {
@@ -153,11 +199,20 @@ describe('getExecutablePath', () => {
 
         await getExecutablePath(true);
 
-        expect(mockExec.exec).toHaveBeenCalledWith('chmod', [
-          '+x',
-          expectedPath,
-        ]);
+        expect(mockExec.exec).toHaveBeenCalledWith('chmod', ['+x', expectedPath]);
       }
+    });
+
+    it('calls chmod with arm64 path on arm64 arch', async () => {
+      mockOs.arch.mockReturnValue('arm64');
+      mockOs.platform.mockReturnValue('darwin');
+
+      await getExecutablePath(true);
+
+      expect(mockExec.exec).toHaveBeenCalledWith('chmod', [
+        '+x',
+        path.join('/test/project', 'bin', 'mock', 'mac', 'mockCli-mac-arm64'),
+      ]);
     });
   });
 
@@ -190,10 +245,11 @@ describe('getExecutablePath', () => {
     // useMock=true uses process.cwd(); useMock=false uses __dirname (not mockable)
     jest.spyOn(process, 'cwd').mockReturnValue('/custom/path');
     mockOs.platform.mockReturnValue('linux');
+    mockOs.arch.mockReturnValue('x64');
 
     const result = await getExecutablePath(true);
     expect(result).toBe(
-      path.join('/custom/path', 'bin', 'mock', 'linux', 'mockCli-linux')
+      path.join('/custom/path', 'bin', 'mock', 'linux', 'mockCli-linux-x64')
     );
   });
 });
