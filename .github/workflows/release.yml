@@ -38,21 +38,32 @@ jobs:
     secrets: inherit
 
   build-mock-binaries:
-    name: Build Mock CLI (${{ matrix.platform }})
+    name: Build Mock CLI (${{ matrix.platform }}-${{ matrix.arch }})
     needs: [type-check, lint-check, unit-tests]
     strategy:
       fail-fast: false
       matrix:
         include:
           - platform: linux
+            arch: x64
             os: ubuntu-latest
-            artifact-path: bin/mock/linux/mockCli-linux
+            artifact-path: bin/mock/linux/mockCli-linux-x64
+          - platform: linux
+            arch: arm64
+            os: ubuntu-latest          # Bun cross-compiles — no arm64 runner needed
+            artifact-path: bin/mock/linux/mockCli-linux-arm64
           - platform: mac
-            os: macos-latest
-            artifact-path: bin/mock/mac/mockCli-mac
+            arch: x64
+            os: macos-13              # last Intel macOS runner
+            artifact-path: bin/mock/mac/mockCli-mac-x64
+          - platform: mac
+            arch: arm64
+            os: macos-latest          # Apple Silicon runner
+            artifact-path: bin/mock/mac/mockCli-mac-arm64
           - platform: windows
+            arch: x64
             os: windows-latest
-            artifact-path: bin/mock/windows/mockCli-windows.exe
+            artifact-path: bin/mock/windows/mockCli-windows-x64.exe
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
@@ -63,7 +74,7 @@ jobs:
 
       - name: Build binary (Unix)
         if: matrix.platform != 'windows'
-        run: bash cli/mock/build-mock-cli-${{ matrix.platform }}.sh
+        run: bash cli/mock/build-mock-cli-${{ matrix.platform }}.sh ${{ matrix.arch }}
 
       - name: Build binary (Windows)
         if: matrix.platform == 'windows'
@@ -73,25 +84,36 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mock-${{ matrix.platform }}
+          name: mock-${{ matrix.platform }}-${{ matrix.arch }}
           path: ${{ matrix.artifact-path }}
 
   build-python-binaries:
-    name: Build Python CLI (${{ matrix.platform }})
+    name: Build Python CLI (${{ matrix.platform }}-${{ matrix.arch }})
     needs: [type-check, lint-check, unit-tests]
     strategy:
       fail-fast: false
       matrix:
         include:
           - platform: linux
+            arch: x64
             os: ubuntu-latest
-            artifact-path: bin/python/linux/play_console_cli-linux
+            artifact-path: bin/python/linux/play_console_cli-linux-x64
+          - platform: linux
+            arch: arm64
+            os: ubuntu-24.04-arm       # native arm64 Linux runner
+            artifact-path: bin/python/linux/play_console_cli-linux-arm64
           - platform: mac
-            os: macos-latest
-            artifact-path: bin/python/mac/play_console_cli-mac
+            arch: x64
+            os: macos-13              # last Intel macOS runner
+            artifact-path: bin/python/mac/play_console_cli-mac-x64
+          - platform: mac
+            arch: arm64
+            os: macos-latest          # Apple Silicon runner
+            artifact-path: bin/python/mac/play_console_cli-mac-arm64
           - platform: windows
+            arch: x64
             os: windows-latest
-            artifact-path: bin/python/windows/play_console_cli-windows.exe
+            artifact-path: bin/python/windows/play_console_cli-windows-x64.exe
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
@@ -114,7 +136,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: python-${{ matrix.platform }}
+          name: python-${{ matrix.platform }}-${{ matrix.arch }}
           path: ${{ matrix.artifact-path }}
 
   create-release:
