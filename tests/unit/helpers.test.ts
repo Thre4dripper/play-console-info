@@ -85,7 +85,7 @@ describe('getExecutablePath', () => {
   });
 
   describe('with useMock = true (Mock CLI, local resolution)', () => {
-      it('returns correct x64 executable path for supported x64 platforms', async () => {
+    it('returns correct x64 executable path for supported x64 platforms', async () => {
       mockOs.arch.mockReturnValue('x64');
       const platforms = [
         [

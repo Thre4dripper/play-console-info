@@ -74,7 +74,9 @@ const getBinarySpec = (useMock: boolean): BinarySpec => {
     }
     case 'darwin': {
       if (arch !== 'arm64') {
-        throw new ActionError('macOS x64 is not supported — only arm64 binaries are published');
+        throw new ActionError(
+          'macOS x64 is not supported — only arm64 binaries are published'
+        );
       }
       const fileName = `${baseName}-mac-arm64`;
       return {
