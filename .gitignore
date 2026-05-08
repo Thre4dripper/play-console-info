@@ -8,6 +8,6 @@ node_modules/
 .DS_Store
 **/__pycache__/**
 cli/python/build
-cli/python/play_console_cli.spec
+cli/python/*.spec
 coverage
 bin/
