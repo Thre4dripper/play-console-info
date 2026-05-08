@@ -86,7 +86,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Make Mock CLI Executable
-        run: chmod +x bin/mock/linux/mockCli-linux bin/python/linux/play_console_cli-linux
+        run: chmod +x bin/mock/linux/mockCli-linux-x64 bin/python/linux/play_console_cli-linux-x64
 
       - name: Run Mock CLI Tests
         run: pnpm run test:mock
@@ -120,7 +120,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Make Mock CLI Executable
-        run: chmod +x bin/mock/linux/mockCli-linux bin/python/linux/play_console_cli-linux
+        run: chmod +x bin/mock/linux/mockCli-linux-x64 bin/python/linux/play_console_cli-linux-x64
 
       - name: Run Tests with c8 Coverage
         run: pnpm run test:coverage
