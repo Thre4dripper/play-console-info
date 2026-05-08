@@ -1,8 +1,8 @@
 name: Release
 on:
-#  push:
-#    branches:
-#      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 permissions:
@@ -37,8 +37,9 @@ jobs:
   build-mock-binaries:
     name: Build Mock CLI (${{ matrix.platform }}-${{ matrix.arch }})
     needs: [type-check, lint-check, unit-tests]
+    timeout-minutes: 10
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         include:
           - platform: linux
@@ -47,15 +48,15 @@ jobs:
             artifact-path: bin/mock/linux/mockCli-linux-x64
           - platform: linux
             arch: arm64
-            os: ubuntu-latest          # Bun cross-compiles — no arm64 runner needed
+            os: ubuntu-latest # Bun cross-compiles — no arm64 runner needed
             artifact-path: bin/mock/linux/mockCli-linux-arm64
           - platform: mac
             arch: x64
-            os: ubuntu-latest         # Bun cross-compiles macOS targets from Linux
+            os: macos-latest
             artifact-path: bin/mock/mac/mockCli-mac-x64
           - platform: mac
             arch: arm64
-            os: ubuntu-latest         # Bun cross-compiles macOS targets from Linux
+            os: macos-latest
             artifact-path: bin/mock/mac/mockCli-mac-arm64
           - platform: windows
             arch: x64
@@ -64,15 +65,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: package.json
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           version: 9
 
@@ -92,7 +93,7 @@ jobs:
         run: cli\mock\build-mock-cli-windows.bat
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mock-${{ matrix.platform }}-${{ matrix.arch }}
           path: ${{ matrix.artifact-path }}
@@ -100,8 +101,9 @@ jobs:
   build-python-binaries:
     name: Build Python CLI (${{ matrix.platform }}-${{ matrix.arch }})
     needs: [type-check, lint-check, unit-tests]
+    timeout-minutes: 20
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         include:
           - platform: linux
@@ -110,15 +112,15 @@ jobs:
             artifact-path: bin/python/linux/play_console_cli-linux-x64
           - platform: linux
             arch: arm64
-            os: ubuntu-24.04-arm       # native arm64 Linux runner
+            os: ubuntu-24.04-arm # native arm64 Linux runner
             artifact-path: bin/python/linux/play_console_cli-linux-arm64
           - platform: mac
             arch: x64
-            os: macos-13              # last Intel macOS runner
+            os: macos-latest
             artifact-path: bin/python/mac/play_console_cli-mac-x64
           - platform: mac
             arch: arm64
-            os: macos-latest          # Apple Silicon runner
+            os: macos-latest
             artifact-path: bin/python/mac/play_console_cli-mac-arm64
           - platform: windows
             arch: x64
@@ -132,7 +134,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Build binary (Unix)
         if: matrix.platform != 'windows'
@@ -144,7 +146,7 @@ jobs:
         run: cli\python\build-cli-windows.bat
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: python-${{ matrix.platform }}-${{ matrix.arch }}
           path: ${{ matrix.artifact-path }}
@@ -152,6 +154,7 @@ jobs:
   create-release:
     name: Create Release
     needs: [test-play-console-cli, build-mock-binaries, build-python-binaries]
+    if: ${{ success() }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -160,7 +163,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download all binary artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           path: release-assets
           merge-multiple: true
