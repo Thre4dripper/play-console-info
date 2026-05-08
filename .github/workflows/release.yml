@@ -17,8 +17,6 @@ jobs:
   version-guard:
     name: Version Guard
     runs-on: ubuntu-latest
-    outputs:
-      is_new: ${{ steps.check.outputs.is_new }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,23 +27,20 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           if git ls-remote --tags origin "refs/tags/v$VERSION" | grep -q .; then
             echo "Tag v$VERSION already exists — release will be skipped."
-            echo "is_new=false" >> $GITHUB_OUTPUT
+            exit 1
           else
             echo "Version v$VERSION is new — release will proceed."
-            echo "is_new=true" >> $GITHUB_OUTPUT
           fi
 
   unit-tests:
     name: Unit Tests
     needs: version-guard
-    if: needs.version-guard.outputs.is_new == 'true'
     uses: ./.github/workflows/tests.yml
     secrets: inherit
 
   lint-check:
     name: Lint Check
     needs: version-guard
-    if: needs.version-guard.outputs.is_new == 'true'
     uses: thre4dripper/Reusable-Atomic-Workflows/.github/workflows/quality-lint.yml@main
     with:
       package-manager: pnpm
@@ -55,7 +50,6 @@ jobs:
     name: Type Check
     uses: thre4dripper/Reusable-Atomic-Workflows/.github/workflows/quality-typecheck.yml@main
     needs: version-guard
-    if: needs.version-guard.outputs.is_new == 'true'
     with:
       package-manager: pnpm
 
