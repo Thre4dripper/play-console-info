@@ -1,6 +1,6 @@
 changelog:
   categories:
-    - title: "📦 Dependency Updates"
+    - title: '📦 Dependency Updates'
       labels:
         - dependencies
         - javascript
