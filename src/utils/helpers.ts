@@ -3,6 +3,7 @@ import os from 'os';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as tc from '@actions/tool-cache';
+import pkg from '../../package.json';
 
 export class ActionError extends Error {
   constructor(message: string) {
@@ -112,8 +113,6 @@ const getActionVersion = (): string => {
     return override.startsWith('v') ? override.slice(1) : override;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const pkg = require(path.resolve('..', '..', '/package.json')) as { version: string };
   return pkg.version;
 };
 
