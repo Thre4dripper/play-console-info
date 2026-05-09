@@ -112,12 +112,8 @@ const getActionVersion = (): string => {
     return override.startsWith('v') ? override.slice(1) : override;
   }
 
-  // dist/index.js is bundled at action root, so package.json sits one level up
-  // from the bundled file's __dirname.
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const pkg = require(path.resolve(__dirname, '../package.json')) as {
-    version: string;
-  };
+  const pkg = require(path.resolve('..', '..', '/package.json')) as { version: string };
   return pkg.version;
 };
 
