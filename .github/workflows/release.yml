@@ -33,7 +33,7 @@ jobs:
           fi
 
   build-dist:
-    name: Build Dist
+    name: Build & Format
     needs: version-guard
     uses: ./.github/workflows/build.yml
 

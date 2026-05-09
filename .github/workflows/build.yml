@@ -1,33 +1,88 @@
-name: Build Dist
+name: Build & Format
 
 on:
   push:
     branches:
       - main
-    paths:
-      - 'src/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'tsconfig.json'
-      - '.github/workflows/build.yml'
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
   workflow_call:
 
-# Standalone runs: cancel any in-flight build for the same branch so only the
-# latest commit gets committed. Reusable calls (workflow_call) must never be
-# cancelled mid-pipeline — each calling run is independent.
+# Standalone runs: cancel any in-flight run for the same branch so only the
+# latest commit's changes land. Reusable calls must never be cancelled
+# mid-pipeline — each calling workflow's run is independent.
 concurrency:
-  group: build-dist-${{ github.ref }}
+  group: build-format-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name != 'workflow_call' }}
 
+permissions:
+  contents: read
+
 jobs:
-  # ─── Job 1: Compile src → dist/index.js and expose as a workflow artifact ──
+  # ─── Job 1: Format code (parallel) ────────────────────────────────────────
+  # Runs format:fix, detects what changed, and exposes it as an output so the
+  # commit job can write a meaningful message. Skipped on workflow_call —
+  # callers only need the dist artifact.
+  format:
+    name: Format Code
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name != 'workflow_call'
+    outputs:
+      changed: ${{ steps.fmt.outputs.changed }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Formatter
+        run: pnpm format:fix
+
+      - name: Detect format changes
+        id: fmt
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No formatting changes."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Files reformatted:"
+            git diff --name-only
+          fi
+
+      - name: Save format patch
+        if: steps.fmt.outputs.changed == 'true'
+        run: git diff > format.patch
+
+      - name: Upload format patch
+        if: steps.fmt.outputs.changed == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: format-patch
+          path: format.patch
+          retention-days: 1
+
+  # ─── Job 2: Build dist/index.js (always — artifact forwarded to callers) ──
   build:
     name: Build dist/index.js
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    permissions:
-      contents: read
 
     steps:
       - name: Checkout
@@ -57,23 +112,35 @@ jobs:
           path: dist/index.js
           retention-days: 1
           if-no-files-found: error
-          overwrite: true   # safe: same commit always produces identical output
+          overwrite: true   # same commit → identical output
 
-  # ─── Job 2: Commit dist to repo (standalone runs only) ────────────────────
-  # Skipped entirely when this workflow is called by another workflow
-  # (workflow_call), so callers never need contents: write.
+  # ─── Job 3: Single atomic commit for format + dist changes ────────────────
+  # Waits for both parallel jobs. Re-applies format (idempotent) and pulls the
+  # built dist artifact, then makes exactly one commit covering both changes.
+  # Skipped on workflow_call — callers should never push to the repo.
+  # Skipped on pull_request — bots don't push to PR branches.
   commit:
-    name: Commit dist if changed
-    needs: build
+    name: Commit changes
+    needs: [format, build]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
       contents: write
-    if: github.event_name != 'workflow_call'
+    if: github.event_name != 'workflow_call' && github.event_name != 'pull_request'
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Download format patch
+        if: needs.format.outputs.changed == 'true'
+        uses: actions/download-artifact@v7
+        with:
+          name: format-patch
+
+      - name: Apply format patch
+        if: needs.format.outputs.changed == 'true'
+        run: git apply format.patch
 
       - name: Download dist artifact
         uses: actions/download-artifact@v7
@@ -81,22 +148,38 @@ jobs:
           name: dist-bundle
           path: dist
 
-      - name: Check for changes
+      - name: Check for any changes
         id: diff
         run: |
-          if git diff --quiet dist/index.js; then
+          if git diff --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "dist/index.js is unchanged — skipping commit."
+            echo "Nothing to commit — skipping."
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "dist/index.js has changed — will commit."
+            echo "Changed files:"
+            git diff --name-only
           fi
 
-      - name: Commit and push dist
+      - name: Build commit message
+        if: steps.diff.outputs.changed == 'true'
+        id: msg
+        run: |
+          FMT="${{ needs.format.outputs.changed }}"
+          DIST_DIFF=$(git diff --name-only | grep -c 'dist/index.js' || true)
+          if [ "$FMT" = "true" ] && [ "$DIST_DIFF" -gt 0 ]; then
+            echo "message=chore: format + rebuild dist [skip ci]" >> "$GITHUB_OUTPUT"
+          elif [ "$FMT" = "true" ]; then
+            echo "message=chore: format code [skip ci]" >> "$GITHUB_OUTPUT"
+          else
+            echo "message=chore: rebuild dist [skip ci]" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and push
         if: steps.diff.outputs.changed == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add dist/index.js
-          git commit -m "chore: rebuild dist/index.js [skip ci]"
+          git add -A
+          git commit -m "${{ steps.msg.outputs.message }}"
           git push
+
