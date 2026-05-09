@@ -137,10 +137,11 @@ jobs:
         uses: actions/download-artifact@v7
         with:
           name: format-patch
+          path: /tmp/format-patch
 
       - name: Apply format patch
         if: needs.format.outputs.changed == 'true'
-        run: git apply format.patch
+        run: git apply /tmp/format-patch/format.patch
 
       - name: Download dist artifact
         uses: actions/download-artifact@v7
