@@ -236,6 +236,12 @@ jobs:
           prerelease: false
           files: release-assets/*
 
+      - name: Update floating major version tag
+        run: |
+          MAJOR=$(echo "${{ steps.version.outputs.VERSION }}" | cut -d. -f1)
+          git tag -f "v${MAJOR}" "v${{ steps.version.outputs.VERSION }}"
+          git push origin "v${MAJOR}" --force
+
   update-readme:
     name: Update README Download Links
     needs: create-release
