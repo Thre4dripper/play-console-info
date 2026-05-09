@@ -1,0 +1,102 @@
+name: Build Dist
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'tsconfig.json'
+      - '.github/workflows/build.yml'
+  workflow_dispatch:
+  workflow_call:
+
+# Standalone runs: cancel any in-flight build for the same branch so only the
+# latest commit gets committed. Reusable calls (workflow_call) must never be
+# cancelled mid-pipeline — each calling run is independent.
+concurrency:
+  group: build-dist-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_call' }}
+
+jobs:
+  # ─── Job 1: Compile src → dist/index.js and expose as a workflow artifact ──
+  build:
+    name: Build dist/index.js
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: dist-bundle
+          path: dist/index.js
+          retention-days: 1
+          if-no-files-found: error
+          overwrite: true   # safe: same commit always produces identical output
+
+  # ─── Job 2: Commit dist to repo (standalone runs only) ────────────────────
+  # Skipped entirely when this workflow is called by another workflow
+  # (workflow_call), so callers never need contents: write.
+  commit:
+    name: Commit dist if changed
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    if: github.event_name != 'workflow_call'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download dist artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: dist-bundle
+          path: dist
+
+      - name: Check for changes
+        id: diff
+        run: |
+          if git diff --quiet dist/index.js; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "dist/index.js is unchanged — skipping commit."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "dist/index.js has changed — will commit."
+          fi
+
+      - name: Commit and push dist
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add dist/index.js
+          git commit -m "chore: rebuild dist/index.js [skip ci]"
+          git push

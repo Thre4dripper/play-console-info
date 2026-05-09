@@ -32,6 +32,11 @@ jobs:
             echo "Version v$VERSION is new — release will proceed."
           fi
 
+  build-dist:
+    name: Build Dist
+    needs: version-guard
+    uses: ./.github/workflows/build.yml
+
   unit-tests:
     name: Unit Tests
     needs: version-guard
@@ -55,13 +60,13 @@ jobs:
 
   test-play-console-cli:
     name: Test Play Console CLI
-    needs: [type-check, lint-check, unit-tests]
+    needs: [type-check, lint-check, unit-tests, build-dist]
     uses: ./.github/workflows/play-console-info.yml
     secrets: inherit
 
   build-mock-binaries:
     name: Build Mock CLI (${{ matrix.platform }}-${{ matrix.arch }})
-    needs: [type-check, lint-check, unit-tests]
+    needs: [type-check, lint-check, unit-tests, build-dist]
     timeout-minutes: 10
     strategy:
       fail-fast: true
@@ -123,7 +128,7 @@ jobs:
 
   build-python-binaries:
     name: Build Python CLI (${{ matrix.platform }}-${{ matrix.arch }})
-    needs: [type-check, lint-check, unit-tests]
+    needs: [type-check, lint-check, unit-tests, build-dist]
     timeout-minutes: 20
     strategy:
       fail-fast: true
