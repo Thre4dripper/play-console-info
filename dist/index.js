@@ -104018,6 +104018,98 @@ var import_os = __toESM(require("os"));
 var core = __toESM(require_core());
 var exec = __toESM(require_exec());
 var tc = __toESM(require_tool_cache());
+
+// package.json
+var package_default = {
+  name: "play-console-info",
+  version: "1.0.1",
+  description: "A Github Action to get play console info",
+  author: "Ijlal Ahmad",
+  main: "index.js",
+  private: true,
+  keywords: [
+    "play",
+    "console",
+    "info",
+    "actions",
+    "github"
+  ],
+  exports: {
+    ".": {
+      dist: "./dist/index.js"
+    }
+  },
+  license: "MIT",
+  scripts: {
+    build: "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js",
+    "build:cli:windows": "cli/python/build-cli-windows.bat",
+    "build:cli:linux": "cli/python/build-cli-linux.sh",
+    "build:cli:mac": "cli/python/build-cli-mac.sh",
+    "build:cli:linux:x64": "cli/python/build-cli-linux.sh x64",
+    "build:cli:linux:arm64": "cli/python/build-cli-linux.sh arm64",
+    "build:cli": "npm run build:cli:windows && npm run build:cli:linux && npm run build:cli:mac",
+    "clean:cli": "rimraf cli/build cli/dist cli/play_console_cli.spec",
+    "build:mock-cli:windows": "cli/mock/build-mock-cli-windows.bat",
+    "build:mock-cli:linux": "cli/mock/build-mock-cli-linux.sh",
+    "build:mock-cli:mac": "cli/mock/build-mock-cli-mac.sh",
+    "build:mock-cli:linux:x64": "cli/mock/build-mock-cli-linux.sh x64",
+    "build:mock-cli:linux:arm64": "cli/mock/build-mock-cli-linux.sh arm64",
+    "build:mock-cli:mac:arm64": "cli/mock/build-mock-cli-mac.sh",
+    "clean:mock-cli": "rimraf cli/mock/build cli/mock/dist cli/mock/play_console_mock_cli.spec",
+    start: "npm run build && node dist/index.js",
+    preview: "node dist/index.js",
+    "clean:dist": "rimraf dist",
+    typecheck: "npx tsc --noEmit",
+    "format:check": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "lint:check": "eslint . --ext .ts,.js",
+    "local-action": "npm run build && act",
+    test: "jest",
+    "test:unit": "jest --testPathPatterns=tests/unit --passWithNoTests",
+    "test:mock": "jest --testPathPatterns=tests/mockCli --passWithNoTests",
+    "test:watch": "jest --watch",
+    "test:coverage": "c8 jest",
+    "test:unit:coverage": "c8 jest --testPathPatterns=tests/unit --passWithNoTests",
+    "test:coverage:strict": "c8 jest && c8 check-coverage",
+    "clean:coverage": "c8 clean",
+    "mock-cli": "node cli/mock/mockCli.js",
+    "mock-cli:help": "node cli/mock/mockCli.js --help"
+  },
+  dependencies: {
+    "@actions/artifact": "^2.3.2",
+    "@actions/core": "^1.11.1",
+    "@actions/exec": "^1.1.1",
+    "@actions/github": "^6.0.1",
+    "@actions/tool-cache": "^2.0.2"
+  },
+  devDependencies: {
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^9.39.4",
+    "@eslint/json": "^1.2.0",
+    "@eslint/markdown": "^8.0.1",
+    "@jest/globals": "^30.3.0",
+    "@types/node": "^25.6.0",
+    c8: "^11.0.0",
+    commander: "^14.0.3",
+    esbuild: "^0.28.0",
+    eslint: "^9.34.0",
+    "eslint-config-prettier": "^10.1.8",
+    globals: "^17.6.0",
+    jest: "^30.3.0",
+    nodemon: "^3.1.14",
+    prettier: "^3.8.3",
+    "prettier-eslint": "^16.4.2",
+    rimraf: "^6.1.3",
+    "ts-jest": "^29.4.9",
+    typescript: "^6.0.3",
+    "typescript-eslint": "^8.59.2"
+  },
+  engines: {
+    node: ">=20.0.0"
+  }
+};
+
+// src/utils/helpers.ts
 var ActionError = class extends Error {
   constructor(message) {
     super(message);
@@ -104090,8 +104182,7 @@ var getActionVersion = () => {
   if (override) {
     return override.startsWith("v") ? override.slice(1) : override;
   }
-  const pkg2 = require(import_path.default.resolve("..", "..", "/package.json"));
-  return pkg2.version;
+  return package_default.version;
 };
 var downloadFromRelease = async (spec) => {
   const version = getActionVersion();
