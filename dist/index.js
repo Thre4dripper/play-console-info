@@ -104060,7 +104060,9 @@ var getBinarySpec = (useMock) => {
     }
     case "darwin": {
       if (arch !== "arm64") {
-        throw new ActionError("macOS x64 is not supported \u2014 only arm64 binaries are published");
+        throw new ActionError(
+          "macOS x64 is not supported \u2014 only arm64 binaries are published"
+        );
       }
       const fileName = `${baseName}-mac-arm64`;
       return {
@@ -104088,7 +104090,7 @@ var getActionVersion = () => {
   if (override) {
     return override.startsWith("v") ? override.slice(1) : override;
   }
-  const pkg2 = require(import_path.default.resolve(__dirname, "../../package.json"));
+  const pkg2 = require(import_path.default.resolve(__dirname, "../package.json"));
   return pkg2.version;
 };
 var downloadFromRelease = async (spec) => {
