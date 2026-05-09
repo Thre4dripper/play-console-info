@@ -104090,7 +104090,7 @@ var getActionVersion = () => {
   if (override) {
     return override.startsWith("v") ? override.slice(1) : override;
   }
-  const pkg2 = require(import_path.default.resolve(__dirname, "../package.json"));
+  const pkg2 = require(import_path.default.resolve("..", "..", "/package.json"));
   return pkg2.version;
 };
 var downloadFromRelease = async (spec) => {
