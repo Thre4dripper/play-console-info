@@ -30,7 +30,7 @@ on:
   workflow_call:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   # ─── Job 0: Build Dist ───────────────────────────────────────────────────
