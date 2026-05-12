@@ -8,6 +8,7 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 10
+    auto-merge: true
     groups:
       actions-minor:
         applies-to: version-updates
@@ -27,6 +28,7 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 10
+    auto-merge: true
     ignore:
       # Ignore major version bumps for runtime-critical packages
       - dependency-name: '@actions/*'
