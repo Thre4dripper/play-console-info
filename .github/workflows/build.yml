@@ -134,7 +134,7 @@ jobs:
 
       - name: Download format patch
         if: needs.format.outputs.changed == 'true'
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: format-patch
           path: /tmp/format-patch
@@ -144,7 +144,7 @@ jobs:
         run: git apply /tmp/format-patch/format.patch
 
       - name: Download dist artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: dist-bundle
           path: dist
