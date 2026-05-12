@@ -1,6 +1,6 @@
 {
   "name": "play-console-info",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A Github Action to get play console info",
   "author": "Ijlal Ahmad",
   "main": "index.js",
