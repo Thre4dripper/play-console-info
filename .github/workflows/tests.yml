@@ -29,8 +29,16 @@ on:
   workflow_dispatch:
   workflow_call:
 
+# Standalone runs (push/PR/dispatch): cancel older in-flight runs for the same
+# branch so only the latest commit is tested.
+# Reusable calls (workflow_call): each caller gets a unique group keyed by
+# run_id so they never cancel each other or race with a standalone run.
+concurrency:
+  group: ${{ github.event_name == 'workflow_call' && format('tests-call-{0}', github.run_id) || format('tests-{0}', github.ref) }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_call' }}
+
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   # ─── Job 0: Build Dist ───────────────────────────────────────────────────

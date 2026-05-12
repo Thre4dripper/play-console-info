@@ -10,11 +10,13 @@ on:
   workflow_dispatch:
   workflow_call:
 
-# Standalone runs: cancel any in-flight run for the same branch so only the
-# latest commit's changes land. Reusable calls must never be cancelled
-# mid-pipeline — each calling workflow's run is independent.
+# Standalone runs (push/PR/dispatch): cancel any in-flight run for the same
+# branch so only the latest commit's changes land.
+# Reusable calls (workflow_call): each caller gets a unique group keyed by the
+# caller's run_id, so callers never cancel each other and never race with a
+# simultaneous standalone push run.
 concurrency:
-  group: build-format-${{ github.ref }}
+  group: ${{ github.event_name == 'workflow_call' && format('build-call-{0}', github.run_id) || format('build-push-{0}', github.ref) }}
   cancel-in-progress: ${{ github.event_name != 'workflow_call' }}
 
 permissions:

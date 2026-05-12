@@ -32,11 +32,12 @@ jobs:
             echo "Version v$VERSION is new — release will proceed."
           fi
 
-  build-dist:
-    name: Build & Format
-    needs: version-guard
-    uses: ./.github/workflows/build.yml
-
+  # Note: build-dist is intentionally omitted here.
+  # tests.yml (called by unit-tests below) already calls build.yml internally,
+  # which validates the dist compiles and uploads the dist-bundle artifact.
+  # Having a separate build-dist job would trigger two concurrent workflow_call
+  # invocations of build.yml with the same run_id → same concurrency group →
+  # one serialises the other, wasting minutes.
   unit-tests:
     name: Unit Tests
     needs: version-guard
@@ -60,13 +61,13 @@ jobs:
 
   test-play-console-cli:
     name: Test Play Console CLI
-    needs: [type-check, lint-check, unit-tests, build-dist]
+    needs: [type-check, lint-check, unit-tests]
     uses: ./.github/workflows/play-console-info.yml
     secrets: inherit
 
   build-mock-binaries:
     name: Build Mock CLI (${{ matrix.platform }}-${{ matrix.arch }})
-    needs: [type-check, lint-check, unit-tests, build-dist]
+    needs: [type-check, lint-check, unit-tests]
     timeout-minutes: 10
     strategy:
       fail-fast: true
@@ -128,7 +129,7 @@ jobs:
 
   build-python-binaries:
     name: Build Python CLI (${{ matrix.platform }}-${{ matrix.arch }})
-    needs: [type-check, lint-check, unit-tests, build-dist]
+    needs: [type-check, lint-check, unit-tests]
     timeout-minutes: 20
     strategy:
       fail-fast: true
