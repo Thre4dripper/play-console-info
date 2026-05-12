@@ -140,7 +140,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Download Mock CLI binary
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: mock-cli-linux-x64
           path: bin/mock/linux
@@ -179,7 +179,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Download Mock CLI binary
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: mock-cli-linux-x64
           path: bin/mock/linux
