@@ -41,13 +41,6 @@ permissions:
   contents: read
 
 jobs:
-  # ─── Job 0: Build Dist ───────────────────────────────────────────────────
-  # Validates that dist/index.js can be compiled and exposes it as an artifact
-  # for any downstream consumer. The format + commit steps inside build.yml
-  # are skipped because we are calling it as a reusable workflow (workflow_call).
-  build-dist:
-    name: Build & Format
-    uses: ./.github/workflows/build.yml
 
   # ─── Job 1: Unit Tests ────────────────────────────────────────────────────
   unit-tests:
