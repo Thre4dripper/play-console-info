@@ -23,53 +23,18 @@ on:
         required: true
 
 jobs:
-  # ─── Build Mock CLI binary once, reused by all test jobs ─────────────────
-  build-mock-cli:
-    runs-on: ubuntu-latest
-    name: Build Mock CLI (linux-x64)
-    timeout-minutes: 10
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v6
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-        with:
-          version: 9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: package.json
-          cache: 'pnpm'
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-
-      - name: Build Mock CLI binary
-        run: bash cli/mock/build-mock-cli-linux.sh x64
-
-      - name: Upload Mock CLI artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: mock-cli-linux-x64
-          path: bin/mock/linux/mockCli-linux-x64
-          retention-days: 1
-          if-no-files-found: error
-
   test-basic:
     runs-on: ubuntu-latest
     name: Test Basic Functionality
-    needs: build-mock-cli
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
 
       - name: Setup Mock CLI
         uses: ./.github/actions/setup-mock-cli
+        with:
+          platform: 'linux'
+          arch: 'x64'
 
       - name: Test basic package info
         id: basic
@@ -99,6 +64,9 @@ jobs:
 
       - name: Setup Mock CLI
         uses: ./.github/actions/setup-mock-cli
+        with:
+            platform: 'linux'
+            arch: 'x64'
 
       - name: Test with all resources enabled
         id: all
@@ -147,6 +115,9 @@ jobs:
 
       - name: Setup Mock CLI
         uses: ./.github/actions/setup-mock-cli
+        with:
+            platform: 'linux'
+            arch: 'x64'
 
       - name: Test tracks - ${{ matrix.tracks }}
         id: tracks
@@ -179,6 +150,9 @@ jobs:
 
       - name: Setup Mock CLI
         uses: ./.github/actions/setup-mock-cli
+        with:
+            platform: 'linux'
+            arch: 'x64'
 
       - name: Test images - ${{ matrix.images }} (${{ matrix.language }})
         id: images
@@ -211,6 +185,9 @@ jobs:
 
       - name: Setup Mock CLI
         uses: ./.github/actions/setup-mock-cli
+        with:
+            platform: 'linux'
+            arch: 'x64'
 
       - name: Test reviews - ${{ matrix.pages }} pages, ${{ matrix.pageSize }} size
         id: reviews
@@ -240,6 +217,9 @@ jobs:
 
       - name: Setup Mock CLI
         uses: ./.github/actions/setup-mock-cli
+        with:
+            platform: 'linux'
+            arch: 'x64'
 
       - name: Create service account file
         run: |
@@ -294,6 +274,9 @@ jobs:
 
       - name: Setup Mock CLI
         uses: ./.github/actions/setup-mock-cli
+        with:
+            platform: 'linux'
+            arch: 'x64'
 
       - name: Test ${{ matrix.resource }}
         uses: ./
@@ -339,6 +322,9 @@ jobs:
 
       - name: Setup Mock CLI
         uses: ./.github/actions/setup-mock-cli
+        with:
+            platform: 'linux'
+            arch: 'x64'
 
       - name: Test testers - ${{ matrix.testers }}
         id: testers
@@ -366,6 +352,9 @@ jobs:
 
       - name: Setup Mock CLI
         uses: ./.github/actions/setup-mock-cli
+        with:
+            platform: 'linux'
+            arch: 'x64'
 
       - name: Test artifact upload
         id: artifact-upload

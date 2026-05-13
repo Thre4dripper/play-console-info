@@ -1,15 +1,86 @@
 name: 'Setup Mock CLI'
-description: 'Downloads the prebuilt mock CLI artifact into bin/mock/linux/ and makes it executable'
+description: >
+  Singleton: ensures the mock-cli-{platform}-{arch} binary is ready in
+  bin/mock/{platform}/. Downloads the pre-built artifact from this workflow
+  run when available; builds from source (and re-uploads for subsequent jobs)
+  otherwise. Handles Linux, macOS, and Windows transparently.
+
+inputs:
+  platform:
+    description: 'Target platform: linux | mac | windows'
+    default: 'linux'
+  arch:
+    description: 'Target CPU architecture: x64 | arm64'
+    default: 'x64'
 
 runs:
   using: composite
   steps:
-    - name: Download Mock CLI binary
-      uses: actions/download-artifact@v6
+    # ── Fast path: artifact already exists in this workflow run ───────────────
+    - name: Try downloading pre-built artifact
+      id: download
+      uses: actions/download-artifact@v8
       with:
-        name: mock-cli-linux-x64
-        path: bin/mock/linux
+        name: mock-cli-${{ inputs.platform }}-${{ inputs.arch }}
+        path: bin/mock/${{ inputs.platform }}
+      continue-on-error: true
 
-    - name: Make Mock CLI executable
+    # ── Slow path: build from source (only when download failed) ─────────────
+    - name: Setup pnpm
+      if: steps.download.outcome == 'failure'
+      uses: pnpm/action-setup@v6
+      with:
+        version: 9
+
+    - name: Setup Node.js
+      if: steps.download.outcome == 'failure'
+      uses: actions/setup-node@v6
+      with:
+        node-version-file: package.json
+        cache: 'pnpm'
+
+    - name: Install Dependencies
+      if: steps.download.outcome == 'failure'
       shell: bash
-      run: chmod +x bin/mock/linux/mockCli-linux-x64
+      run: pnpm install --frozen-lockfile
+
+    - name: Setup Bun
+      if: steps.download.outcome == 'failure'
+      uses: oven-sh/setup-bun@v2
+
+    - name: Build from source (Unix)
+      if: steps.download.outcome == 'failure' && inputs.platform != 'windows'
+      shell: bash
+      run: bash cli/mock/build-mock-cli-${{ inputs.platform }}.sh ${{ inputs.arch }}
+
+    - name: Build from source (Windows)
+      if: steps.download.outcome == 'failure' && inputs.platform == 'windows'
+      shell: cmd
+      run: cli\mock\build-mock-cli-windows.bat
+
+    # Upload so subsequent jobs in the same run skip the build entirely
+    - name: Upload artifact for subsequent jobs (Unix)
+      if: steps.download.outcome == 'failure' && inputs.platform != 'windows'
+      uses: actions/upload-artifact@v7
+      with:
+        name: mock-cli-${{ inputs.platform }}-${{ inputs.arch }}
+        path: bin/mock/${{ inputs.platform }}/mockCli-${{ inputs.platform }}-${{ inputs.arch }}
+        retention-days: 1
+        if-no-files-found: error
+        overwrite: true
+
+    - name: Upload artifact for subsequent jobs (Windows)
+      if: steps.download.outcome == 'failure' && inputs.platform == 'windows'
+      uses: actions/upload-artifact@v7
+      with:
+        name: mock-cli-${{ inputs.platform }}-${{ inputs.arch }}
+        path: bin/mock/${{ inputs.platform }}/mockCli-${{ inputs.platform }}-${{ inputs.arch }}.exe
+        retention-days: 1
+        if-no-files-found: error
+        overwrite: true
+
+    # ── chmod only on Unix (Windows binaries don't need it) ───────────────────
+    - name: Make executable
+      if: inputs.platform != 'windows'
+      shell: bash
+      run: chmod +x bin/mock/${{ inputs.platform }}/mockCli-${{ inputs.platform }}-${{ inputs.arch }}
