@@ -1,65 +1,85 @@
-import { spawn } from 'child_process';
 import { EventEmitter } from 'events';
-import run from '../../src/main';
-import { setOutputs } from '../../src/utils/outputs';
-import { createArtifact } from '../../src/utils/artifacts';
-import { ActionError, getExecutablePath } from '../../src/utils/helpers';
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import mockResult from '../../cli/mock/result.json';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+import mockResult from '../../cli/mock/result.json' with { type: 'json' };
+import type { spawn as SpawnType } from 'child_process';
+import type { setOutputs as SetOutputsType } from '../../src/utils/outputs.js';
+import type { createArtifact as CreateArtifactType } from '../../src/utils/artifacts.js';
+import type { getExecutablePath as GetExecutablePathType } from '../../src/utils/helpers.js';
 
-// Mock dependencies
-jest.mock('child_process');
-jest.mock('../../src/utils/outputs');
-jest.mock('../../src/utils/artifacts');
-jest.mock('../../src/utils/helpers', () => ({
+const {
+  mockSpawnFn,
+  mockSetOutputsFn,
+  mockCreateArtifactFn,
+  mockGetExecutablePathFn,
+} = vi.hoisted(() => ({
+  mockSpawnFn: vi.fn(),
+  mockSetOutputsFn: vi.fn(),
+  mockCreateArtifactFn: vi.fn(),
+  mockGetExecutablePathFn: vi.fn(),
+}));
+
+vi.mock('child_process', () => ({
+  spawn: mockSpawnFn,
+}));
+
+vi.mock('../../src/utils/outputs.js', () => ({
+  setOutputs: mockSetOutputsFn,
+}));
+
+vi.mock('../../src/utils/artifacts.js', () => ({
+  createArtifact: mockCreateArtifactFn,
+}));
+
+vi.mock('../../src/utils/helpers.js', () => ({
   ActionError: class ActionError extends Error {
     constructor(message: string) {
       super(message);
     }
   },
-  getExecutablePath: jest.fn(),
+  getExecutablePath: mockGetExecutablePathFn,
   Logger: {
-    info: jest.fn(),
-    warning: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-    notice: jest.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+    notice: vi.fn(),
   },
 }));
-jest.mock('@actions/core', () => ({
-  setFailed: jest.fn(),
-  info: jest.fn(),
-  warning: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  notice: jest.fn(),
+
+vi.mock('@actions/core', () => ({
+  setFailed: vi.fn(),
+  info: vi.fn(),
+  warning: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+  notice: vi.fn(),
 }));
 
-const mockSpawn = spawn as jest.MockedFunction<typeof spawn>;
-const mockSetOutputs = setOutputs as jest.MockedFunction<typeof setOutputs>;
-const mockCreateArtifact = createArtifact as jest.MockedFunction<
-  typeof createArtifact
->;
-const mockGetExecutablePath = getExecutablePath as jest.MockedFunction<
-  typeof getExecutablePath
->;
+import { default as run } from '../../src/main.js';
+import { ActionError } from '../../src/utils/helpers.js';
+
+// Typed aliases for better mock method inference
+const mockSpawn = mockSpawnFn as unknown as ReturnType<typeof vi.fn> & typeof SpawnType;
+const mockSetOutputs = mockSetOutputsFn as ReturnType<typeof vi.fn> & { mockResolvedValue: (v: unknown) => void };
+const mockCreateArtifact = mockCreateArtifactFn as ReturnType<typeof vi.fn>;
+const mockGetExecutablePath = mockGetExecutablePathFn as ReturnType<typeof vi.fn>;
 
 describe('main.ts', () => {
   let mockChildProcess: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockChildProcess = new EventEmitter();
     mockChildProcess.stdout = new EventEmitter();
     mockChildProcess.stderr = new EventEmitter();
-    mockChildProcess.stdout.setEncoding = jest.fn();
-    mockChildProcess.stderr.setEncoding = jest.fn();
+    mockChildProcess.stdout.setEncoding = vi.fn();
+    mockChildProcess.stderr.setEncoding = vi.fn();
 
-    mockSpawn.mockReturnValue(mockChildProcess);
-    mockSetOutputs.mockResolvedValue(undefined);
-    mockCreateArtifact.mockResolvedValue(undefined);
-    mockGetExecutablePath.mockResolvedValue('test-command');
+    mockSpawnFn.mockReturnValue(mockChildProcess);
+    mockSetOutputsFn.mockResolvedValue(undefined);
+    mockCreateArtifactFn.mockResolvedValue(undefined);
+    mockGetExecutablePathFn.mockResolvedValue('test-command');
   });
 
   describe('run function', () => {
@@ -89,7 +109,7 @@ describe('main.ts', () => {
 
       await runPromise;
 
-      expect(mockSpawn).toHaveBeenCalledWith(
+      expect(mockSpawnFn).toHaveBeenCalledWith(
         'test-command',
         ['--arg1', 'value1'],
         {
@@ -97,8 +117,8 @@ describe('main.ts', () => {
           env: { ...process.env },
         }
       );
-      expect(mockSetOutputs).toHaveBeenCalledWith(mockResult);
-      expect(mockCreateArtifact).toHaveBeenCalledWith(
+      expect(mockSetOutputsFn).toHaveBeenCalledWith(mockResult);
+      expect(mockCreateArtifactFn).toHaveBeenCalledWith(
         mockRunProps.artifactArgs,
         mockResult
       );
@@ -168,8 +188,8 @@ describe('main.ts', () => {
 
       await runPromise;
 
-      expect(mockSetOutputs).toHaveBeenCalledWith(mockResult);
-      expect(mockCreateArtifact).toHaveBeenCalledWith(
+      expect(mockSetOutputsFn).toHaveBeenCalledWith(mockResult);
+      expect(mockCreateArtifactFn).toHaveBeenCalledWith(
         mockRunProps.artifactArgs,
         mockResult
       );
@@ -177,7 +197,7 @@ describe('main.ts', () => {
 
     it('should stream stderr data to stdout', async () => {
       const originalWrite = process.stdout.write;
-      const mockWrite = jest.fn();
+      const mockWrite = vi.fn();
       process.stdout.write = mockWrite as any;
 
       const runPromise = run(mockRunProps);
@@ -242,7 +262,7 @@ describe('main.ts', () => {
         // Expected to fail due to no stdout data
       }
 
-      expect(mockSpawn).toHaveBeenCalledWith(
+      expect(mockSpawnFn).toHaveBeenCalledWith(
         expect.any(String),
         expect.any(Array),
         expect.objectContaining({

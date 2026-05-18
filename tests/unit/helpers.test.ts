@@ -1,54 +1,65 @@
-import * as os from 'os';
-import * as path from 'path';
-import * as core from '@actions/core';
-import * as exec from '@actions/exec';
-import * as tc from '@actions/tool-cache';
-import {
-  describe,
-  it,
-  expect,
-  jest,
-  beforeEach,
-  afterEach,
-} from '@jest/globals';
-import {
-  ActionError,
-  getExecutablePath,
-  Logger,
-} from '../../src/utils/helpers';
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import path from 'path';
+import pkg from '../../package.json' with { type: 'json' };
 
-jest.mock('os', () => ({
-  platform: jest.fn(),
-  arch: jest.fn(),
+// vi.hoisted() defines mock-function references BEFORE vi.mock() factories run,
+// so the same vi.fn() instances are shared between factories and test assertions.
+const {
+  mockPlatform,
+  mockArch,
+  mockSetFailed,
+  mockInfo,
+  mockWarning,
+  mockError,
+  mockDebug,
+  mockNotice,
+  mockExecFn,
+  mockFind,
+  mockDownloadTool,
+  mockCacheFile,
+} = vi.hoisted(() => ({
+  mockPlatform: vi.fn<() => NodeJS.Platform>(),
+  mockArch: vi.fn<() => string>(),
+  mockSetFailed: vi.fn(),
+  mockInfo: vi.fn(),
+  mockWarning: vi.fn(),
+  mockError: vi.fn(),
+  mockDebug: vi.fn(),
+  mockNotice: vi.fn(),
+  mockExecFn: vi.fn(),
+  mockFind: vi.fn<() => string>(),
+  mockDownloadTool: vi.fn<() => Promise<string>>(),
+  mockCacheFile: vi.fn<() => Promise<string>>(),
 }));
 
-jest.mock('@actions/exec', () => ({
-  exec: jest.fn(),
+vi.mock('os', () => ({
+  platform: mockPlatform,
+  arch: mockArch,
+  default: { platform: mockPlatform, arch: mockArch },
 }));
 
-jest.mock('@actions/tool-cache', () => ({
-  find: jest.fn(),
-  downloadTool: jest.fn(),
-  cacheFile: jest.fn(),
+vi.mock('@actions/core', () => ({
+  setFailed: mockSetFailed,
+  info: mockInfo,
+  warning: mockWarning,
+  error: mockError,
+  debug: mockDebug,
+  notice: mockNotice,
 }));
 
-jest.mock('@actions/core', () => ({
-  setFailed: jest.fn(),
-  info: jest.fn(),
-  warning: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  notice: jest.fn(),
+vi.mock('@actions/exec', () => ({ exec: mockExecFn }));
+
+vi.mock('@actions/tool-cache', () => ({
+  find: mockFind,
+  downloadTool: mockDownloadTool,
+  cacheFile: mockCacheFile,
 }));
 
-const mockOs = jest.mocked(os);
-const mockCore = jest.mocked(core);
-const mockExec = jest.mocked(exec);
-const mockTc = jest.mocked(tc);
+import { ActionError, getExecutablePath, Logger } from '../../src/utils/helpers.js';
 
 describe('ActionError', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('creates error with message and calls core.setFailed', () => {
@@ -58,7 +69,7 @@ describe('ActionError', () => {
     expect(error.message).toBe(message);
     expect(error).toBeInstanceOf(Error);
     expect(error).toBeInstanceOf(ActionError);
-    expect(mockCore.setFailed).toHaveBeenCalledWith(message);
+    expect(mockSetFailed).toHaveBeenCalledWith(message);
   });
 });
 
@@ -66,10 +77,11 @@ describe('getExecutablePath', () => {
   const ORIGINAL_ENV = process.env;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(process, 'cwd').mockReturnValue('/test/project');
-    mockExec.exec.mockResolvedValue(0);
-    mockOs.arch.mockReturnValue('x64');
+    vi.clearAllMocks();
+    vi.spyOn(process, 'cwd').mockReturnValue('/test/project');
+    mockExecFn.mockResolvedValue(0);
+    mockArch.mockReturnValue('x64');
+    mockFind.mockReturnValue('');
     process.env = {
       ...ORIGINAL_ENV,
       PLAY_CONSOLE_BIN_DIR: undefined,
@@ -80,13 +92,13 @@ describe('getExecutablePath', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
     process.env = ORIGINAL_ENV;
   });
 
   describe('with useMock = true (Mock CLI, local resolution)', () => {
     it('returns correct x64 executable path for supported x64 platforms', async () => {
-      mockOs.arch.mockReturnValue('x64');
+      mockArch.mockReturnValue('x64');
       const platforms = [
         [
           'win32',
@@ -96,41 +108,41 @@ describe('getExecutablePath', () => {
       ] as const;
 
       for (const [platform, expectedPath] of platforms) {
-        mockOs.platform.mockReturnValue(platform);
+        mockPlatform.mockReturnValue(platform);
         const result = await getExecutablePath(true);
         expect(result).toBe(path.join('/test/project', expectedPath));
       }
     });
 
     it('returns correct arm64 executable path for linux and darwin', async () => {
-      mockOs.arch.mockReturnValue('arm64');
+      mockArch.mockReturnValue('arm64');
       const platforms = [
         ['darwin', path.join('bin', 'mock', 'mac', 'mockCli-mac-arm64')],
         ['linux', path.join('bin', 'mock', 'linux', 'mockCli-linux-arm64')],
       ] as const;
 
       for (const [platform, expectedPath] of platforms) {
-        mockOs.platform.mockReturnValue(platform);
+        mockPlatform.mockReturnValue(platform);
         const result = await getExecutablePath(true);
         expect(result).toBe(path.join('/test/project', expectedPath));
       }
     });
 
     it('throws for macOS x64', async () => {
-      mockOs.platform.mockReturnValue('darwin');
-      mockOs.arch.mockReturnValue('x64');
+      mockPlatform.mockReturnValue('darwin');
+      mockArch.mockReturnValue('x64');
 
       await expect(getExecutablePath(true)).rejects.toThrow(
         'macOS x64 is not supported — only arm64 binaries are published'
       );
-      expect(mockCore.setFailed).toHaveBeenCalledWith(
+      expect(mockSetFailed).toHaveBeenCalledWith(
         'macOS x64 is not supported — only arm64 binaries are published'
       );
     });
 
     it('windows always uses x64 suffix regardless of arch', async () => {
-      mockOs.platform.mockReturnValue('win32');
-      mockOs.arch.mockReturnValue('arm64');
+      mockPlatform.mockReturnValue('win32');
+      mockArch.mockReturnValue('arm64');
       const result = await getExecutablePath(true);
       expect(result).toBe(
         path.join(
@@ -164,22 +176,22 @@ describe('getExecutablePath', () => {
       ] as const;
 
       for (const [platform, arch, expectedPath] of platformPaths) {
-        mockExec.exec.mockClear();
-        mockOs.platform.mockReturnValue(platform);
-        mockOs.arch.mockReturnValue(arch);
+        mockExecFn.mockClear();
+        mockPlatform.mockReturnValue(platform);
+        mockArch.mockReturnValue(arch);
 
         await getExecutablePath(true);
 
-        expect(mockExec.exec).toHaveBeenCalledWith('chmod', [
+        expect(mockExecFn).toHaveBeenCalledWith('chmod', [
           '+x',
           expectedPath,
         ]);
       }
 
-      mockExec.exec.mockClear();
-      mockOs.platform.mockReturnValue('win32');
+      mockExecFn.mockClear();
+      mockPlatform.mockReturnValue('win32');
       await getExecutablePath(true);
-      expect(mockExec.exec).not.toHaveBeenCalled();
+      expect(mockExecFn).not.toHaveBeenCalled();
     });
   });
 
@@ -189,8 +201,8 @@ describe('getExecutablePath', () => {
     });
 
     it('resolves binary from override directory and chmods on unix', async () => {
-      mockOs.platform.mockReturnValue('linux');
-      mockOs.arch.mockReturnValue('x64');
+      mockPlatform.mockReturnValue('linux');
+      mockArch.mockReturnValue('x64');
 
       const result = await getExecutablePath(false);
 
@@ -203,13 +215,13 @@ describe('getExecutablePath', () => {
           'play_console_cli-linux-x64'
         )
       );
-      expect(mockExec.exec).toHaveBeenCalledWith('chmod', ['+x', result]);
-      expect(mockTc.downloadTool).not.toHaveBeenCalled();
+      expect(mockExecFn).toHaveBeenCalledWith('chmod', ['+x', result]);
+      expect(mockDownloadTool).not.toHaveBeenCalled();
     });
 
     it('does not chmod on windows', async () => {
-      mockOs.platform.mockReturnValue('win32');
-      mockOs.arch.mockReturnValue('x64');
+      mockPlatform.mockReturnValue('win32');
+      mockArch.mockReturnValue('x64');
 
       const result = await getExecutablePath(false);
 
@@ -222,7 +234,7 @@ describe('getExecutablePath', () => {
           'play_console_cli-windows-x64.exe'
         )
       );
-      expect(mockExec.exec).not.toHaveBeenCalled();
+      expect(mockExecFn).not.toHaveBeenCalled();
     });
   });
 
@@ -232,38 +244,38 @@ describe('getExecutablePath', () => {
     });
 
     it('returns cached binary path when tool-cache hits', async () => {
-      mockOs.platform.mockReturnValue('linux');
-      mockOs.arch.mockReturnValue('x64');
-      mockTc.find.mockReturnValue('/runner/cache/python-cli-linux-x64/9.9.9');
+      mockPlatform.mockReturnValue('linux');
+      mockArch.mockReturnValue('x64');
+      mockFind.mockReturnValue('/runner/cache/python-cli-linux-x64/9.9.9');
 
       const result = await getExecutablePath(false);
 
-      expect(mockTc.find).toHaveBeenCalledWith('python-cli-linux-x64', '9.9.9');
-      expect(mockTc.downloadTool).not.toHaveBeenCalled();
+      expect(mockFind).toHaveBeenCalledWith('python-cli-linux-x64', '9.9.9');
+      expect(mockDownloadTool).not.toHaveBeenCalled();
       expect(result).toBe(
         path.join(
           '/runner/cache/python-cli-linux-x64/9.9.9',
           'play_console_cli-linux-x64'
         )
       );
-      expect(mockExec.exec).toHaveBeenCalledWith('chmod', ['+x', result]);
+      expect(mockExecFn).toHaveBeenCalledWith('chmod', ['+x', result]);
     });
 
     it('downloads, caches, and returns binary path on cache miss', async () => {
-      mockOs.platform.mockReturnValue('darwin');
-      mockOs.arch.mockReturnValue('arm64');
-      mockTc.find.mockReturnValue('');
-      mockTc.downloadTool.mockResolvedValue('/tmp/downloaded-file');
-      mockTc.cacheFile.mockResolvedValue(
+      mockPlatform.mockReturnValue('darwin');
+      mockArch.mockReturnValue('arm64');
+      mockFind.mockReturnValue('');
+      mockDownloadTool.mockResolvedValue('/tmp/downloaded-file');
+      mockCacheFile.mockResolvedValue(
         '/runner/cache/python-cli-mac-arm64/9.9.9'
       );
 
       const result = await getExecutablePath(false);
 
-      expect(mockTc.downloadTool).toHaveBeenCalledWith(
+      expect(mockDownloadTool).toHaveBeenCalledWith(
         'https://github.com/Thre4dripper/play-console-info/releases/download/v9.9.9/play_console_cli-mac-arm64'
       );
-      expect(mockTc.cacheFile).toHaveBeenCalledWith(
+      expect(mockCacheFile).toHaveBeenCalledWith(
         '/tmp/downloaded-file',
         'play_console_cli-mac-arm64',
         'python-cli-mac-arm64',
@@ -275,52 +287,50 @@ describe('getExecutablePath', () => {
           'play_console_cli-mac-arm64'
         )
       );
-      expect(mockExec.exec).toHaveBeenCalledWith('chmod', ['+x', result]);
+      expect(mockExecFn).toHaveBeenCalledWith('chmod', ['+x', result]);
     });
 
     it('strips leading v from PLAY_CONSOLE_RELEASE_TAG override', async () => {
       process.env.PLAY_CONSOLE_RELEASE_TAG = 'v1.2.3';
-      mockOs.platform.mockReturnValue('linux');
-      mockOs.arch.mockReturnValue('x64');
-      mockTc.find.mockReturnValue('');
-      mockTc.downloadTool.mockResolvedValue('/tmp/downloaded');
-      mockTc.cacheFile.mockResolvedValue('/cache/dir');
+      mockPlatform.mockReturnValue('linux');
+      mockArch.mockReturnValue('x64');
+      mockFind.mockReturnValue('');
+      mockDownloadTool.mockResolvedValue('/tmp/downloaded');
+      mockCacheFile.mockResolvedValue('/cache/dir');
 
       await getExecutablePath(false);
 
-      expect(mockTc.find).toHaveBeenCalledWith('python-cli-linux-x64', '1.2.3');
-      expect(mockTc.downloadTool).toHaveBeenCalledWith(
+      expect(mockFind).toHaveBeenCalledWith('python-cli-linux-x64', '1.2.3');
+      expect(mockDownloadTool).toHaveBeenCalledWith(
         expect.stringContaining('/releases/download/v1.2.3/')
       );
     });
 
     it('does not chmod on windows after download', async () => {
-      mockOs.platform.mockReturnValue('win32');
-      mockOs.arch.mockReturnValue('x64');
-      mockTc.find.mockReturnValue('');
-      mockTc.downloadTool.mockResolvedValue('/tmp/downloaded');
-      mockTc.cacheFile.mockResolvedValue('/cache/dir');
+      mockPlatform.mockReturnValue('win32');
+      mockArch.mockReturnValue('x64');
+      mockFind.mockReturnValue('');
+      mockDownloadTool.mockResolvedValue('/tmp/downloaded');
+      mockCacheFile.mockResolvedValue('/cache/dir');
 
       await getExecutablePath(false);
 
-      expect(mockExec.exec).not.toHaveBeenCalled();
+      expect(mockExecFn).not.toHaveBeenCalled();
     });
 
     it('falls back to package.json version when no release tag override is set', async () => {
       delete process.env.PLAY_CONSOLE_RELEASE_TAG;
-      mockOs.platform.mockReturnValue('linux');
-      mockOs.arch.mockReturnValue('x64');
-      mockTc.find.mockReturnValue('');
-      mockTc.downloadTool.mockResolvedValue('/tmp/downloaded');
-      mockTc.cacheFile.mockResolvedValue('/cache/dir');
+      mockPlatform.mockReturnValue('linux');
+      mockArch.mockReturnValue('x64');
+      mockFind.mockReturnValue('');
+      mockDownloadTool.mockResolvedValue('/tmp/downloaded');
+      mockCacheFile.mockResolvedValue('/cache/dir');
 
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const pkgVersion = (require('../../package.json') as { version: string })
-        .version;
+      const pkgVersion = pkg.version;
 
       await getExecutablePath(false);
 
-      expect(mockTc.find).toHaveBeenCalledWith(
+      expect(mockFind).toHaveBeenCalledWith(
         'python-cli-linux-x64',
         pkgVersion
       );
@@ -336,7 +346,7 @@ describe('getExecutablePath', () => {
     ] as const;
 
     for (const platform of unsupportedPlatforms) {
-      mockOs.platform.mockReturnValue(platform as NodeJS.Platform);
+      mockPlatform.mockReturnValue(platform as NodeJS.Platform);
 
       await expect(getExecutablePath(true)).rejects.toThrow(ActionError);
       await expect(getExecutablePath(true)).rejects.toThrow(
@@ -351,9 +361,9 @@ describe('getExecutablePath', () => {
   });
 
   it('uses current working directory in path construction (mock CLI)', async () => {
-    jest.spyOn(process, 'cwd').mockReturnValue('/custom/path');
-    mockOs.platform.mockReturnValue('linux');
-    mockOs.arch.mockReturnValue('x64');
+    vi.spyOn(process, 'cwd').mockReturnValue('/custom/path');
+    mockPlatform.mockReturnValue('linux');
+    mockArch.mockReturnValue('x64');
 
     const result = await getExecutablePath(true);
     expect(result).toBe(
@@ -364,7 +374,7 @@ describe('getExecutablePath', () => {
 
 describe('Logger', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls all core logging methods correctly', () => {
@@ -376,11 +386,11 @@ describe('Logger', () => {
     Logger.debug(testMessage);
     Logger.notice(testMessage);
 
-    expect(mockCore.info).toHaveBeenCalledWith(testMessage);
-    expect(mockCore.warning).toHaveBeenCalledWith(testMessage);
-    expect(mockCore.error).toHaveBeenCalledWith(testMessage);
-    expect(mockCore.debug).toHaveBeenCalledWith(testMessage);
-    expect(mockCore.notice).toHaveBeenCalledWith(testMessage);
+    expect(mockInfo).toHaveBeenCalledWith(testMessage);
+    expect(mockWarning).toHaveBeenCalledWith(testMessage);
+    expect(mockError).toHaveBeenCalledWith(testMessage);
+    expect(mockDebug).toHaveBeenCalledWith(testMessage);
+    expect(mockNotice).toHaveBeenCalledWith(testMessage);
   });
 
   it('handles different message types', () => {
@@ -388,8 +398,8 @@ describe('Logger', () => {
     Logger.error('Special chars: !@#$%^&*()');
     Logger.debug('Multi\nline\nmessage');
 
-    expect(mockCore.info).toHaveBeenCalledWith('');
-    expect(mockCore.error).toHaveBeenCalledWith('Special chars: !@#$%^&*()');
-    expect(mockCore.debug).toHaveBeenCalledWith('Multi\nline\nmessage');
+    expect(mockInfo).toHaveBeenCalledWith('');
+    expect(mockError).toHaveBeenCalledWith('Special chars: !@#$%^&*()');
+    expect(mockDebug).toHaveBeenCalledWith('Multi\nline\nmessage');
   });
 });

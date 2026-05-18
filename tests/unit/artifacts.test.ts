@@ -1,69 +1,89 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+import type { ResultData } from '../../src/types.js';
+import mockResultData from '../../cli/mock/result.json' with { type: 'json' };
 
-// Simple mocks
-const mockArtifactClient: any = {
-  uploadArtifact: jest.fn(),
-  deleteArtifact: jest.fn(),
-};
+const {
+  mockArtifactClient,
+  mockWriteFileSync,
+  mockJoin,
+  mockLoggerInfo,
+  mockLoggerWarning,
+  mockLoggerError,
+  mockLoggerDebug,
+  mockLoggerNotice,
+} = vi.hoisted(() => {
+  const mockArtifactClient = {
+    uploadArtifact: vi.fn(),
+    deleteArtifact: vi.fn(),
+  };
+  return {
+    mockArtifactClient,
+    mockWriteFileSync: vi.fn(),
+    mockJoin: vi.fn<(...args: string[]) => string>((...args: string[]) => args.join('/')),
+    mockLoggerInfo: vi.fn(),
+    mockLoggerWarning: vi.fn(),
+    mockLoggerError: vi.fn(),
+    mockLoggerDebug: vi.fn(),
+    mockLoggerNotice: vi.fn(),
+  };
+});
 
-const mockLogger = {
-  info: jest.fn(),
-  warning: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  notice: jest.fn(),
-};
-
-jest.mock('@actions/core');
-jest.mock('../../src/utils/helpers', () => ({
-  Logger: mockLogger,
-}));
-jest.mock('@actions/artifact', () => ({
-  DefaultArtifactClient: jest.fn(() => mockArtifactClient),
-  ArtifactNotFoundError: class extends Error {
+vi.mock('@actions/artifact', () => ({
+  // Must use a regular function (not arrow) — arrow functions are not constructable.
+  DefaultArtifactClient: vi.fn(function () { return mockArtifactClient; }),
+  ArtifactNotFoundError: class ArtifactNotFoundError extends Error {
     constructor(message: string) {
       super(message);
       this.name = 'ArtifactNotFoundError';
     }
   },
 }));
-jest.mock('fs', () => ({
-  writeFileSync: jest.fn(),
-  promises: {
-    access: jest.fn(),
-    writeFile: jest.fn(),
+
+vi.mock('../../src/utils/helpers.js', () => ({
+  Logger: {
+    info: mockLoggerInfo,
+    warning: mockLoggerWarning,
+    error: mockLoggerError,
+    debug: mockLoggerDebug,
+    notice: mockLoggerNotice,
   },
-  constants: {
-    O_RDONLY: 0,
-    F_OK: 0,
-    R_OK: 4,
-    W_OK: 2,
-    X_OK: 1,
-  },
-}));
-jest.mock('path', () => ({
-  join: jest.fn((...args) => args.join('/')),
 }));
 
-import * as core from '@actions/core';
+vi.mock('@actions/core', () => ({
+  setOutput: vi.fn(),
+  setFailed: vi.fn(),
+  info: vi.fn(),
+  warning: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+  notice: vi.fn(),
+}));
+
+vi.mock('fs', () => ({
+  writeFileSync: mockWriteFileSync,
+  promises: { access: vi.fn(), writeFile: vi.fn() },
+  constants: { O_RDONLY: 0, F_OK: 0, R_OK: 4, W_OK: 2, X_OK: 1 },
+  default: {
+    writeFileSync: mockWriteFileSync,
+    promises: { access: vi.fn(), writeFile: vi.fn() },
+    constants: { O_RDONLY: 0, F_OK: 0, R_OK: 4, W_OK: 2, X_OK: 1 },
+  },
+}));
+
+vi.mock('path', () => ({
+  join: mockJoin,
+  default: { join: mockJoin },
+}));
+
+import { createArtifact } from '../../src/utils/artifacts.js';
 import { ArtifactNotFoundError } from '@actions/artifact';
-import fs from 'fs';
-import path from 'path';
-import { createArtifact } from '../../src/utils/artifacts';
-import { ResultData } from '../../src/types';
-import mockResultData from '../../cli/mock/result.json';
 
-const mockCore = core as jest.Mocked<typeof core>;
-const mockFs = fs as jest.Mocked<typeof fs>;
-const mockPath = path as jest.Mocked<typeof path>;
-
-// Use the existing mock data
 const mockData = mockResultData as ResultData;
 
 describe('artifacts utilities', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockPath.join.mockImplementation((...args) => args.join('/'));
+    vi.clearAllMocks();
+    mockJoin.mockImplementation((...args: string[]) => args.join('/'));
   });
 
   describe('createArtifact', () => {
@@ -77,7 +97,7 @@ describe('artifacts utilities', () => {
 
       await createArtifact(args, mockData);
 
-      expect(mockCore.info).not.toHaveBeenCalled();
+      expect(mockLoggerInfo).not.toHaveBeenCalled();
       expect(mockArtifactClient.uploadArtifact).not.toHaveBeenCalled();
     });
 
@@ -91,11 +111,11 @@ describe('artifacts utilities', () => {
 
       await createArtifact(args, mockData);
 
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLoggerInfo).toHaveBeenCalledWith(
         'Uploading artifact: test-artifact'
       );
-      expect(mockPath.join).toHaveBeenCalledWith('/test/path', 'test-artifact');
-      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+      expect(mockJoin).toHaveBeenCalledWith('/test/path', 'test-artifact');
+      expect(mockWriteFileSync).toHaveBeenCalledWith(
         '/test/path/test-artifact',
         JSON.stringify(mockData, null, 2),
         { encoding: 'utf8' }
@@ -121,7 +141,7 @@ describe('artifacts utilities', () => {
 
       await createArtifact(args, mockData);
 
-      expect(mockLogger.debug).toHaveBeenCalledWith(
+      expect(mockLoggerDebug).toHaveBeenCalledWith(
         "Skipping deletion of 'test', it does not exist"
       );
       expect(mockArtifactClient.uploadArtifact).toHaveBeenCalled();
@@ -140,7 +160,7 @@ describe('artifacts utilities', () => {
 
       await createArtifact(args, mockData);
 
-      expect(mockLogger.debug).toHaveBeenCalledWith(
+      expect(mockLoggerDebug).toHaveBeenCalledWith(
         'Unable to delete artifact: Other error'
       );
       expect(mockArtifactClient.uploadArtifact).toHaveBeenCalled();

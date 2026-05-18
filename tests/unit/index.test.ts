@@ -1,50 +1,69 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 
-// Mock all dependencies
-const mockRun = jest.fn();
+// vi.hoisted() ensures these mock functions are initialised before vi.mock() factories run.
+const {
+  mockRun,
+  mockGetServiceAccountJsonPath,
+  mockGetPackage,
+  mockGetCliArguments,
+  mockGetArtifactsInputs,
+} = vi.hoisted(() => ({
+  mockRun: vi.fn(),
+  mockGetServiceAccountJsonPath: vi.fn(),
+  mockGetPackage: vi.fn(),
+  mockGetCliArguments: vi.fn(),
+  mockGetArtifactsInputs: vi.fn(),
+}));
 
-jest.mock('../../src/main', () => ({
-  __esModule: true,
+vi.mock('../../src/main.js', () => ({
   default: mockRun,
 }));
-jest.mock('../../src/utils/helpers', () => ({
-  getExecutablePath: jest.fn().mockReturnValue('/path/to/cli'),
+
+vi.mock('../../src/utils/helpers.js', () => ({
+  getExecutablePath: vi.fn(),
 }));
-jest.mock('../../src/utils/inputs', () => ({
-  getServiceAccountJsonPath: jest.fn().mockReturnValue('/path/to/creds.json'),
-  getPackage: jest.fn().mockReturnValue('com.example.app'),
-  getCliArguments: jest.fn().mockReturnValue(['--extra-arg']),
-  getArtifactsInputs: jest.fn().mockReturnValue({
-    uploadOutputsArtifact: false,
-    outputsJsonPath: 'test-path',
-    outputsArtifactName: 'test-artifact',
-    outputsArtifactRetentionDays: '30',
-  }),
+
+vi.mock('../../src/utils/inputs.js', () => ({
+  getServiceAccountJsonPath: mockGetServiceAccountJsonPath,
+  getPackage: mockGetPackage,
+  getCliArguments: mockGetCliArguments,
+  getArtifactsInputs: mockGetArtifactsInputs,
 }));
-jest.mock('@actions/core', () => ({
-  setFailed: jest.fn(),
-  info: jest.fn(),
-  warning: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  notice: jest.fn(),
+
+vi.mock('@actions/core', () => ({
+  setFailed: vi.fn(),
+  info: vi.fn(),
+  warning: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+  notice: vi.fn(),
 }));
 
 describe('index', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    // Clear call history; then reset the module cache so each test
+    // gets a fresh evaluation of index.ts (which runs its top-level code).
+    vi.clearAllMocks();
+    vi.resetModules();
+
     mockRun.mockImplementation(() => Promise.resolve());
+    mockGetServiceAccountJsonPath.mockReturnValue('/path/to/creds.json');
+    mockGetPackage.mockReturnValue('com.example.app');
+    mockGetCliArguments.mockReturnValue(['--extra-arg']);
+    mockGetArtifactsInputs.mockReturnValue({
+      uploadOutputsArtifact: false,
+      outputsJsonPath: 'test-path',
+      outputsArtifactName: 'test-artifact',
+      outputsArtifactRetentionDays: '30',
+    });
   });
 
-  it('should import without throwing errors', () => {
-    expect(() => {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      require('../../src');
-    }).not.toThrow();
+  it('should import without throwing errors', async () => {
+    await expect(import('../../src/index.js')).resolves.toBeDefined();
   });
 
   it('should call run and handle rejection', async () => {
-    const consoleSpy = jest
+    const consoleSpy = vi
       .spyOn(console, 'error')
       .mockImplementation(() => {});
     const originalExitCode = process.exitCode;
@@ -53,10 +72,9 @@ describe('index', () => {
       Promise.reject(new Error('Test error'))
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('../../src');
+    await import('../../src/index.js');
 
-    // Wait a tick for the promise to reject
+    // Wait a tick for the unhandled-rejection catch branch to settle.
     await new Promise(process.nextTick);
 
     expect(mockRun).toHaveBeenCalledWith({

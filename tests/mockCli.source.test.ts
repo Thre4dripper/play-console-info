@@ -2,7 +2,10 @@ import { spawn } from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { describe, it, expect, afterAll } from '@jest/globals';
+import { fileURLToPath } from 'url';
+import { describe, it, expect, afterAll } from 'vitest';
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 /**
  * These tests spawn cli/mock/mockCli.js via Node.js (not the compiled binary).

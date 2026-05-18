@@ -1,26 +1,38 @@
-import { setOutputs } from '../../src/utils/outputs';
-import { ResultData } from '../../src/types';
-import * as core from '@actions/core';
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import result from '../../cli/mock/result.json';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+import type { ResultData } from '../../src/types.js';
+import result from '../../cli/mock/result.json' with { type: 'json' };
 
-// Mock the core module
-jest.mock('@actions/core');
-jest.mock('../../src/utils/helpers', () => ({
+const { mockSetOutput, mockLoggerInfo, mockLoggerWarning } = vi.hoisted(() => ({
+  mockSetOutput: vi.fn(),
+  mockLoggerInfo: vi.fn(),
+  mockLoggerWarning: vi.fn(),
+}));
+
+vi.mock('@actions/core', () => ({
+  setOutput: mockSetOutput,
+  setFailed: vi.fn(),
+  info: vi.fn(),
+  warning: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+  notice: vi.fn(),
+}));
+
+vi.mock('../../src/utils/helpers.js', () => ({
   Logger: {
-    info: jest.fn(),
-    warning: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-    notice: jest.fn(),
+    info: mockLoggerInfo,
+    warning: mockLoggerWarning,
+    error: vi.fn(),
+    debug: vi.fn(),
+    notice: vi.fn(),
   },
 }));
 
-describe('setOutputs', () => {
-  const mockCore = jest.mocked(core);
+import { setOutputs } from '../../src/utils/outputs.js';
 
+describe('setOutputs', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('individual output properties', () => {
@@ -29,11 +41,11 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith(
+      expect(mockSetOutput).toHaveBeenCalledWith(
         'tracks',
         testResult.tracks
       );
-      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+      expect(mockSetOutput).toHaveBeenCalledTimes(1);
     });
 
     it('sets apks output when apks property exists', async () => {
@@ -41,8 +53,8 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith('apks', testResult.apks);
-      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+      expect(mockSetOutput).toHaveBeenCalledWith('apks', testResult.apks);
+      expect(mockSetOutput).toHaveBeenCalledTimes(1);
     });
 
     it('sets bundles output when bundles property exists', async () => {
@@ -50,11 +62,11 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith(
+      expect(mockSetOutput).toHaveBeenCalledWith(
         'bundles',
         testResult.bundles
       );
-      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+      expect(mockSetOutput).toHaveBeenCalledTimes(1);
     });
 
     it('sets listings output when listings property exists', async () => {
@@ -62,11 +74,11 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith(
+      expect(mockSetOutput).toHaveBeenCalledWith(
         'listings',
         testResult.listings
       );
-      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+      expect(mockSetOutput).toHaveBeenCalledTimes(1);
     });
 
     it('sets images output when images property exists', async () => {
@@ -74,11 +86,11 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith(
+      expect(mockSetOutput).toHaveBeenCalledWith(
         'images',
         testResult.images
       );
-      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+      expect(mockSetOutput).toHaveBeenCalledTimes(1);
     });
 
     it('sets inapps output when inapps property exists', async () => {
@@ -86,11 +98,11 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith(
+      expect(mockSetOutput).toHaveBeenCalledWith(
         'inapps',
         testResult.inapps
       );
-      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+      expect(mockSetOutput).toHaveBeenCalledTimes(1);
     });
 
     it('sets reviews output when reviews property exists', async () => {
@@ -98,11 +110,11 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith(
+      expect(mockSetOutput).toHaveBeenCalledWith(
         'reviews',
         testResult.reviews
       );
-      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+      expect(mockSetOutput).toHaveBeenCalledTimes(1);
     });
 
     it('sets voidedPurchases output when voided_purchases property exists', async () => {
@@ -112,11 +124,11 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith(
+      expect(mockSetOutput).toHaveBeenCalledWith(
         'voidedPurchases',
         testResult.voided_purchases
       );
-      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+      expect(mockSetOutput).toHaveBeenCalledTimes(1);
     });
 
     it('sets testers output when testers property exists', async () => {
@@ -124,11 +136,11 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith(
+      expect(mockSetOutput).toHaveBeenCalledWith(
         'testers',
         testResult.testers
       );
-      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+      expect(mockSetOutput).toHaveBeenCalledTimes(1);
     });
 
     it('sets appDetails output when app_details property exists', async () => {
@@ -138,11 +150,11 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith(
+      expect(mockSetOutput).toHaveBeenCalledWith(
         'appDetails',
         testResult.app_details
       );
-      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+      expect(mockSetOutput).toHaveBeenCalledTimes(1);
     });
 
     it('sets expansionFiles output when expansion_files property exists', async () => {
@@ -152,11 +164,11 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockCore.setOutput).toHaveBeenCalledWith(
+      expect(mockSetOutput).toHaveBeenCalledWith(
         'expansionFiles',
         testResult.expansion_files
       );
-      expect(mockCore.setOutput).toHaveBeenCalledTimes(1);
+      expect(mockSetOutput).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -166,7 +178,7 @@ describe('setOutputs', () => {
 
       await setOutputs(emptyResult);
 
-      expect(mockCore.setOutput).not.toHaveBeenCalled();
+      expect(mockSetOutput).not.toHaveBeenCalled();
     });
   });
 
@@ -176,9 +188,8 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      // Count expected calls based on properties in testResult
       const expectedCalls = Object.keys(testResult).length;
-      expect(mockCore.setOutput).toHaveBeenCalledTimes(expectedCalls);
+      expect(mockSetOutput).toHaveBeenCalledTimes(expectedCalls);
     });
   });
 });

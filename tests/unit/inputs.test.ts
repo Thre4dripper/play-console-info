@@ -1,85 +1,104 @@
-import * as core from '@actions/core';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+
+const {
+  mockGetInput,
+  mockExistsSync,
+  mockWriteFileSync,
+  mockMkdirSync,
+  mockTmpdir,
+  mockJoin,
+} = vi.hoisted(() => ({
+  mockGetInput: vi.fn<(name: string, options?: object) => string>(),
+  mockExistsSync: vi.fn(),
+  mockWriteFileSync: vi.fn(),
+  mockMkdirSync: vi.fn(),
+  mockTmpdir: vi.fn(),
+  mockJoin: vi.fn<(...args: string[]) => string>(),
+}));
+
+vi.mock('@actions/core', () => ({
+  getInput: mockGetInput,
+  setFailed: vi.fn(),
+  info: vi.fn(),
+  warning: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+  notice: vi.fn(),
+}));
+
+vi.mock('fs', () => ({
+  existsSync: mockExistsSync,
+  writeFileSync: mockWriteFileSync,
+  mkdirSync: mockMkdirSync,
+  promises: { access: vi.fn(), writeFile: vi.fn(), readFile: vi.fn() },
+  constants: { O_RDONLY: 0, O_WRONLY: 1, O_RDWR: 2, F_OK: 0, R_OK: 4, W_OK: 2, X_OK: 1 },
+  default: {
+    existsSync: mockExistsSync,
+    writeFileSync: mockWriteFileSync,
+    mkdirSync: mockMkdirSync,
+    promises: { access: vi.fn(), writeFile: vi.fn(), readFile: vi.fn() },
+    constants: { O_RDONLY: 0, O_WRONLY: 1, O_RDWR: 2, F_OK: 0, R_OK: 4, W_OK: 2, X_OK: 1 },
+  },
+}));
+
+vi.mock('os', () => ({
+  tmpdir: mockTmpdir,
+  default: { tmpdir: mockTmpdir },
+}));
+
+vi.mock('path', () => ({
+  join: mockJoin,
+  default: { join: mockJoin },
+}));
+
 import {
   getPackage,
   getServiceAccountJsonPath,
   getCliArguments,
   getArtifactsInputs,
-} from '../../src/utils/inputs';
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-
-// Mock dependencies
-jest.mock('@actions/core');
-jest.mock('fs', () => ({
-  existsSync: jest.fn(),
-  writeFileSync: jest.fn(),
-  mkdirSync: jest.fn(),
-  promises: {
-    access: jest.fn(),
-    writeFile: jest.fn(),
-    readFile: jest.fn(),
-  },
-  constants: {
-    O_RDONLY: 0,
-    O_WRONLY: 1,
-    O_RDWR: 2,
-    F_OK: 0,
-    R_OK: 4,
-    W_OK: 2,
-    X_OK: 1,
-  },
-}));
-jest.mock('os');
-jest.mock('path');
-
-const mockCore = core as jest.Mocked<typeof core>;
-const mockFs = fs as jest.Mocked<typeof fs>;
-const mockOs = os as jest.Mocked<typeof os>;
-const mockPath = path as jest.Mocked<typeof path>;
+} from '../../src/utils/inputs.js';
 
 describe('inputs utilities', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getPackage', () => {
     it('should return package name when provided', () => {
-      mockCore.getInput.mockReturnValue('com.example.app');
+      mockGetInput.mockReturnValue('com.example.app');
       expect(getPackage()).toBe('com.example.app');
     });
 
     it('should throw ActionError when package is not provided', () => {
-      mockCore.getInput.mockReturnValue('');
+      mockGetInput.mockReturnValue('');
       expect(() => getPackage()).toThrow("Input 'package' is required.");
     });
   });
 
   describe('getServiceAccountJsonPath', () => {
     it('should return service account json path when file exists', () => {
-      mockCore.getInput.mockImplementation((name) =>
+      mockGetInput.mockImplementation((name) =>
         name === 'serviceAccountJsonPath' ? '/path/to/service.json' : ''
       );
-      mockFs.existsSync.mockReturnValue(true);
+      mockExistsSync.mockReturnValue(true);
       expect(getServiceAccountJsonPath()).toBe('/path/to/service.json');
     });
 
     it('should create temp file when plain text is provided', () => {
       const mockTempPath = '/tmp/gplaycli-creds-123456.json';
-      mockCore.getInput.mockImplementation((name) =>
+      mockGetInput.mockImplementation((name) =>
         name === 'serviceAccountJsonPlainText'
           ? '{"type": "service_account"}'
           : ''
       );
-      mockOs.tmpdir.mockReturnValue('/tmp');
-      mockPath.join.mockReturnValue(mockTempPath);
+      mockTmpdir.mockReturnValue('/tmp');
+      mockJoin.mockReturnValue(mockTempPath);
 
       expect(getServiceAccountJsonPath()).toBe(mockTempPath);
     });
 
     it('should throw error when neither path nor plain text is provided', () => {
-      mockCore.getInput.mockReturnValue('');
+      mockGetInput.mockReturnValue('');
       expect(() => getServiceAccountJsonPath()).toThrow(
         "Either 'serviceAccountJsonPath' or 'serviceAccountJsonPlainText' input must be provided."
       );
@@ -87,15 +106,15 @@ describe('inputs utilities', () => {
 
     it('should fallback to plain text when path does not exist', () => {
       const mockTempPath = '/tmp/gplaycli-creds-123456.json';
-      mockCore.getInput.mockImplementation((name) => {
+      mockGetInput.mockImplementation((name) => {
         if (name === 'serviceAccountJsonPath') return '/nonexistent/path.json';
         if (name === 'serviceAccountJsonPlainText')
           return '{"type": "service_account"}';
         return '';
       });
-      mockFs.existsSync.mockReturnValue(false);
-      mockOs.tmpdir.mockReturnValue('/tmp');
-      mockPath.join.mockReturnValue(mockTempPath);
+      mockExistsSync.mockReturnValue(false);
+      mockTmpdir.mockReturnValue('/tmp');
+      mockJoin.mockReturnValue(mockTempPath);
 
       expect(getServiceAccountJsonPath()).toBe(mockTempPath);
     });
@@ -103,7 +122,7 @@ describe('inputs utilities', () => {
 
   describe('getCliArguments', () => {
     it('should return correct arguments for boolean flags', () => {
-      mockCore.getInput.mockImplementation((name) =>
+      mockGetInput.mockImplementation((name) =>
         [
           'apks',
           'bundles',
@@ -131,7 +150,7 @@ describe('inputs utilities', () => {
     });
 
     it('should return correct arguments for value-based inputs', () => {
-      mockCore.getInput.mockImplementation((name) => {
+      mockGetInput.mockImplementation((name) => {
         const inputs: Record<string, string> = {
           tracks: 'production,beta',
           images: 'icon,featureGraphic',
@@ -151,7 +170,7 @@ describe('inputs utilities', () => {
     });
 
     it('should return correct arguments for reviews with options', () => {
-      mockCore.getInput.mockImplementation((name) => {
+      mockGetInput.mockImplementation((name) => {
         const inputs: Record<string, string> = {
           reviews: 'true',
           reviewsPages: '5',
@@ -170,26 +189,26 @@ describe('inputs utilities', () => {
     });
 
     it('should throw error when no inputs are provided', () => {
-      mockCore.getInput.mockReturnValue('');
+      mockGetInput.mockReturnValue('');
       expect(() => getCliArguments()).toThrow(
         'At least one of the following inputs must be set:'
       );
     });
 
     it('should throw error for invalid values', () => {
-      mockCore.getInput.mockImplementation((name) =>
+      mockGetInput.mockImplementation((name) =>
         name === 'tracks' ? 'invalid-track' : ''
       );
       expect(() => getCliArguments()).toThrow('Invalid track: invalid-track');
 
-      mockCore.getInput.mockImplementation((name) =>
+      mockGetInput.mockImplementation((name) =>
         name === 'images' ? 'invalidImage' : ''
       );
       expect(() => getCliArguments()).toThrow(
         'Invalid image type: invalidImage'
       );
 
-      mockCore.getInput.mockImplementation((name) =>
+      mockGetInput.mockImplementation((name) =>
         name === 'testers' ? 'invalid-tester' : ''
       );
       expect(() => getCliArguments()).toThrow('Invalid tester: invalid-tester');
@@ -198,13 +217,12 @@ describe('inputs utilities', () => {
 
   describe('getArtifactsInputs', () => {
     beforeEach(() => {
-      mockPath.join.mockReturnValue('/default/artifacts');
-      mockFs.existsSync.mockReturnValue(false);
+      mockJoin.mockReturnValue('/default/artifacts');
+      mockExistsSync.mockReturnValue(false);
     });
 
     it('should return artifact inputs with defaults from action.yml', () => {
-      // Mock the default values as they would be provided by GitHub Actions from action.yml
-      mockCore.getInput.mockImplementation((name) => {
+      mockGetInput.mockImplementation((name) => {
         const defaults: Record<string, string> = {
           uploadOutputsArtifact: 'false',
           outputsJsonPath: 'artifacts/',
@@ -225,7 +243,7 @@ describe('inputs utilities', () => {
     });
 
     it('should handle custom inputs and create directories', () => {
-      mockCore.getInput.mockImplementation((name) => {
+      mockGetInput.mockImplementation((name) => {
         const inputs: Record<string, string> = {
           uploadOutputsArtifact: 'true',
           outputsJsonPath: '/custom/path',
@@ -241,30 +259,30 @@ describe('inputs utilities', () => {
     });
 
     it('should not create directory if it exists', () => {
-      mockCore.getInput.mockImplementation((name) =>
+      mockGetInput.mockImplementation((name) =>
         name === 'outputsJsonPath' ? '/existing/path' : ''
       );
-      mockFs.existsSync.mockReturnValue(true);
+      mockExistsSync.mockReturnValue(true);
       getArtifactsInputs();
-      expect(mockFs.mkdirSync).not.toHaveBeenCalled();
+      expect(mockMkdirSync).not.toHaveBeenCalled();
     });
 
     it('should validate artifact inputs', () => {
-      mockCore.getInput.mockImplementation((name) =>
+      mockGetInput.mockImplementation((name) =>
         name === 'uploadOutputsArtifact' ? 'invalid' : ''
       );
       expect(() => getArtifactsInputs()).toThrow(
         "Input 'uploadOutputsArtifact' must be either 'true' or 'false'."
       );
 
-      mockCore.getInput.mockImplementation((name) =>
+      mockGetInput.mockImplementation((name) =>
         name === 'outputsArtifactRetentionDays' ? '0' : ''
       );
       expect(() => getArtifactsInputs()).toThrow(
         "Input 'outputsArtifactRetentionDays' must be a positive integer between 1 and 90."
       );
 
-      mockCore.getInput.mockImplementation((name) =>
+      mockGetInput.mockImplementation((name) =>
         name === 'outputsArtifactRetentionDays' ? '91' : ''
       );
       expect(() => getArtifactsInputs()).toThrow(
@@ -273,11 +291,11 @@ describe('inputs utilities', () => {
     });
 
     it('should handle outputsJsonPath with whitespace', () => {
-      mockCore.getInput.mockImplementation((name) =>
+      mockGetInput.mockImplementation((name) =>
         name === 'outputsJsonPath' ? '  /path/with/spaces  ' : ''
       );
       getArtifactsInputs();
-      expect(mockFs.mkdirSync).toHaveBeenCalledWith('/path/with/spaces', {
+      expect(mockMkdirSync).toHaveBeenCalledWith('/path/with/spaces', {
         recursive: true,
       });
     });

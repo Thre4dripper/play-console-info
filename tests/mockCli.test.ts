@@ -1,7 +1,10 @@
 import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import { describe, it, expect, afterAll } from '@jest/globals';
+import { fileURLToPath } from 'url';
+import { describe, it, expect, afterAll } from 'vitest';
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 describe('mockCli', () => {
   const platform = process.platform;
