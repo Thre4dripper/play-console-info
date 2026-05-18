@@ -41,10 +41,7 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockSetOutput).toHaveBeenCalledWith(
-        'tracks',
-        testResult.tracks
-      );
+      expect(mockSetOutput).toHaveBeenCalledWith('tracks', testResult.tracks);
       expect(mockSetOutput).toHaveBeenCalledTimes(1);
     });
 
@@ -62,10 +59,7 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockSetOutput).toHaveBeenCalledWith(
-        'bundles',
-        testResult.bundles
-      );
+      expect(mockSetOutput).toHaveBeenCalledWith('bundles', testResult.bundles);
       expect(mockSetOutput).toHaveBeenCalledTimes(1);
     });
 
@@ -86,10 +80,7 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockSetOutput).toHaveBeenCalledWith(
-        'images',
-        testResult.images
-      );
+      expect(mockSetOutput).toHaveBeenCalledWith('images', testResult.images);
       expect(mockSetOutput).toHaveBeenCalledTimes(1);
     });
 
@@ -98,10 +89,7 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockSetOutput).toHaveBeenCalledWith(
-        'inapps',
-        testResult.inapps
-      );
+      expect(mockSetOutput).toHaveBeenCalledWith('inapps', testResult.inapps);
       expect(mockSetOutput).toHaveBeenCalledTimes(1);
     });
 
@@ -110,10 +98,7 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockSetOutput).toHaveBeenCalledWith(
-        'reviews',
-        testResult.reviews
-      );
+      expect(mockSetOutput).toHaveBeenCalledWith('reviews', testResult.reviews);
       expect(mockSetOutput).toHaveBeenCalledTimes(1);
     });
 
@@ -136,10 +121,7 @@ describe('setOutputs', () => {
 
       await setOutputs(testResult);
 
-      expect(mockSetOutput).toHaveBeenCalledWith(
-        'testers',
-        testResult.testers
-      );
+      expect(mockSetOutput).toHaveBeenCalledWith('testers', testResult.testers);
       expect(mockSetOutput).toHaveBeenCalledTimes(1);
     });
 

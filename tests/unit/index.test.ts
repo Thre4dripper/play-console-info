@@ -63,9 +63,7 @@ describe('index', () => {
   });
 
   it('should call run and handle rejection', async () => {
-    const consoleSpy = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const originalExitCode = process.exitCode;
 
     mockRun.mockImplementationOnce(() =>

@@ -19,7 +19,9 @@ const {
   return {
     mockArtifactClient,
     mockWriteFileSync: vi.fn(),
-    mockJoin: vi.fn<(...args: string[]) => string>((...args: string[]) => args.join('/')),
+    mockJoin: vi.fn<(...args: string[]) => string>((...args: string[]) =>
+      args.join('/')
+    ),
     mockLoggerInfo: vi.fn(),
     mockLoggerWarning: vi.fn(),
     mockLoggerError: vi.fn(),
@@ -30,7 +32,9 @@ const {
 
 vi.mock('@actions/artifact', () => ({
   // Must use a regular function (not arrow) — arrow functions are not constructable.
-  DefaultArtifactClient: vi.fn(function () { return mockArtifactClient; }),
+  DefaultArtifactClient: vi.fn(function () {
+    return mockArtifactClient;
+  }),
   ArtifactNotFoundError: class ArtifactNotFoundError extends Error {
     constructor(message: string) {
       super(message);

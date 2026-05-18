@@ -55,7 +55,11 @@ vi.mock('@actions/tool-cache', () => ({
   cacheFile: mockCacheFile,
 }));
 
-import { ActionError, getExecutablePath, Logger } from '../../src/utils/helpers.js';
+import {
+  ActionError,
+  getExecutablePath,
+  Logger,
+} from '../../src/utils/helpers.js';
 
 describe('ActionError', () => {
   beforeEach(() => {
@@ -182,10 +186,7 @@ describe('getExecutablePath', () => {
 
         await getExecutablePath(true);
 
-        expect(mockExecFn).toHaveBeenCalledWith('chmod', [
-          '+x',
-          expectedPath,
-        ]);
+        expect(mockExecFn).toHaveBeenCalledWith('chmod', ['+x', expectedPath]);
       }
 
       mockExecFn.mockClear();
@@ -330,10 +331,7 @@ describe('getExecutablePath', () => {
 
       await getExecutablePath(false);
 
-      expect(mockFind).toHaveBeenCalledWith(
-        'python-cli-linux-x64',
-        pkgVersion
-      );
+      expect(mockFind).toHaveBeenCalledWith('python-cli-linux-x64', pkgVersion);
     });
   });
 

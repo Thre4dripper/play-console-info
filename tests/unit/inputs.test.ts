@@ -31,13 +31,29 @@ vi.mock('fs', () => ({
   writeFileSync: mockWriteFileSync,
   mkdirSync: mockMkdirSync,
   promises: { access: vi.fn(), writeFile: vi.fn(), readFile: vi.fn() },
-  constants: { O_RDONLY: 0, O_WRONLY: 1, O_RDWR: 2, F_OK: 0, R_OK: 4, W_OK: 2, X_OK: 1 },
+  constants: {
+    O_RDONLY: 0,
+    O_WRONLY: 1,
+    O_RDWR: 2,
+    F_OK: 0,
+    R_OK: 4,
+    W_OK: 2,
+    X_OK: 1,
+  },
   default: {
     existsSync: mockExistsSync,
     writeFileSync: mockWriteFileSync,
     mkdirSync: mockMkdirSync,
     promises: { access: vi.fn(), writeFile: vi.fn(), readFile: vi.fn() },
-    constants: { O_RDONLY: 0, O_WRONLY: 1, O_RDWR: 2, F_OK: 0, R_OK: 4, W_OK: 2, X_OK: 1 },
+    constants: {
+      O_RDONLY: 0,
+      O_WRONLY: 1,
+      O_RDWR: 2,
+      F_OK: 0,
+      R_OK: 4,
+      W_OK: 2,
+      X_OK: 1,
+    },
   },
 }));
 

@@ -59,10 +59,15 @@ import { default as run } from '../../src/main.js';
 import { ActionError } from '../../src/utils/helpers.js';
 
 // Typed aliases for better mock method inference
-const mockSpawn = mockSpawnFn as unknown as ReturnType<typeof vi.fn> & typeof SpawnType;
-const mockSetOutputs = mockSetOutputsFn as ReturnType<typeof vi.fn> & { mockResolvedValue: (v: unknown) => void };
+const mockSpawn = mockSpawnFn as unknown as ReturnType<typeof vi.fn> &
+  typeof SpawnType;
+const mockSetOutputs = mockSetOutputsFn as ReturnType<typeof vi.fn> & {
+  mockResolvedValue: (v: unknown) => void;
+};
 const mockCreateArtifact = mockCreateArtifactFn as ReturnType<typeof vi.fn>;
-const mockGetExecutablePath = mockGetExecutablePathFn as ReturnType<typeof vi.fn>;
+const mockGetExecutablePath = mockGetExecutablePathFn as ReturnType<
+  typeof vi.fn
+>;
 
 describe('main.ts', () => {
   let mockChildProcess: any;
