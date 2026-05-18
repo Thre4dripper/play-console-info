@@ -1,6 +1,6 @@
-const path = require('path');
-const fs = require('fs');
-const { Command } = require('commander');
+import path from 'path';
+import fs from 'fs';
+import { Command } from 'commander';
 
 class Log {
   static progress(msg) {

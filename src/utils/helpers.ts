@@ -3,7 +3,7 @@ import os from 'os';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as tc from '@actions/tool-cache';
-import pkg from '../../package.json';
+import pkg from '../../package.json' with { type: 'json' };
 
 export class ActionError extends Error {
   constructor(message: string) {
