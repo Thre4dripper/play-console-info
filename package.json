@@ -3,7 +3,7 @@
   "version": "1.0.2",
   "description": "A Github Action to get play console info",
   "author": "Ijlal Ahmad",
-  "main": "index.js",
+  "type": "module",
   "private": true,
   "keywords": [
     "play",

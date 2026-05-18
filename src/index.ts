@@ -1,10 +1,10 @@
-import run from './main';
+import run from './main.js';
 import {
   getCliArguments,
   getArtifactsInputs,
   getPackage,
   getServiceAccountJsonPath,
-} from './utils/inputs';
+} from './utils/inputs.js';
 
 const serviceAccountJson = getServiceAccountJsonPath();
 const pkg = getPackage();

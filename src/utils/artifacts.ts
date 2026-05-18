@@ -2,8 +2,8 @@ import {
   ArtifactNotFoundError,
   DefaultArtifactClient,
 } from '@actions/artifact';
-import { ArtifactArgs, ResultData } from '../types';
-import { Logger } from './helpers';
+import { ArtifactArgs, ResultData } from '../types.js';
+import { Logger } from './helpers.js';
 import fs from 'fs';
 import path from 'path';
 

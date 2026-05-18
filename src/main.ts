@@ -1,8 +1,8 @@
 import { ChildProcess, spawn } from 'child_process';
-import { GetResultProps, ResultData, RunProps } from './types';
-import { ActionError, getExecutablePath, Logger } from './utils/helpers';
-import { setOutputs } from './utils/outputs';
-import { createArtifact } from './utils/artifacts';
+import { GetResultProps, ResultData, RunProps } from './types.js';
+import { ActionError, getExecutablePath, Logger } from './utils/helpers.js';
+import { setOutputs } from './utils/outputs.js';
+import { createArtifact } from './utils/artifacts.js';
 
 const run = async ({ cliArgs, artifactArgs }: RunProps) => {
   Logger.info('🚀 Starting Play Console Info Action');

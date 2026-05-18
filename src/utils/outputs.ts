@@ -1,6 +1,6 @@
-import { ResultData } from '../types';
+import { ResultData } from '../types.js';
 import * as core from '@actions/core';
-import { Logger } from './helpers';
+import { Logger } from './helpers.js';
 
 export const setOutputs = async (result: ResultData) => {
   const outputs: string[] = [];

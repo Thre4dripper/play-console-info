@@ -1,9 +1,9 @@
-import { ActionError } from './helpers';
+import { ActionError } from './helpers.js';
 import * as core from '@actions/core';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { ArtifactArgs } from '../types';
+import { ArtifactArgs } from '../types.js';
 
 export const getPackage = (): string => {
   const pkg = core.getInput('package');
