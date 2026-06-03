@@ -17,50 +17,68 @@ runs:
   using: composite
   steps:
     # ── Fast path: artifact already exists in this workflow run ───────────────
+    # Check via API first to avoid a spurious error annotation from
+    # download-artifact when the artifact simply hasn't been uploaded yet.
+    - name: Check if artifact exists in this run
+      id: check-artifact
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        artifact_name="mock-cli-${{ inputs.platform }}-${{ inputs.arch }}"
+        found=$(gh api \
+          "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
+          --jq ".artifacts[] | select(.name == \"$artifact_name\") | .id" 2>/dev/null || true)
+        if [ -n "$found" ]; then
+          echo "found=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "found=false" >> "$GITHUB_OUTPUT"
+        fi
+
     - name: Try downloading pre-built artifact
       id: download
+      if: steps.check-artifact.outputs.found == 'true'
       uses: actions/download-artifact@v8
       with:
         name: mock-cli-${{ inputs.platform }}-${{ inputs.arch }}
         path: bin/mock/${{ inputs.platform }}
-      continue-on-error: true
 
     # ── Slow path: build from source (only when download failed) ─────────────
     - name: Setup pnpm
-      if: steps.download.outcome == 'failure'
+      if: steps.check-artifact.outputs.found == 'false'
       uses: pnpm/action-setup@v6
       with:
         version: 9
 
     - name: Setup Node.js
-      if: steps.download.outcome == 'failure'
+      if: steps.check-artifact.outputs.found == 'false'
       uses: actions/setup-node@v6
       with:
         node-version-file: package.json
         cache: 'pnpm'
 
     - name: Install Dependencies
-      if: steps.download.outcome == 'failure'
+      if: steps.check-artifact.outputs.found == 'false'
       shell: bash
       run: pnpm install --frozen-lockfile
 
     - name: Setup Bun
-      if: steps.download.outcome == 'failure'
+      if: steps.check-artifact.outputs.found == 'false'
       uses: oven-sh/setup-bun@v2
 
     - name: Build from source (Unix)
-      if: steps.download.outcome == 'failure' && inputs.platform != 'windows'
+      if: steps.check-artifact.outputs.found == 'false' && inputs.platform != 'windows'
       shell: bash
       run: bash cli/mock/build-mock-cli-${{ inputs.platform }}.sh ${{ inputs.arch }}
 
     - name: Build from source (Windows)
-      if: steps.download.outcome == 'failure' && inputs.platform == 'windows'
+      if: steps.check-artifact.outputs.found == 'false' && inputs.platform == 'windows'
       shell: cmd
       run: cli\mock\build-mock-cli-windows.bat
 
     # Upload so subsequent jobs in the same run skip the build entirely
     - name: Upload artifact for subsequent jobs (Unix)
-      if: steps.download.outcome == 'failure' && inputs.platform != 'windows'
+      if: steps.check-artifact.outputs.found == 'false' && inputs.platform != 'windows'
       uses: actions/upload-artifact@v7
       with:
         name: mock-cli-${{ inputs.platform }}-${{ inputs.arch }}
@@ -70,7 +88,7 @@ runs:
         overwrite: true
 
     - name: Upload artifact for subsequent jobs (Windows)
-      if: steps.download.outcome == 'failure' && inputs.platform == 'windows'
+      if: steps.check-artifact.outputs.found == 'false' && inputs.platform == 'windows'
       uses: actions/upload-artifact@v7
       with:
         name: mock-cli-${{ inputs.platform }}-${{ inputs.arch }}
