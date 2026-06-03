@@ -139,9 +139,6 @@ jobs:
       - name: Run Tests with c8 Coverage
         run: pnpm run test:coverage
 
-      - name: Generate HTML Coverage Report
-        run: pnpm exec c8 report --reporter=html --reporter=lcov --reporter=json-summary
-
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v7
         with:
