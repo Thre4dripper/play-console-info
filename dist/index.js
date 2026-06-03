@@ -58127,7 +58127,7 @@ var package_default = {
     "@eslint/js": "^10.0.1",
     "@types/node": "^25.9.1",
     "@vitest/coverage-v8": "^4.1.7",
-    commander: "^14.0.3",
+    commander: "^15.0.0",
     esbuild: "^0.28.0",
     eslint: "^10.4.1",
     "eslint-config-prettier": "^10.1.8",
