@@ -26376,9 +26376,9 @@ var require_balanced_match = __commonJS({
   }
 });
 
-// node_modules/.pnpm/brace-expansion@2.1.0/node_modules/brace-expansion/index.js
+// node_modules/.pnpm/brace-expansion@2.1.1/node_modules/brace-expansion/index.js
 var require_brace_expansion = __commonJS({
-  "node_modules/.pnpm/brace-expansion@2.1.0/node_modules/brace-expansion/index.js"(exports2, module2) {
+  "node_modules/.pnpm/brace-expansion@2.1.1/node_modules/brace-expansion/index.js"(exports2, module2) {
     var balanced = require_balanced_match();
     module2.exports = expandTop;
     var escSlash = "\0SLASH" + Math.random() + "\0";
@@ -26488,7 +26488,7 @@ var require_brace_expansion = __commonJS({
           }
           var pad = n.some(isPadded);
           N = [];
-          for (var i = x; test(i, y); i += incr) {
+          for (var i = x; test(i, y) && N.length < max; i += incr) {
             var c;
             if (isAlphaSequence) {
               c = String.fromCharCode(i);
@@ -58125,18 +58125,18 @@ var package_default = {
   },
   devDependencies: {
     "@eslint/js": "^10.0.1",
-    "@types/node": "^25.8.0",
-    "@vitest/coverage-v8": "^4.1.6",
+    "@types/node": "^25.9.1",
+    "@vitest/coverage-v8": "^4.1.7",
     commander: "^14.0.3",
     esbuild: "^0.28.0",
-    eslint: "^10.4.0",
+    eslint: "^10.4.1",
     "eslint-config-prettier": "^10.1.8",
     globals: "^17.6.0",
     prettier: "^3.8.3",
     rimraf: "^6.1.3",
     typescript: "^6.0.3",
-    "typescript-eslint": "^8.59.3",
-    vitest: "^4.1.6"
+    "typescript-eslint": "^8.60.0",
+    vitest: "^4.1.7"
   },
   engines: {
     node: ">=20.0.0"
