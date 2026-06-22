@@ -28,7 +28,7 @@ jobs:
     name: Test Basic Functionality
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Mock CLI
         uses: ./.github/actions/setup-mock-cli
@@ -60,7 +60,7 @@ jobs:
     needs: test-basic
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Mock CLI
         uses: ./.github/actions/setup-mock-cli
@@ -111,7 +111,7 @@ jobs:
           ]
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Mock CLI
         uses: ./.github/actions/setup-mock-cli
@@ -146,7 +146,7 @@ jobs:
         language: ['en-US', 'es-ES', 'fr-FR']
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Mock CLI
         uses: ./.github/actions/setup-mock-cli
@@ -181,7 +181,7 @@ jobs:
         pageSize: ['50', '100', '200']
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Mock CLI
         uses: ./.github/actions/setup-mock-cli
@@ -213,7 +213,7 @@ jobs:
     needs: test-reviews-pagination
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Mock CLI
         uses: ./.github/actions/setup-mock-cli
@@ -270,7 +270,7 @@ jobs:
           ]
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Mock CLI
         uses: ./.github/actions/setup-mock-cli
@@ -318,7 +318,7 @@ jobs:
           ['internal', 'alpha', 'beta', 'production', 'all', 'internal,alpha']
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Mock CLI
         uses: ./.github/actions/setup-mock-cli
@@ -348,7 +348,7 @@ jobs:
     needs: test-testers
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Mock CLI
         uses: ./.github/actions/setup-mock-cli
