@@ -58129,17 +58129,17 @@ var package_default = {
   },
   devDependencies: {
     "@eslint/js": "^10.0.1",
-    "@types/node": "^25.9.3",
+    "@types/node": "^26.0.1",
     "@vitest/coverage-v8": "^4.1.9",
     commander: "^15.0.0",
     esbuild: "^0.28.1",
-    eslint: "^10.5.0",
+    eslint: "^10.6.0",
     "eslint-config-prettier": "^10.1.8",
-    globals: "^17.6.0",
-    prettier: "^3.8.4",
+    globals: "^17.7.0",
+    prettier: "^3.9.1",
     rimraf: "^6.1.3",
     typescript: "^6.0.3",
-    "typescript-eslint": "^8.61.1",
+    "typescript-eslint": "^8.62.0",
     vitest: "^4.1.9"
   },
   engines: {
