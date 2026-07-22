@@ -26380,9 +26380,9 @@ var require_balanced_match = __commonJS({
   }
 });
 
-// node_modules/.pnpm/brace-expansion@2.1.1/node_modules/brace-expansion/index.js
+// node_modules/.pnpm/brace-expansion@2.1.2/node_modules/brace-expansion/index.js
 var require_brace_expansion = __commonJS({
-  "node_modules/.pnpm/brace-expansion@2.1.1/node_modules/brace-expansion/index.js"(exports2, module2) {
+  "node_modules/.pnpm/brace-expansion@2.1.2/node_modules/brace-expansion/index.js"(exports2, module2) {
     var balanced = require_balanced_match();
     module2.exports = expandTop;
     var escSlash = "\0SLASH" + Math.random() + "\0";
@@ -26443,16 +26443,18 @@ var require_brace_expansion = __commonJS({
     }
     function expand2(str, max, isTop) {
       var expansions = [];
-      var m = balanced("{", "}", str);
-      if (!m) return [str];
-      var pre = m.pre;
-      var post = m.post.length ? expand2(m.post, max, false) : [""];
-      if (/\$$/.test(m.pre)) {
-        for (var k = 0; k < post.length && k < max; k++) {
-          var expansion = pre + "{" + m.body + "}" + post[k];
-          expansions.push(expansion);
+      for (; ; ) {
+        const m = balanced("{", "}", str);
+        if (!m) return [str];
+        const pre = m.pre;
+        if (/\$$/.test(m.pre)) {
+          const post2 = m.post.length ? expand2(m.post, max, false) : [""];
+          for (let k2 = 0; k2 < post2.length && k2 < max; k2++) {
+            const expansion2 = pre + "{" + m.body + "}" + post2[k2];
+            expansions.push(expansion2);
+          }
+          return expansions;
         }
-      } else {
         var isNumericSequence = /^-?\d+\.\.-?\d+(?:\.\.-?\d+)?$/.test(m.body);
         var isAlphaSequence = /^[a-zA-Z]\.\.[a-zA-Z](?:\.\.-?\d+)?$/.test(m.body);
         var isSequence = isNumericSequence || isAlphaSequence;
@@ -26460,10 +26462,12 @@ var require_brace_expansion = __commonJS({
         if (!isSequence && !isOptions) {
           if (m.post.match(/,(?!,).*\}/)) {
             str = m.pre + "{" + m.body + escClose + m.post;
-            return expand2(str, max, true);
+            isTop = true;
+            continue;
           }
           return [str];
         }
+        const post = m.post.length ? expand2(m.post, max, false) : [""];
         var n;
         if (isSequence) {
           n = m.body.split(/\.\./);
@@ -26526,8 +26530,8 @@ var require_brace_expansion = __commonJS({
               expansions.push(expansion);
           }
         }
+        return expansions;
       }
-      return expansions;
     }
   }
 });
@@ -58129,18 +58133,18 @@ var package_default = {
   },
   devDependencies: {
     "@eslint/js": "^10.0.1",
-    "@types/node": "^26.0.1",
-    "@vitest/coverage-v8": "^4.1.9",
+    "@types/node": "^26.1.1",
+    "@vitest/coverage-v8": "^4.1.10",
     commander: "^15.0.0",
     esbuild: "^0.28.1",
-    eslint: "^10.6.0",
+    eslint: "^10.7.0",
     "eslint-config-prettier": "^10.1.8",
     globals: "^17.7.0",
-    prettier: "^3.9.1",
+    prettier: "^3.9.5",
     rimraf: "^6.1.3",
     typescript: "^6.0.3",
-    "typescript-eslint": "^8.62.0",
-    vitest: "^4.1.9"
+    "typescript-eslint": "^8.64.0",
+    vitest: "^4.1.10"
   },
   engines: {
     node: ">=20.0.0"
