@@ -58137,13 +58137,13 @@ var package_default = {
     "@vitest/coverage-v8": "^4.1.10",
     commander: "^15.0.0",
     esbuild: "^0.28.1",
-    eslint: "^10.7.0",
+    eslint: "^10.8.0",
     "eslint-config-prettier": "^10.1.8",
-    globals: "^17.7.0",
-    prettier: "^3.9.5",
+    globals: "^17.8.0",
+    prettier: "^3.9.6",
     rimraf: "^6.1.3",
     typescript: "^6.0.3",
-    "typescript-eslint": "^8.64.0",
+    "typescript-eslint": "^8.65.0",
     vitest: "^4.1.10"
   },
   engines: {
