@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@actions/artifact':
-        specifier: ^6.2.1
-        version: 6.2.1(supports-color@7.2.0)
+        specifier: ^6.3.1
+        version: 6.3.1(supports-color@7.2.0)
       '@actions/core':
         specifier: ^3.0.1
         version: 3.0.1
@@ -63,8 +63,8 @@ importers:
 
 packages:
 
-  '@actions/artifact@6.2.1':
-    resolution: {integrity: sha512-sJGH0mhEbEjBCw7o6SaLhUU66u27aFW8HTfkIb5Tk2/Wy0caUDc+oYQEgnuFN7a0HCpAbQyK0U6U7XUJDgDWrw==}
+  '@actions/artifact@6.3.1':
+    resolution: {integrity: sha512-DBXgdB9T4yj2KSe0tFg+MTi9T5se+16bdrFQh+3Y6Nq1lZ3gYQk1BjHoTof+7Zf36bEAlfVMf+8ifRKeyGJugQ==}
 
   '@actions/core@3.0.1':
     resolution: {integrity: sha512-a6d/Nwahm9fliVGRhdhofo40HjHQasUPusmc7vBfyky+7Z+P2A1J68zyFVaNcEclc/Se+eO595oAr5nwEIoIUA==}
@@ -159,12 +159,6 @@ packages:
   '@bcoe/v8-coverage@1.0.2':
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
-
-  '@bufbuild/protobuf@2.8.0':
-    resolution: {integrity: sha512-r1/0w5C9dkbcdjyxY8ZHsC5AOWg4Pnzhm2zu7LO4UHSounp2tMm6Y+oioV9zlGbLveE7YaWRDUk48WLxRDgoqg==}
-
-  '@bufbuild/protoplugin@2.8.0':
-    resolution: {integrity: sha512-kwZeZAz6jmDC571Wf/f5cDX02IjvPmtdspdxW/hbLS+bnZHkXMW4StaW+irGd4TkykvHD4fFgBnPG/O1x8OgXw==}
 
   '@cacheable/memory@2.2.0':
     resolution: {integrity: sha512-CTLKqLItRCEixEAewD3/j9DB3/o96gpTPD4eJ1v+DGOlxZRZncRQkGYqqnAGCscYd6RNeXfGeiuCphsPtqyIfQ==}
@@ -490,14 +484,6 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@protobuf-ts/plugin@2.11.1':
-    resolution: {integrity: sha512-HyuprDcw0bEEJqkOWe1rnXUP0gwYLij8YhPuZyZk6cJbIgc/Q0IFgoHQxOXNIXAcXM4Sbehh6kjVnCzasElw1A==}
-    hasBin: true
-
-  '@protobuf-ts/protoc@2.11.1':
-    resolution: {integrity: sha512-mUZJaV0daGO6HUX90o/atzQ6A7bbN2RSuHtdwo8SSF2Qoe3zHwa4IHyCN1evftTeHfLmdz+45qo47sL+5P8nyg==}
-    hasBin: true
-
   '@protobuf-ts/runtime-rpc@2.11.1':
     resolution: {integrity: sha512-4CqqUmNA+/uMz00+d3CYKgElXO9VrEbucjnBFEjqI4GuDrEQ32MaI3q+9qPBvIGOlL4PmHXrzM32vBPWRhQKWQ==}
 
@@ -684,11 +670,6 @@ packages:
   '@typescript-eslint/visitor-keys@8.71.0':
     resolution: {integrity: sha512-8eQ9R218XORK+KLosnf4bu/QsUXvUyVwTbArg7/0NMB1Pu87OJKvj4nhFblkYE8gQV73mW1dx1ptlPCkwRGa7A==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@typescript/vfs@1.6.1':
-    resolution: {integrity: sha512-JwoxboBh7Oz1v38tPbkrZ62ZXNHAk9bJ7c9x0eI5zBfBnBYGhURdbnh7Z4smN/MV48Y5OCcZb58n972UtbazsA==}
-    peerDependencies:
-      typescript: '*'
 
   '@typespec/ts-http-runtime@0.3.1':
     resolution: {integrity: sha512-SnbaqayTVFEA6/tYumdF0UmybY0KHyKwGPBXnyckFlrrKdhWFrL3a2HIPXHjht5ZOElKGcXfD2D63P36btb+ww==}
@@ -1521,16 +1502,6 @@ packages:
       eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
       typescript: '>=4.8.4 <6.1.0'
 
-  typescript@3.9.10:
-    resolution: {integrity: sha512-w6fIxVE/H1PkLKcCPsFqKE7Kv7QUwhU8qQY2MueZXWx5cPZdwFupLgKK3vntcK98BtNHZtAF4LA/yl2a7k8R6Q==}
-    engines: {node: '>=4.2.0'}
-    hasBin: true
-
-  typescript@5.4.5:
-    resolution: {integrity: sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==}
-    engines: {node: '>=14.17'}
-    hasBin: true
-
   typescript@6.0.3:
     resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
     engines: {node: '>=14.17'}
@@ -1671,7 +1642,7 @@ packages:
 
 snapshots:
 
-  '@actions/artifact@6.2.1(supports-color@7.2.0)':
+  '@actions/artifact@6.3.1(supports-color@7.2.0)':
     dependencies:
       '@actions/core': 3.0.1
       '@actions/github': 9.1.1
@@ -1682,8 +1653,8 @@ snapshots:
       '@octokit/plugin-retry': 8.1.0(@octokit/core@7.0.6)
       '@octokit/request': 10.0.9
       '@octokit/request-error': 7.1.0
-      '@protobuf-ts/plugin': 2.11.1(supports-color@7.2.0)
       '@protobuf-ts/runtime': 2.11.1
+      '@protobuf-ts/runtime-rpc': 2.11.1
       archiver: 7.0.1
       jwt-decode: 4.0.0
       unzip-stream: 0.3.4
@@ -1858,16 +1829,6 @@ snapshots:
       '@babel/helper-validator-identifier': 7.29.7
 
   '@bcoe/v8-coverage@1.0.2': {}
-
-  '@bufbuild/protobuf@2.8.0': {}
-
-  '@bufbuild/protoplugin@2.8.0(supports-color@7.2.0)':
-    dependencies:
-      '@bufbuild/protobuf': 2.8.0
-      '@typescript/vfs': 1.6.1(supports-color@7.2.0)(typescript@5.4.5)
-      typescript: 5.4.5
-    transitivePeerDependencies:
-      - supports-color
 
   '@cacheable/memory@2.2.0':
     dependencies:
@@ -2129,19 +2090,6 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@protobuf-ts/plugin@2.11.1(supports-color@7.2.0)':
-    dependencies:
-      '@bufbuild/protobuf': 2.8.0
-      '@bufbuild/protoplugin': 2.8.0(supports-color@7.2.0)
-      '@protobuf-ts/protoc': 2.11.1
-      '@protobuf-ts/runtime': 2.11.1
-      '@protobuf-ts/runtime-rpc': 2.11.1
-      typescript: 3.9.10
-    transitivePeerDependencies:
-      - supports-color
-
-  '@protobuf-ts/protoc@2.11.1': {}
-
   '@protobuf-ts/runtime-rpc@2.11.1':
     dependencies:
       '@protobuf-ts/runtime': 2.11.1
@@ -2313,13 +2261,6 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 8.71.0
       eslint-visitor-keys: 5.0.1
-
-  '@typescript/vfs@1.6.1(supports-color@7.2.0)(typescript@5.4.5)':
-    dependencies:
-      debug: 4.4.3(supports-color@7.2.0)
-      typescript: 5.4.5
-    transitivePeerDependencies:
-      - supports-color
 
   '@typespec/ts-http-runtime@0.3.1(supports-color@7.2.0)':
     dependencies:
@@ -3156,10 +3097,6 @@ snapshots:
       typescript: 6.0.3
     transitivePeerDependencies:
       - supports-color
-
-  typescript@3.9.10: {}
-
-  typescript@5.4.5: {}
 
   typescript@6.0.3: {}
 
